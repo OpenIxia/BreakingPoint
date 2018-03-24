@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # from __future__ import absolute_import, print_function, division
 
@@ -15,7 +14,7 @@
 import getopt
 import sys
 
-from webApi import *
+from WebApi import *
 
 DEFAULT_PORT = 80
 DEFAULT_SECURE_PORT = 443
