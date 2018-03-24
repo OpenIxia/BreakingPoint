@@ -1,7 +1,7 @@
 import sys
 
 sys.path.insert(0, '../Modules')
-from bpsRest import *
+from BpsRestApi import *
 from optparse import OptionParser
 
 # Demo 1 Script. This script will perform the following steps:

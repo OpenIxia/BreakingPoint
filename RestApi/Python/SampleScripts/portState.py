@@ -1,7 +1,7 @@
 import sys
 
 sys.path.insert(0, '../Modules')
-from bpsRest import *
+from BpsRestApi import *
 
 # Demo 1 Script. This script will print out the current state of the ports in JSON format:
 # 1. Login
