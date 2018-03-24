@@ -1,3 +1,6 @@
+import sys
+
+sys.path.insert(0, '../Modules')
 from bpsRest import *
 
 # Demo 1 Script. This script will perform the following steps:

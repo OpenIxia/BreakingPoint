@@ -1,3 +1,6 @@
+import sys
+
+sys.path.insert(0, '../Modules')
 from bpsRest import *
 from optparse import OptionParser
 
