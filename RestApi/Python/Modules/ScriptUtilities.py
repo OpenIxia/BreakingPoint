@@ -15,7 +15,7 @@
 import getopt
 import sys
 
-from ixia.webapi import *
+from webApi import *
 
 DEFAULT_PORT = 80
 DEFAULT_SECURE_PORT = 443
