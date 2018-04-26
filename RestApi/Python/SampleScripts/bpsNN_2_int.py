@@ -1,4 +1,6 @@
-from bpsRest import *
+import sys
+sys.path.insert(0, '../Modules')
+from BpsRestApi import *
 import Queue,time, sys
 from optparse import OptionParser
 
