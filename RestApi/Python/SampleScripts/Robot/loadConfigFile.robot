@@ -5,8 +5,7 @@ Metadata  Version  1.0
 Library  BuiltIn
 
 # This script assumes that your PYTHONPATH has the path to BpsApi.py.
-# Otherwise, add the full path /full_path_to/BreakingPoint/RestApi/Python/Modules to PYTHONPATH or
-# state the full path below.
+# Otherwise, state the full path: /full_path_to/BreakingPoint/RestApi/Python/Modules/BpsApi.py.
 Library  BpsApi.py
 
 *** Variables ***
