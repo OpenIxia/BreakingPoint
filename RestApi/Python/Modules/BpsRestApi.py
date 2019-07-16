@@ -361,10 +361,10 @@ class BPS:
             self.pretty_print_requests(r)
          print "For view working model %s" %r.json()
          
-    def uploadCapture(self, filePath, enableRequestPrints = False):
+    def uploadCapture(self, filePath, enableRequestPrints = False, forceOverwrite=False):
         service = 'https://' + self.ipstr + '/api/v1/bps/upload/capture'
         fileName = basename(filePath)
-        files = {'file': (fileName, open(filePath, 'rb'), 'multipart/form-data')}
+        files = {'force': forceOverwrite, 'file': (fileName, open(filePath, 'rb'), 'multipart/form-data')}
         r = self.session.post(service, files=files, verify=False)
         if(enableRequestPrints):
             self.pretty_print_requests(r)
@@ -375,7 +375,7 @@ class BPS:
             print "Failed to load Capture"
             print "For Upload Capture json object %s" %(r.json())
             return
-     
+
     def modifyNormalTest(self, componentId, elementId, Value, enableRequestPrints = False):
          service  = 'https://' + self.ipstr + '/api/v1/bps/workingmodel'
          jheaders = {'content-type': 'application/json'}
