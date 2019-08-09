@@ -1,0 +1,11 @@
+import sys
+
+sys.path.insert(0, '../Modules')
+from BpsRestApi import *
+
+bps = BPS('10.36.18.42', 'admin', 'admin')
+bps.login()
+
+
+
+
