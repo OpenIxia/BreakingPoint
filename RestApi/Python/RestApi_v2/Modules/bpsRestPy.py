@@ -1,3 +1,6 @@
+from __future__ import absolute_import, print_function, division
+from six import with_metaclass
+
 import requests
 import json
 import pprint
@@ -4787,7 +4790,7 @@ class DataModelMeta(type):
     def __call__(cls, *args, **kwds):
         return DataModelMeta._decorate_model_object(type.__call__(cls, *args, **kwds))
 
-class DataModelProxy(object, metaclass=DataModelMeta):
+class DataModelProxy(with_metaclass(DataModelMeta, object)):
     def __init__(self, wrapper, name,  path='', model_path=None):
         self._wrapper = wrapper
         self._name = name
@@ -4826,3 +4829,45 @@ class DataModelProxy(object, metaclass=DataModelMeta):
 
     def delete(self):
         return self._wrapper._delete(self._path+'/'+self._name)
+
+'''
+class DataModelProxy_backup(object, metaclass=DataModelMeta):
+    def __init__(self, wrapper, name,  path='', model_path=None):
+        self._wrapper = wrapper
+        self._name = name
+        self._path = path
+        if model_path is None:
+            self._model_path = self._path
+        else:
+            self._model_path = model_path
+
+    def __full_path__(self):
+        return '%s/%s' % (self._path, self._name)
+
+    def __data_model_path__(self):
+        return '%s/%s' % (self._model_path, self._name)
+
+    def __url__(self):
+        return 'https://%s/bps/api/v2/core%s' % (self._wrapper.host, self.__full_path__())
+
+    def __repr__(self):
+        return 'proxy object for \'%s\' ' % (self.__url__())
+
+    def __getitem__(self, item):
+        return self._getitem_(item)
+
+    def get(self, responseDepth=None, **kwargs):
+        return self._wrapper._get(self._path+'/'+self._name, responseDepth, **kwargs)
+
+    def patch(self, value):
+        return self._wrapper._patch(self._path+'/'+self._name, value)
+
+    def set(self, value):
+        return self.patch(value)
+
+    def put(self, value):
+        return self._wrapper._put(self._path+'/'+self._name, value)
+
+    def delete(self):
+        return self._wrapper._delete(self._path+'/'+self._name)
+'''
