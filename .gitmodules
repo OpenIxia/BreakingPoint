@@ -1,0 +1,3 @@
+[submodule "RestApi/Python/RestApi_v2/modules"]
+	path = RestApi/Python/RestApi_v2/modules
+	url = https://github.com/OpenIxia/bps_restpy.git
