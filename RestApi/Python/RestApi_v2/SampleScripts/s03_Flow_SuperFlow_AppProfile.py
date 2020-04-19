@@ -14,7 +14,7 @@
 import time, sys, os
 # Add bps_restpy libpath *required if the library is not installed
 libpath = os.path.abspath(__file__+"/../../..")
-    sys.path.insert(0,libpath)
+sys.path.insert(0,libpath)
 
 from bps_restpy.bps import BPS,pp
 
