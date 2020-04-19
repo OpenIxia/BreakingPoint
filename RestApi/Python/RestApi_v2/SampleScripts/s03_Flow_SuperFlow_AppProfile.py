@@ -1,6 +1,5 @@
 # Title:  Python Script made to create a Test Model from scratch.
-# Date:   April 2019
-# Author: Maria Turcu
+# Date:   April 2020
 # Actions:
 #   1. Login to BPS box
 #   2. Create a new superflow from scratch
@@ -11,13 +10,11 @@
 #   7. Run a test with the AppMix and get the result.
 
 
-# Import BPSv2 python library from outside the folder with samples.
-
 ########################################
 import time, sys, os
 # Add bps_restpy libpath *required if the library is not installed
 libpath = os.path.abspath(__file__+"/../../..")
-sys.path.insert(0,libpath)
+    sys.path.insert(0,libpath)
 
 from bps_restpy.bps import BPS,pp
 
@@ -33,15 +30,17 @@ new_testmodel_name  =  "TestModel_Edited"
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.81.89'
+bps_system  = '10.36.83.194'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
-slot_number = 1
-port_list   = [0, 4]
+
+slot_number = 3
+port_list   = [0, 1]
 
 ########################################
-
+#optional the port group used for port reservation
+port_group_id = 12
 
 ########################################
 # Login to BPS box
@@ -110,8 +109,14 @@ bps.superflow.save()
 print("Change parameters inside action 2")
 bps.superflow.actions["2"].set({"tls_handshake_timeout": 20})
 bps.superflow.actions["1"].set({"tls_max_version": "TLS_VERSION_3_1"})
-print("Change the cipher to RSA_WITH_RC4_128_MD5. The real value can be read from the tool tip inside UI.")
-bps.superflow.actions["1"].set({"tls_max_version": "TLS_VERSION_3_1"})
+print("Change the cipher to RSA_WITH_RC4_128_MD5. \
+The real value can be read from the tool tip\
+inside UI hovering over the cipher name.In this case: ")
+bps.superflow.actions["1"].set({"tls_ciphers": "TLS_CIPHERSUITE_0004"})
+
+print("Change Certificates and Private key parameters inside action 1")
+bps.superflow.actions["1"].set({"u'tls_own_cert": "BreakingPoint_serverB_2048.key"})
+bps.superflow.actions["1"].set({"tls_own_key": "BreakingPoint_serverB_2048.key"})
 
 print("Save superflow")
 bps.superflow.save()
@@ -126,24 +131,24 @@ print("Handshake timeout: %s  and the decrypt mode: %s" %
 print("Save superflow")
 bps.superflow.save()
 
-print ("Create a new appProfile")
+print("Create a new appProfile")
 bps.appProfile.new()
 bps.appProfile.name.set(new_appprofile_name)
 
 
-print ('Preparing to add: %s' % new_superflow_name)
+print('Preparing to add: %s' % new_superflow_name)
 superflows_to_use = [{"superflow": new_superflow_name, "weight": 2 }]
-print ("Find 2 more canned SIP flows")
+print("Find 2 more canned SIP flows")
 sip_canned_flows = bps.superflow.search('sip',limit = 100, sort='name', sortorder = 'ascending')
-print ('Preparing to add: ', sip_canned_flows[0]['name'])
+print('Preparing to add: ', sip_canned_flows[0]['name'])
 superflows_to_use.append({"superflow": sip_canned_flows[0]['name'], "weight": 1 })
-print ('Preparing to add: ', sip_canned_flows[1]['name'])
+print('Preparing to add: ', sip_canned_flows[1]['name'])
 superflows_to_use.append({"superflow": sip_canned_flows[1]['name'], "weight": 2 })
-print ('Adding superflows to approfile: %s' % new_appprofile_name)
+print('Adding superflows to approfile: %s' % new_appprofile_name)
 bps.appProfile.add(superflows_to_use)
 bps.appProfile.saveAs(new_appprofile_name, force = True)
 
-print ("Create a new testmodel to use the newly created aplication mix")
+print("Create a new testmodel to use the newly created aplication mix")
 bps.testmodel.new()
 print('Adding an application simulator component ')
 bps.testmodel.add(name='my_appsim', type='appsim', active=True, component='appsim')
@@ -159,13 +164,13 @@ bps.testmodel.saveAs(new_testmodel_name, force = True)
 ########################################
 print("Reserve Ports")
 for p in port_list:
-    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 2}])
+    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': port_group_id}])
 
 
 ########################################
 print("Run test and Get Progress:")
-test_id_json = bps.testmodel.run(modelname=new_testmodel_name, group=2)
-testid = str( test_id_json["runid"] )
+test_id_json = bps.testmodel.run(modelname=new_testmodel_name, group=port_group_id)
+testid = str( test_id_json["runid"])
 run_id = 'TEST-' + testid
 print("Test Run Id: %s"%run_id)
 
@@ -185,12 +190,6 @@ print("~The test finished the execution.")
 results = bps.reports.search(searchString=new_testmodel_name, limit=10, sort="endTime", sortorder="descending")
 result  = results[0]
 print ("%s execution duration %s ended with status: %s " % (result['name'], result['duration'], result['result']) )
-
-#####################
-#Do not allow malware traffic on the test ports  - anymore without conmfirmation
-bps.administration.userSettings.changeUserSetting(name = 'allowMalware' , value = False)
-######################
-
 
 #getting 3.4 Section: Synopsis Summary of Results from the Report
 tabledata = bps.reports.getReportTable(runid=testid, sectionId="3.4")
