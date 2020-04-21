@@ -10,15 +10,17 @@
 #   8. Logout
 
 
-#================
+# ================
 
 ########################################
-import time, sys, os
+import time
+import sys
+import os
 # Add bps_restpy libpath *required if the library is not installed
 libpath = os.path.abspath(__file__+"/../../..")
-sys.path.insert(0,libpath)
+sys.path.insert(0, libpath)
 
-from bps_restpy.bps import BPS,pp
+from bps_restpy.bps import BPS, pp
 
 ########################################
 
@@ -28,7 +30,7 @@ from bps_restpy.bps import BPS,pp
 ########################################
 # Demo script global variables
 canned_test_name = 'AppSim'
-#bps system info
+# bps system info
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
@@ -62,7 +64,7 @@ for p in port_list:
 ########################################
 print("Run test and Get Stats:")
 test_id_json = bps.testmodel.run(modelname=canned_test_name, group=2)
-testid = str( test_id_json["runid"] )
+testid = str(test_id_json["runid"] )
 run_id = 'TEST-' + testid
 print("Test Run Id: %s"%run_id)
 
