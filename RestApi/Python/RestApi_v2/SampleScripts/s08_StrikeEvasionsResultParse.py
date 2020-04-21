@@ -40,12 +40,12 @@ new_evasion_profile                = 'Evasion_100Variants_' + new_testmodel_name
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.81.89'
+bps_system  = '10.36.83.194'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
-slot_number = 1
-port_list   = [0, 4]
+slot_number = 3
+port_list   = [0, 1]
 
 ########################################
 # # # procedure to check the strikes report section and read the tables of data
@@ -155,10 +155,13 @@ pset={"attackPlan": new_strikeList_name, "attackPlanIterations": 1, "attackProfi
 cmpid = bps.testmodel.component.get()[0]['id']
 #set the profile on the component
 bps.testmodel.component[cmpid].patch(pset)
-
-
-
+# save model
 bps.testmodel.saveAs(new_testmodel_name, force = True)
+
+#####################
+#Do not allow malware traffic on the test ports  - anymore without conmfirmation
+bps.administration.userSettings.changeUserSetting(name = 'allowMalware' , value = True)
+######################
 
 ########################################
 print("Reserve Ports")
@@ -248,5 +251,12 @@ print ("Unreserving the ports")
 time.sleep(3)
 for p in port_list:
     bps.topology.unreserve([{'slot': slot_number, 'port': p, 'group': 2}])
+
+######################
+# Do not allow malware traffic on the test ports  - anymore without conmfirmation
+bps.administration.userSettings.changeUserSetting(name = 'allowMalware' , value = False)
+######################
+
+
 
 bps.logout()
