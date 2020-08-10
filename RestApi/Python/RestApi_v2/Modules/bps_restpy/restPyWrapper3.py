@@ -29,6 +29,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
 import ssl
 import logging
+bps_api_log = logging.getLogger(__name__)
 
 requests.packages.urllib3.disable_warnings()
 pp = pprint.PrettyPrinter(indent=1).pprint
@@ -63,21 +64,18 @@ class BPS(object):
         self.network = DataModelProxy(wrapper=self, name='network')
         self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
         self.results = DataModelProxy(wrapper=self, name='results')
-        self.output = True
 
     def disablePrints(self,disable=True):
         if disable:
-            self.output = False
+            log=bps_api_log.parent
+            log.setLevel(logging.CRITICAL)
             logging.getLogger("requests").setLevel(logging.CRITICAL)
             logging.getLogger("urllib3").setLevel(logging.CRITICAL)
-        elif not self.output:
-            self.output = True
+        else:
+            log=bps_api_log.parent
+            log.setLevel(logging.INFO)
             logging.getLogger("requests").setLevel(logging.ERROR)
             logging.getLogger("urllib3").setLevel(logging.ERROR)
-
-    def apiPrint(self,message):
-        if (self.output):
-            print(message)
 
     ### connect to the system
     def __connect(self):
@@ -87,7 +85,7 @@ class BPS(object):
             self.sessionId = r.json().get('sessionId')
             self.session.headers['sessionId'] = r.json().get('sessionId')
             self.session.headers['X-API-KEY'] = r.json().get('apiKey')
-            self.apiPrint('Successfully connected to %s.' % self.host)
+            bps_api_log.info('Successfully connected to %s.' % self.host)
         else:
             raise Exception('Failed connecting to %s: (%s, %s)' % (self.host, r.status_code, r.content))
 
@@ -100,7 +98,7 @@ class BPS(object):
             if 'sessionId' in self.session.headers:
                 del self.session.headers['sessionId']
                 del self.session.headers['X-API-KEY']
-            self.apiPrint('Successfully disconnected from %s.' % self.host)
+            bps_api_log.info('Successfully disconnected from %s.' % self.host)
         else:
             raise Exception('Failed disconnecting from %s: (%s, %s)' % (self.host, r.status_code, r.content))
 
@@ -110,7 +108,7 @@ class BPS(object):
         r = self.session.post(url='https://' + self.host + '/bps/api/v2/core/auth/login', data=json.dumps({'username': self.user, 'password': self.password, 'sessionId': self.sessionId}), headers={'content-type': 'application/json'}, verify=False)
         jsonContent = r.content is not None and (r.content.startswith(b'{') or r.content.startswith(b'['))
         if(r.status_code == 200):
-            self.apiPrint('Login successful.\nWelcome %s. \nYour session id is %s' % (self.user, self.sessionId))
+            bps_api_log.info('Login successful.\nWelcome %s. \nYour session id is %s' % (self.user, self.sessionId))
         else:
             raise Exception('Login failed.\ncode:%s, content:%s' % (r.status_code, r.content))
 
@@ -119,7 +117,7 @@ class BPS(object):
         r = self.session.post(url='https://' + self.host + '/bps/api/v2/core/auth/logout', data=json.dumps({'username': self.user, 'password': self.password, 'sessionId': self.sessionId}), headers={'content-type': 'application/json'}, verify=False)
         jsonContent = r.content is not None and (r.content.startswith(b'{') or r.content.startswith(b'['))
         if(r.status_code == 200):
-            self.apiPrint('Logout successful. \nBye %s.' % self.user)
+            bps_api_log.info('Logout successful. \nBye %s.' % self.user)
             self.__disconnect()
         else:
             raise Exception('Logout failed: (%s, %s)' % (r.status_code, r.content))
@@ -5895,4 +5893,4 @@ class DataModelProxy(object, metaclass = DataModelMeta):
         if doc_data and 'custom' in doc_data:
             doc_data = doc_data['custom']
         if doc_data and 'description' in doc_data:
-            self.apiPrint(doc_data['description'])
+            bps_api_log.info(doc_data['description'])
