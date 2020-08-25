@@ -24,6 +24,6 @@
 import sys,os
 #sys.path.insert(0,os.path.abspath(__file__+"/../.."))
 if sys.version_info[0] >= 3:
-    from .restPyWrapper3 import BPS, pp
+    from .restPyWrapper3 import BPS, pp, bps_api_log
 else:
-	from .restPyWrapper import BPS, pp
+	from restPyWrapper import BPS, pp, bps_api_log

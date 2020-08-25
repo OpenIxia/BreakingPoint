@@ -32,6 +32,7 @@ import logging
 bps_api_log = logging.getLogger(__name__)
 
 
+
 requests.packages.urllib3.disable_warnings()
 pp = pprint.PrettyPrinter(indent=1).pprint
 
@@ -66,7 +67,7 @@ class BPS(object):
         self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
         self.results = DataModelProxy(wrapper=self, name='results')
 
-    def disablePrints(self,disable=True):
+    def disablePrints(self, disable=True):
         if disable:
             log = bps_api_log.parent
             log.setLevel(logging.CRITICAL)
