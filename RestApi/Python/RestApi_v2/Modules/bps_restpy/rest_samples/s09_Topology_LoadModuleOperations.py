@@ -22,11 +22,11 @@ import re
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.83.194'
+bps_system  = '10.36.81.87'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
-slot_number = 5
+slot_number = 3
 port_list   = [0, 1]
 
 ########################################
@@ -96,7 +96,7 @@ print ("Slot " + str(slot_number) +\
      " link status: " + port_link_status +\
      " reservedby: " + port_reservedby_status + '(Empty if not reserved)')
 
-print ('The setCardMode, setCardSpeed, setCardSpeed can be execrcised. See the help in restapi browser for more options')
+print ('The setCardMode, setCardSpeed, setCardSpeed can be exercised. See the help in restapi browser for more options')
 print ('setCardMode to BPS mode--')
 # 10(BPS-L23), 7(BPS L4-7), 3(IxLoad), 11(BPS QT L2-3), 12(BPS QT L4-7)
 r = bps.topology.setCardMode(board=slot_number, mode=10)
