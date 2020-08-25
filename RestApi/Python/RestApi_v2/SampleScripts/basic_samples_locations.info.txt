@@ -1,4 +1,5 @@
-####To avoid mantaining twice the same files. The basic samples have been moved to the releative paths: 
+#Basic Python-REST Sample Scripts
+To avoid mantaining twice the same files. The basic samples have been moved to the releative paths: 
 *Breaking Point Functionality
 RestApi\Python\RestApi_v2\Modules\bps_restpy\rest_samples
 *Platform Administration
