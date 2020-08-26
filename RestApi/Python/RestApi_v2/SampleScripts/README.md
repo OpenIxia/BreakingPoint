@@ -1,6 +1,6 @@
 # Basic Python-REST Sample Scripts
-Use the below links to get started with the Python wraper.
-* **Breaking Point Gettinmg Started - Sample Scripts**
+Use the below links to get started with the Python wrapper.
+* **Breaking Point Getting Started - Sample Scripts**
 
     [RestApi\Python\RestApi_v2\Modules\bps_restpy\rest_samples](https://github.com/OpenIxia/BreakingPoint/tree/master/RestApi/Python/RestApi_v2/Modules/bps_restpy/rest_samples)
 
@@ -9,7 +9,7 @@ Use the below links to get started with the Python wraper.
 
   [RestApi\Python\RestApi_v2\Modules\bps_restpy\bps_restpy_admin](https://github.com/OpenIxia/BreakingPoint/tree/master/RestApi/Python/RestApi_v2/Modules/bps_restpy/bps_restpy_v1/restv1_samples)
 
- **Note:** *The content of this folder contains actual end to end usecases of automation. To get started with bpsretpy (BPS REST API Python Library), please look over the  samples from the above links - They will jump start your REST API automation. *   
+ **Note:** *The content of this folder contains actual end to end usecases of automation. To get started with bpsretpy (BPS REST API Python Library), please look over the  samples from the above links - They will jump start your BreakingPoint REST API automation. *   
 
 
 ## Contents
