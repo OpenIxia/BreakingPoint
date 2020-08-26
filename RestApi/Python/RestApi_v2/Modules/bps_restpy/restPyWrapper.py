@@ -1,7 +1,7 @@
 """
 # MIT LICENSE
 #
-# Copyright 1997 - 2019 by IXIA Keysight
+# Copyright 1997 - 2020 by IXIA Keysight
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"),
@@ -20,7 +20,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE. 
-*Created with Breaking Point build :  EB 9.10v9.10.0.200 -- ENGINEERING BUILD"""
+*Created with Breaking Point build : EB 9.10v9.10.110.25 -- ENGINEERING BUILD"""
 import requests
 import json
 import pprint
@@ -31,8 +31,6 @@ import ssl
 import logging
 bps_api_log = logging.getLogger(__name__)
 
-
-
 requests.packages.urllib3.disable_warnings()
 pp = pprint.PrettyPrinter(indent=1).pprint
 
@@ -42,7 +40,7 @@ class TlsAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block):
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block)
 
-### this BPS REST API wrapper is generated for version: 9.00.0.233
+### this BPS REST API wrapper is generated for version: 9.10.110.25
 class BPS(object):
 
     def __init__(self, host, user, password):
@@ -52,29 +50,29 @@ class BPS(object):
         self.sessionId = None
         self.session = requests.Session()
         self.session.mount('https://', TlsAdapter())
-        self.reports = DataModelProxy(wrapper=self, name='reports')
-        self.administration = DataModelProxy(wrapper=self, name='administration')
-        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
         self.evasionProfile = DataModelProxy(wrapper=self, name='evasionProfile')
+        self.reports = DataModelProxy(wrapper=self, name='reports')
+        self.capture = DataModelProxy(wrapper=self, name='capture')
+        self.network = DataModelProxy(wrapper=self, name='network')
+        self.topology = DataModelProxy(wrapper=self, name='topology')
         self.superflow = DataModelProxy(wrapper=self, name='superflow')
+        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
+        self.administration = DataModelProxy(wrapper=self, name='administration')
+        self.results = DataModelProxy(wrapper=self, name='results')
+        self.statistics = DataModelProxy(wrapper=self, name='statistics')
+        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
         self.strikes = DataModelProxy(wrapper=self, name='strikes')
         self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
-        self.topology = DataModelProxy(wrapper=self, name='topology')
-        self.statistics = DataModelProxy(wrapper=self, name='statistics')
-        self.capture = DataModelProxy(wrapper=self, name='capture')
-        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
-        self.network = DataModelProxy(wrapper=self, name='network')
         self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
-        self.results = DataModelProxy(wrapper=self, name='results')
 
-    def disablePrints(self, disable=True):
+    def disablePrints(self,disable=True):
         if disable:
-            log = bps_api_log.parent
+            log=bps_api_log.parent
             log.setLevel(logging.CRITICAL)
             logging.getLogger("requests").setLevel(logging.CRITICAL)
             logging.getLogger("urllib3").setLevel(logging.CRITICAL)
         else:
-            log = bps_api_log.parent
+            log=bps_api_log.parent
             log.setLevel(logging.INFO)
             logging.getLogger("requests").setLevel(logging.ERROR)
             logging.getLogger("urllib3").setLevel(logging.ERROR)
@@ -226,330 +224,14 @@ class BPS(object):
 
     ### null
     @staticmethod
-    def _topology_operations_reserve(self, reservation, force=False):
+    def _topology_operations_unreserve(self, unreservation):
         """
-        :param reservation (list): 
+        :param unreservation (list): 
                list of object with fields
-                      group (number): 
                       slot (number): 
                       port (number): 
-                      capture (bool): 
-        :param force (bool): 
         """
-        return self._wrapper._post('/topology/operations/reserve', **{'reservation': reservation, 'force': force})
-
-    ### null
-    @staticmethod
-    def _evasionProfile_operations_search(self, searchString, limit, sort, sortorder):
-        """
-        :param searchString (string): Search evasion profile name matching the string given.
-        :param limit (string): The limit of rows to return
-        :param sort (string): Parameter to sort by. (name/createdBy ...)
-        :param sortorder (string): The sort order (ascending/descending)
-        :return results (list): 
-               list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      revision (number): 
-                      description (string): 
-        """
-        return self._wrapper._post('/evasionProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
-
-    ### Get information about an action in the current working Superflow, retrieving also the choices for each action setting.
-    @staticmethod
-    def _superflow_actions_operations_getActionInfo(self, id):
-        """
-        Get information about an action in the current working Superflow, retrieving also the choices for each action setting.
-        :param id (number): The action id
-        :return result (list): 
-               list of object with fields
-                      label (string): 
-                      name (string): 
-                      description (string): 
-                      choice (object): 
-        """
-        return self._wrapper._post('/superflow/actions/' + self._name + '/operations/getActionInfo', **{'id': id})
-
-    ### Imports a test model, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _testmodel_operations_importModel(self, name, filename, force):
-        """
-        Imports a test model, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param name (string): The name of the object being imported
-        :param filename (string): The file containing the object
-        :param force (bool): Force to import the file and the object having the same name will be replaced.
-        """
-        return self._wrapper._import('/testmodel/operations/importModel', **{'name': name, 'filename': filename, 'force': force})
-
-    ### Imports an application profile, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _appProfile_operations_importAppProfile(self, name, filename, force):
-        """
-        Imports an application profile, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param name (string): The name of the object being imported
-        :param filename (string): The file containing the object
-        :param force (bool): Force to import the file and the object having the same name will be replaced.
-        """
-        return self._wrapper._import('/appProfile/operations/importAppProfile', **{'name': name, 'filename': filename, 'force': force})
-
-    ### Imports a network neighborhood model, given as a file.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _network_operations_importNetwork(self, name, filename, force):
-        """
-        Imports a network neighborhood model, given as a file.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param name (string): The name of the object being imported
-        :param filename (string): The file containing the object
-        :param force (bool): Force to import the file and replace the object having the same name.
-        """
-        return self._wrapper._import('/network/operations/importNetwork', **{'name': name, 'filename': filename, 'force': force})
-
-    ### Adds a flow to the current working SuperFlow
-    @staticmethod
-    def _superflow_operations_addFlow(self, flowParams):
-        """
-        Adds a flow to the current working SuperFlow
-        :param flowParams (object): The flow object to add.
-               object of object with fields
-                      name (string): The name of the flow
-                      from (string): Traffic initiator.
-                      to (string): Traffic responder.
-        """
-        return self._wrapper._post('/superflow/operations/addFlow', **{'flowParams': flowParams})
-
-    ### Create a new custom Load Profile.
-    @staticmethod
-    def _loadProfile_operations_createNewCustom(self, loadProfile):
-        """
-        Create a new custom Load Profile.
-        :param loadProfile (string): The Name of The load profile object to create.
-        """
-        return self._wrapper._post('/loadProfile/operations/createNewCustom', **{'loadProfile': loadProfile})
-
-    ### Deletes a given Network Neighborhood Config from the database.
-    @staticmethod
-    def _network_operations_delete(self, name):
-        """
-        Deletes a given Network Neighborhood Config from the database.
-        :param name (string): The name of the Network Neighborhood Config.
-        """
-        return self._wrapper._post('/network/operations/delete', **{'name': name})
-
-    ### Exports the Strike List identified by its name and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _strikeList_operations_exportStrikeList(self, name, filepath):
-        """
-        Exports the Strike List identified by its name and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param name (string): The name of the strike list to be exported.
-        :param filepath (string): The local path where to save the exported object. The file should have .bap extension
-        """
-        return self._wrapper._export('/strikeList/operations/exportStrikeList', **{'name': name, 'filepath': filepath})
-
-    ### Imports an ATI License file (.lic) on a hardware platform. This operation is NOT recommended to be used on BPS Virtual platforms.
-    @staticmethod
-    def _administration_atiLicensing_operations_importAtiLicense(self, filename, name):
-        """
-        Imports an ATI License file (.lic) on a hardware platform. This operation is NOT recommended to be used on BPS Virtual platforms.
-        :param filename (string): import file path
-        :param name (string): the name of the license file
-        """
-        return self._wrapper._import('/administration/atiLicensing/operations/importAtiLicense', **{'filename': filename, 'name': name})
-
-    ### Deletes a given Application Profile from the database.
-    @staticmethod
-    def _appProfile_operations_delete(self, name):
-        """
-        Deletes a given Application Profile from the database.
-        :param name (string): The name of the Application Profiles.
-        """
-        return self._wrapper._post('/appProfile/operations/delete', **{'name': name})
-
-    ### Runs a Test.
-    @staticmethod
-    def _testmodel_operations_run(self, modelname, group, allowMalware=False):
-        """
-        Runs a Test.
-        :param modelname (string): Test Name to run
-        :param group (number): Group to run
-        :param allowMalware (bool): Enable this option to allow malware in test.
-        """
-        return self._wrapper._post('/testmodel/operations/run', **{'modelname': modelname, 'group': group, 'allowMalware': allowMalware})
-
-    ### Runs a Test.
-    @staticmethod
-    def _topology_operations_run(self, modelname, group, allowMalware=False):
-        """
-        Runs a Test.
-        :param modelname (string): Test Name to run
-        :param group (number): Group to run
-        :param allowMalware (bool): Enable this option to allow malware in test.
-        """
-        return self._wrapper._post('/topology/operations/run', **{'modelname': modelname, 'group': group, 'allowMalware': allowMalware})
-
-    ### Recompute percentages in the current working Application Profile
-    @staticmethod
-    def _appProfile_operations_recompute(self):
-        """
-        Recompute percentages in the current working Application Profile
-        """
-        return self._wrapper._post('/appProfile/operations/recompute', **{})
-
-    ### null
-    @staticmethod
-    def _superflow_operations_search(self, searchString, limit, sort, sortorder):
-        """
-        :param searchString (string): Search Super Flow name matching the string given.
-        :param limit (string): The limit of rows to return
-        :param sort (string): Parameter to sort by.
-        :param sortorder (string): The sort order (ascending/descending)
-        """
-        return self._wrapper._post('/superflow/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
-
-    ### Exports an Application profile and all of its dependencies.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _appProfile_operations_exportAppProfile(self, name, attachments, filepath):
-        """
-        Exports an Application profile and all of its dependencies.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param name (string): The name of the test model to be exported.
-        :param attachments (bool): True if object attachments are needed.
-        :param filepath (string): The local path where to save the exported object.
-        """
-        return self._wrapper._export('/appProfile/operations/exportAppProfile', **{'name': name, 'attachments': attachments, 'filepath': filepath})
-
-    ### Removes a flow from the current working SuperFlow.
-    @staticmethod
-    def _superflow_operations_removeFlow(self, id):
-        """
-        Removes a flow from the current working SuperFlow.
-        :param id (number): The flow ID.
-        """
-        return self._wrapper._post('/superflow/operations/removeFlow', **{'id': id})
-
-    ### Load an existing Super Flow and sets it as the current one.
-    @staticmethod
-    def _superflow_operations_load(self, template):
-        """
-        Load an existing Super Flow and sets it as the current one.
-        :param template (string): The name of the existing Super Flow template
-        """
-        return self._wrapper._post('/superflow/operations/load', **{'template': template})
-
-    ### Creates a new Super Flow.
-    @staticmethod
-    def _superflow_operations_new(self, template=None):
-        """
-        Creates a new Super Flow.
-        :param template (string): The name of the template. In this case will be empty.
-        """
-        return self._wrapper._post('/superflow/operations/new', **{'template': template})
-
-    ### Saves the working network config and gives it a new name.
-    @staticmethod
-    def _network_operations_saveAs(self, name, regenerateOldStyle=True, force=False):
-        """
-        Saves the working network config and gives it a new name.
-        :param name (string): The new name given for the current working network config
-        :param regenerateOldStyle (bool): Force to apply the changes made on the loaded network configuration. Force to generate a network from the old one.
-        :param force (bool): Force to save the network config. It replaces a pre-existing config having the same name.
-        """
-        return self._wrapper._post('/network/operations/saveAs', **{'name': name, 'regenerateOldStyle': regenerateOldStyle, 'force': force})
-
-    ### Save the current working network config.
-    @staticmethod
-    def _network_operations_save(self, name=None, regenerateOldStyle=True, force=True):
-        """
-        Save the current working network config.
-        :param name (string): The new name given for the current working network config. No need to configure. The current name is used.
-        :param regenerateOldStyle (bool): No need to configure. The default is used.
-        :param force (bool): No need to configure. The default is used.
-        """
-        return self._wrapper._post('/network/operations/save', **{'name': name, 'regenerateOldStyle': regenerateOldStyle, 'force': force})
-
-    ### Adds a note to given port.
-    @staticmethod
-    def _topology_operations_addPortNote(self, interface, note):
-        """
-        Adds a note to given port.
-        :param interface (object): Slot and Port ID.
-               object of object with fields
-                      slot (number): 
-                      port (number): 
-        :param note (string): Note info.
-        """
-        return self._wrapper._post('/topology/operations/addPortNote', **{'interface': interface, 'note': note})
-
-    ### Retrieves the real time statistics for the running test, by giving the run id.
-    @staticmethod
-    def _testmodel_operations_realTimeStats(self, runid, rtsgroup, numSeconds, numDataPoints=1):
-        """
-        Retrieves the real time statistics for the running test, by giving the run id.
-        :param runid (number): Test RUN ID
-        :param rtsgroup (string): Real Time Stats group name. Values for this can be get from 'statistics' node, inside 'statNames' from each component at 'realtime Group' key/column. Examples: l7STats, all, bpslite, summary, clientStats etc.
-        :param numSeconds (number): The number of seconds.  If negative, means from the end
-        :param numDataPoints (number): The number of data points, the default is 1.
-        :return result (object): 
-               object of object with fields
-                      testStuck (bool): 
-                      time (number): 
-                      progress (number): 
-                      values (string): 
-        """
-        return self._wrapper._post('/testmodel/operations/realTimeStats', **{'runid': runid, 'rtsgroup': rtsgroup, 'numSeconds': numSeconds, 'numDataPoints': numDataPoints})
-
-    ### Deletes a Test Report from the database.
-    @staticmethod
-    def _reports_operations_delete(self, runid):
-        """
-        Deletes a Test Report from the database.
-        :param runid (number): The test run id that generated the report you want to delete.
-        """
-        return self._wrapper._post('/reports/operations/delete', **{'runid': runid})
-
-    ### Searches a strike inside all BPS strike database.To list all the available strikes, leave the arguments empty.
-    @staticmethod
-    def _strikes_operations_search(self, searchString='', limit=10, sort='name', sortorder='ascending', offset=0):
-        """
-        Searches a strike inside all BPS strike database.To list all the available strikes, leave the arguments empty.
-        :param searchString (string): The string used as a criteria to search a strike by.Example: 'strike_name', 'year:2019', 'path:strikes/xml..'
-        :param limit (number): The limit of rows to return. Use empty string or empty box to get all the available strikes.
-        :param sort (string): Parameter to sort by.
-        :param sortorder (string): The sort order (ascending/descending)
-        :param offset (number): The offset to begin from. Default is 0.
-        :return results (list): 
-               list of object with fields
-                      id (string): 
-                      protocol (string): 
-                      category (string): 
-                      direction (string): 
-                      keyword (string): 
-                      name (string): 
-                      path (string): 
-                      variants (number): 
-                      severity (string): 
-                      reference (string): 
-                      fileSize (string): 
-                      fileExtension (string): 
-                      year (string): 
-        """
-        return self._wrapper._post('/strikes/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder, 'offset': offset})
-
-    ### Exports everything including test models, network configurations and others from system.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _administration_operations_exportAllTests(self, filepath):
-        """
-        Exports everything including test models, network configurations and others from system.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param filepath (string): The local path where to save the compressed file with all the models. The path must contain the file name and extension (.tar.gz): '/d/c/f/AllTests.tar.gz'
-        """
-        return self._wrapper._export('/administration/operations/exportAllTests', **{'filepath': filepath})
-
-    ### Removes a component from the current working Test Model.
-    @staticmethod
-    def _testmodel_operations_remove(self, id):
-        """
-        Removes a component from the current working Test Model.
-        :param id (string): The component id.
-        """
-        return self._wrapper._post('/testmodel/operations/remove', **{'id': id})
+        return self._wrapper._post('/topology/operations/unreserve', **{'unreservation': unreservation})
 
     ### Deletes a given Evasion Profile from the database.
     @staticmethod
@@ -560,333 +242,24 @@ class BPS(object):
         """
         return self._wrapper._post('/evasionProfile/operations/delete', **{'name': name})
 
-    ### null
+    ### Clones a component in the current working Test Model
     @staticmethod
-    def _superflow_actions_operations_getActionChoices(self, id):
+    def _testmodel_operations_clone(self, template, type, active):
         """
-        :param id (number): the flow id
+        Clones a component in the current working Test Model
+        :param template (string): The ID of the test component to clone.
+        :param type (string): Component Type: appsim, sesionsender ..
+        :param active (bool): Set component enable (by default is active) or disable
         """
-        return self._wrapper._post('/superflow/actions/' + self._name + '/operations/getActionChoices', **{'id': id})
-
-    ### Saves the current working Test Model under specified name.
-    @staticmethod
-    def _evasionProfile_operations_saveAs(self, name, force):
-        """
-        Saves the current working Test Model under specified name.
-        :param name (string): The new name given for the current working Evasion Profile
-        :param force (bool): Force to save the working Evasion Profile using a new name.
-        """
-        return self._wrapper._post('/evasionProfile/operations/saveAs', **{'name': name, 'force': force})
-
-    ### Saves the working Test Model using the current name. No need to configure. The current name is used.
-    @staticmethod
-    def _evasionProfile_operations_save(self, name=None, force=True):
-        """
-        Saves the working Test Model using the current name. No need to configure. The current name is used.
-        :param name (string): This argument should be empty for saving the profile using it's actual name.
-        :param force (bool): Force to save the working profile with the same name.
-        """
-        return self._wrapper._post('/evasionProfile/operations/save', **{'name': name, 'force': force})
-
-    ### Exports a wanted test model by giving its name or its test run id.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _testmodel_operations_exportModel(self, name, attachments, filepath, runid=None):
-        """
-        Exports a wanted test model by giving its name or its test run id.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param name (string): The name of the test model to be exported.
-        :param attachments (bool): True if object attachments are needed.
-        :param filepath (string): The local path where to save the exported object.
-        :param runid (number): Test RUN ID
-        """
-        return self._wrapper._export('/testmodel/operations/exportModel', **{'name': name, 'attachments': attachments, 'filepath': filepath, 'runid': runid})
-
-    ### Sets a User Preference.
-    @staticmethod
-    def _administration_userSettings_operations_changeUserSetting(self, name, value):
-        """
-        Sets a User Preference.
-        :param name (string): The setting name.
-        :param value (string): The new value for setting.
-        """
-        return self._wrapper._post('/administration/userSettings/' + self._name + '/operations/changeUserSetting', **{'name': name, 'value': value})
-
-    ### Removes a strike from the current working  Strike List.([{id: 'bb/c/d'}, {id: 'aa/f/g'}])
-    @staticmethod
-    def _strikeList_operations_remove(self, strike):
-        """
-        Removes a strike from the current working  Strike List.([{id: 'bb/c/d'}, {id: 'aa/f/g'}])
-        :param strike (list): The list of strike ids to remove. The strike id is in fact the it's path.
-               list of object with fields
-                      id (string): 
-        """
-        return self._wrapper._post('/strikeList/operations/remove', **{'strike': strike})
-
-    ### Deletes a given Strike List from the database.
-    @staticmethod
-    def _strikeList_operations_delete(self, name):
-        """
-        Deletes a given Strike List from the database.
-        :param name (string): The name of the Strike List to be deleted.
-        """
-        return self._wrapper._post('/strikeList/operations/delete', **{'name': name})
-
-    ### Search Networks.
-    @staticmethod
-    def _network_operations_search(self, searchString, userid, clazz, sortorder, sort, limit, offset):
-        """
-        Search Networks.
-        :param searchString (string): Search networks matching the string given.
-        :param userid (string): The owner to search for
-        :param clazz (string): The 'class' of the object (usually 'canned' or 'custom')
-        :param sortorder (string): The order in which to sort: ascending/descending
-        :param sort (string): Parameter to sort by: 'name'/'class'/'createdBy'/'interfaces'/'timestamp'
-        :param limit (number): The limit of network elements to return
-        :param offset (number): The offset to begin from.
-        :return results (list): 
-               list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      revision (number): 
-                      description (string): 
-        """
-        return self._wrapper._post('/network/operations/search', **{'searchString': searchString, 'userid': userid, 'clazz': clazz, 'sortorder': sortorder, 'sort': sort, 'limit': limit, 'offset': offset})
-
-    ### Lists all the component presets names.
-    @staticmethod
-    def _testmodel_component_operations_getComponentPresetNames(self, type='None'):
-        """
-        Lists all the component presets names.
-        :param type (string): The Component type.
-        All the component types are listed under the node testComponentTypesDescription.
-        If this argument is not set, all the presets will be listed.
-        :return result (list): 
-               list of object with fields
-                      id (string): 
-                      label (string): 
-                      type (string): 
-                      description (string): 
-        """
-        return self._wrapper._post('/testmodel/component/' + self._name + '/operations/getComponentPresetNames', **{'type': type})
+        return self._wrapper._post('/testmodel/operations/clone', **{'template': template, 'type': type, 'active': active})
 
     ### null
     @staticmethod
-    def _strikeList_operations_search(self, searchString='', limit=10, sort='name', sortorder='ascending'):
+    def _loadProfile_operations_load(self, template):
         """
-        :param searchString (string): Search strike list name matching the string given.
-        :param limit (number): The limit of rows to return
-        :param sort (string): Parameter to sort by. Default is by name.
-        :param sortorder (string): The sort order (ascending/descending). Default is ascending.
+        :param template (string): 
         """
-        return self._wrapper._post('/strikeList/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
-
-    ### null
-    @staticmethod
-    def _results_operations_getHistoricalResultSize(self, runid, componentid, group):
-        """
-        :param runid (number): The test run id
-        :param componentid (string): The component identifier
-        :param group (string): The data group or one of the BPS component main groups. The group name can be get by executing the operation 'getGroups' from results node
-        :return result (string): 
-        """
-        return self._wrapper._post('/results/' + self._name + '/operations/getHistoricalResultSize', **{'runid': runid, 'componentid': componentid, 'group': group})
-
-    ### Add a host to the current working Superflow
-    @staticmethod
-    def _superflow_operations_addHost(self, hostParams, force):
-        """
-        Add a host to the current working Superflow
-        :param hostParams (object): 
-               object of object with fields
-                      name (string): The host name.
-                      hostname (string): The NickName of the host.
-                      iface (string): The traffic direction.Values can be: 'origin'(means client) and 'target'(means server)
-        :param force (bool): The flow id.
-        """
-        return self._wrapper._post('/superflow/operations/addHost', **{'hostParams': hostParams, 'force': force})
-
-    ### Load an existing Application Profile and sets it as the current one.
-    @staticmethod
-    def _appProfile_operations_load(self, template):
-        """
-        Load an existing Application Profile and sets it as the current one.
-        :param template (string): The name of the template application profile
-        """
-        return self._wrapper._post('/appProfile/operations/load', **{'template': template})
-
-    ### Creates a new Application Profile.
-    @staticmethod
-    def _appProfile_operations_new(self, template=None):
-        """
-        Creates a new Application Profile.
-        :param template (string): This argument must remain unset. Do not set any value for it.
-        """
-        return self._wrapper._post('/appProfile/operations/new', **{'template': template})
-
-    ### Deletes a specified load profile from the database.
-    @staticmethod
-    def _loadProfile_operations_delete(self, name):
-        """
-        Deletes a specified load profile from the database.
-        :param name (string): The name of the loadProfile object to delete.
-        """
-        return self._wrapper._post('/loadProfile/operations/delete', **{'name': name})
-
-    ### Saves the current working Application Profiles and gives it a new name.
-    @staticmethod
-    def _appProfile_operations_saveAs(self, name, force):
-        """
-        Saves the current working Application Profiles and gives it a new name.
-        :param name (string): The new name given for the current working Application Profile
-        :param force (bool): Force to save the working Application Profile using the given name.
-        """
-        return self._wrapper._post('/appProfile/operations/saveAs', **{'name': name, 'force': force})
-
-    ### Saves the current working application profile using the current name. No need to use any parameter.
-    @staticmethod
-    def _appProfile_operations_save(self, name=None, force=True):
-        """
-        Saves the current working application profile using the current name. No need to use any parameter.
-        :param name (string): The name of the template. No need to configure. The current name is used.
-        :param force (bool): Force to save the working Application Profile with the same name. No need to configure. The default is used.
-        """
-        return self._wrapper._post('/appProfile/operations/save', **{'name': name, 'force': force})
-
-    ### Saves the current working Strike List and gives it a new name.
-    @staticmethod
-    def _strikeList_operations_saveAs(self, name, force):
-        """
-        Saves the current working Strike List and gives it a new name.
-        :param name (string): The new name given for the current working Strike List
-        :param force (bool): Force to save the working Strike List using the given name.
-        """
-        return self._wrapper._post('/strikeList/operations/saveAs', **{'name': name, 'force': force})
-
-    ### Saves the current working Strike List using the current name
-    @staticmethod
-    def _strikeList_operations_save(self, name=None, force=True):
-        """
-        Saves the current working Strike List using the current name
-        :param name (string): The name of the template. Default is empty.
-        :param force (bool): Force to save the working Strike List with the same name.
-        """
-        return self._wrapper._post('/strikeList/operations/save', **{'name': name, 'force': force})
-
-    ### null
-    @staticmethod
-    def _appProfile_operations_search(self, searchString, limit, sort, sortorder):
-        """
-        :param searchString (string): Search application profile name matching the string given.
-        :param limit (string): The limit of rows to return
-        :param sort (string): Parameter to sort by.
-        :param sortorder (string): The sort order (ascending/descending)
-        :return results (list): 
-               list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      revision (number): 
-                      description (string): 
-        """
-        return self._wrapper._post('/appProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
-
-    ### null
-    @staticmethod
-    def _topology_operations_unreserve(self, unreservation):
-        """
-        :param unreservation (list): 
-               list of object with fields
-                      slot (number): 
-                      port (number): 
-        """
-        return self._wrapper._post('/topology/operations/unreserve', **{'unreservation': unreservation})
-
-    ### null
-    @staticmethod
-    def _testmodel_operations_search(self, searchString, limit, sort, sortorder):
-        """
-        :param searchString (string): Search test name matching the string given.
-        :param limit (string): The limit of rows to return
-        :param sort (string): Parameter to sort by: 'createdOn'/'timestamp'/'bandwidth'/'result'/'lastrunby'/'createdBy'/'interfaces'/'testLabType'
-        :param sortorder (string): The sort order: ascending/descending 
-        :return results (list): 
-               list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      network (string): 
-                      duration (number): 
-                      description (string): 
-        """
-        return self._wrapper._post('/testmodel/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
-
-    ### Returns stats series for a given component group stat output for a given timestamp
-    @staticmethod
-    def _results_operations_getHistoricalSeries(self, runid, componentid, dataindex, group):
-        """
-        Returns stats series for a given component group stat output for a given timestamp
-        :param runid (number): The test identifier
-        :param componentid (string): The component identifier. Each component has an id and can be get loading the testand checking it's components info
-        :param dataindex (number): The table index, equivalent with timestamp.
-        :param group (string): The data group or one of the BPS component main groups. The group name can be get by executing the operation 'getGroups' from results node.
-        :return results (list): 
-               list of object with fields
-                      name (string): 
-                      content (string): 
-                      datasetvals (string): 
-        """
-        return self._wrapper._post('/results/' + self._name + '/operations/getHistoricalSeries', **{'runid': runid, 'componentid': componentid, 'dataindex': dataindex, 'group': group})
-
-    ### null
-    @staticmethod
-    def _loadProfile_operations_save(self):
-        return self._wrapper._post('/loadProfile/operations/save', **{})
-
-    ### Save the active editing LoadProfile under specified name
-    @staticmethod
-    def _loadProfile_operations_saveAs(self, name):
-        """
-        Save the active editing LoadProfile under specified name
-        :param name (string): 
-        """
-        return self._wrapper._post('/loadProfile/operations/saveAs', **{'name': name})
-
-    ### Removes a SuperFlow from the current working Application Profile. 
-    @staticmethod
-    def _appProfile_operations_remove(self, superflow):
-        """
-        Removes a SuperFlow from the current working Application Profile. 
-        :param superflow (string): The name of the super flow.
-        """
-        return self._wrapper._post('/appProfile/operations/remove', **{'superflow': superflow})
-
-    ### null
-    @staticmethod
-    def _superflow_flows_operations_getFlowChoices(self, id, name):
-        """
-        :param id (number): The flow id.
-        :param name (string): The flow type/name.
-        :return result (list): 
-        """
-        return self._wrapper._post('/superflow/flows/' + self._name + '/operations/getFlowChoices', **{'id': id, 'name': name})
-
-    ### Stops the test run.
-    @staticmethod
-    def _testmodel_operations_stopRun(self, runid):
-        """
-        Stops the test run.
-        :param runid (number): Test RUN ID
-        """
-        return self._wrapper._post('/testmodel/operations/stopRun', **{'runid': runid})
-
-    ### Stops the test run.
-    @staticmethod
-    def _topology_operations_stopRun(self, runid):
-        """
-        Stops the test run.
-        :param runid (number): Test RUN ID
-        """
-        return self._wrapper._post('/topology/operations/stopRun', **{'runid': runid})
+        return self._wrapper._post('/loadProfile/operations/load', **{'template': template})
 
     ### Sets the card mode of a board.
     @staticmethod
@@ -932,121 +305,184 @@ class BPS(object):
         """
         return self._wrapper._post('/topology/operations/setPerfAcc', **{'board': board, 'perfacc': perfacc})
 
+    ### Deletes a given Application Profile from the database.
+    @staticmethod
+    def _appProfile_operations_delete(self, name):
+        """
+        Deletes a given Application Profile from the database.
+        :param name (string): The name of the Application Profiles.
+        """
+        return self._wrapper._post('/appProfile/operations/delete', **{'name': name})
+
+    ### Saves the current working Test Model under specified name.
+    @staticmethod
+    def _evasionProfile_operations_saveAs(self, name, force):
+        """
+        Saves the current working Test Model under specified name.
+        :param name (string): The new name given for the current working Evasion Profile
+        :param force (bool): Force to save the working Evasion Profile using a new name.
+        """
+        return self._wrapper._post('/evasionProfile/operations/saveAs', **{'name': name, 'force': force})
+
+    ### Saves the working Test Model using the current name. No need to configure. The current name is used.
+    @staticmethod
+    def _evasionProfile_operations_save(self, name=None, force=True):
+        """
+        Saves the working Test Model using the current name. No need to configure. The current name is used.
+        :param name (string): This argument should be empty for saving the profile using it's actual name.
+        :param force (bool): Force to save the working profile with the same name.
+        """
+        return self._wrapper._post('/evasionProfile/operations/save', **{'name': name, 'force': force})
+
+    ### Imports a test model, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _testmodel_operations_importModel(self, name, filename, force):
+        """
+        Imports a test model, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the object being imported
+        :param filename (string): The file containing the object
+        :param force (bool): Force to import the file and the object having the same name will be replaced.
+        """
+        return self._wrapper._import('/testmodel/operations/importModel', **{'name': name, 'filename': filename, 'force': force})
+
+    ### Imports an application profile, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _appProfile_operations_importAppProfile(self, name, filename, force):
+        """
+        Imports an application profile, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the object being imported
+        :param filename (string): The file containing the object
+        :param force (bool): Force to import the file and the object having the same name will be replaced.
+        """
+        return self._wrapper._import('/appProfile/operations/importAppProfile', **{'name': name, 'filename': filename, 'force': force})
+
+    ### Imports a network neighborhood model, given as a file.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _network_operations_importNetwork(self, name, filename, force):
+        """
+        Imports a network neighborhood model, given as a file.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the object being imported
+        :param filename (string): The file containing the object
+        :param force (bool): Force to import the file and replace the object having the same name.
+        """
+        return self._wrapper._import('/network/operations/importNetwork', **{'name': name, 'filename': filename, 'force': force})
+
     ### null
     @staticmethod
-    def _loadProfile_operations_load(self, template):
+    def _superflow_operations_search(self, searchString, limit, sort, sortorder):
         """
-        :param template (string): 
+        :param searchString (string): Search Super Flow name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by.
+        :param sortorder (string): The sort order (ascending/descending)
         """
-        return self._wrapper._post('/loadProfile/operations/load', **{'template': template})
+        return self._wrapper._post('/superflow/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
-    ### Retrieves all the security options
+    ### Adds a new test component to the current working test model
     @staticmethod
-    def _evasionProfile_StrikeOptions_operations_getStrikeOptions(self):
+    def _testmodel_operations_add(self, name, component, type, active):
         """
-        Retrieves all the security options
-        :return result (list): 
-        """
-        return self._wrapper._post('/evasionProfile/StrikeOptions/operations/getStrikeOptions', **{})
-
-    ### Load an existing Evasion Profile and sets it as the current one.
-    @staticmethod
-    def _evasionProfile_operations_load(self, template):
-        """
-        Load an existing Evasion Profile and sets it as the current one.
-        :param template (string): The name of an Evasion profile template.
-        """
-        return self._wrapper._post('/evasionProfile/operations/load', **{'template': template})
-
-    ### Creates a new Evasion Profile.
-    @staticmethod
-    def _evasionProfile_operations_new(self, template=None):
-        """
-        Creates a new Evasion Profile.
-        :param template (string): The name should be empty to create a new object.
-        """
-        return self._wrapper._post('/evasionProfile/operations/new', **{'template': template})
-
-    ### Deletes a given Test Model from the database.
-    @staticmethod
-    def _testmodel_operations_delete(self, name):
-        """
-        Deletes a given Test Model from the database.
-        :param name (string): The name of the Test Model.
-        """
-        return self._wrapper._post('/testmodel/operations/delete', **{'name': name})
-
-    ### Clones a component in the current working Test Model
-    @staticmethod
-    def _testmodel_operations_clone(self, template, type, active):
-        """
-        Clones a component in the current working Test Model
-        :param template (string): The ID of the test component to clone.
+        Adds a new test component to the current working test model
+        :param name (string): Component Name
+        :param component (string): Component template, preset.
         :param type (string): Component Type: appsim, sesionsender ..
         :param active (bool): Set component enable (by default is active) or disable
         """
-        return self._wrapper._post('/testmodel/operations/clone', **{'template': template, 'type': type, 'active': active})
+        return self._wrapper._post('/testmodel/operations/add', **{'name': name, 'component': component, 'type': type, 'active': active})
 
-    ### Load an existing Strike List and sets it as the current one.
+    ### Add a host to the current working Superflow
     @staticmethod
-    def _strikeList_operations_load(self, template):
+    def _superflow_operations_addHost(self, hostParams, force):
         """
-        Load an existing Strike List and sets it as the current one.
-        :param template (string): The name of the Strike List template
-        """
-        return self._wrapper._post('/strikeList/operations/load', **{'template': template})
-
-    ### Creates a new Strike List.
-    @staticmethod
-    def _strikeList_operations_new(self, template=None):
-        """
-        Creates a new Strike List.
-        :param template (string): The name of the template. In this case will be empty.
-        """
-        return self._wrapper._post('/strikeList/operations/new', **{'template': template})
-
-    ### Exports a port capture from a test run.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _topology_operations_exportCapture(self, filepath, args):
-        """
-        Exports a port capture from a test run.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param filepath (string): The local path where to save the exported object.
-        :param args (object): Export filters. The Possible values for: 'dir'(direction) are 'tx','rx','both';for 'sizetype' and 'starttype'(units for size and start) are 'megabytes' or 'frames'
+        Add a host to the current working Superflow
+        :param hostParams (object): 
                object of object with fields
-                      port (number): Port number
-                      slot (number): Slot number
-                      dir (string): Capturing direction (rx, tx, both)
-                      size (number): The size of the capture to be exported.
-                      start (number): Start at point.
-                      sizetype (string): The size unit: megabytes or frames.
-                      starttype (string): The start unit: megabytes or frames.
+                      name (string): The host name.
+                      hostname (string): The NickName of the host.
+                      iface (string): The traffic direction.Values can be: 'origin'(means client) and 'target'(means server)
+        :param force (bool): The flow id.
         """
-        return self._wrapper._export('/topology/operations/exportCapture', **{'filepath': filepath, 'args': args})
+        return self._wrapper._post('/superflow/operations/addHost', **{'hostParams': hostParams, 'force': force})
 
-    ### Exports the result report of a test, identified by its run id and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    ### Stops the test run.
     @staticmethod
-    def _reports_operations_exportReport(self, filepath, runid, reportType, sectionIds='', dataType='ALL'):
+    def _testmodel_operations_stopRun(self, runid):
         """
-        Exports the result report of a test, identified by its run id and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param filepath (string): The local path where to export the report, including the report name.
+        Stops the test run.
         :param runid (number): Test RUN ID
-        :param reportType (string): Report file format to be exported in.
-        :param sectionIds (string): Chapter Ids. Can be extracted a chapter or many, a sub-chapter or many or the entire report: (sectionIds='6' / sectionIds='5,6,7' / sectionIds='7.4,8.5.2,8.6.3.1' / sectionIds=''(to export the entire report))
-        :param dataType (string): Report content data type to export. Default value is 'all data'. For tabular only use 'TABLE' and for graphs only use 'CHARTS'.
         """
-        return self._wrapper._export('/reports/operations/exportReport', **{'filepath': filepath, 'runid': runid, 'reportType': reportType, 'sectionIds': sectionIds, 'dataType': dataType})
+        return self._wrapper._post('/testmodel/operations/stopRun', **{'runid': runid})
 
-    ### Adds an action to the current working SuperFlow
+    ### Stops the test run.
     @staticmethod
-    def _superflow_operations_addAction(self, flowid, type, actionid, source):
+    def _topology_operations_stopRun(self, runid):
         """
-        Adds an action to the current working SuperFlow
-        :param flowid (number): The flow id.
-        :param type (string): The type of the action definition.
-        :param actionid (number): The new action id.
-        :param source (string): The action source.
+        Stops the test run.
+        :param runid (number): Test RUN ID
         """
-        return self._wrapper._post('/superflow/operations/addAction', **{'flowid': flowid, 'type': type, 'actionid': actionid, 'source': source})
+        return self._wrapper._post('/topology/operations/stopRun', **{'runid': runid})
+
+    ### null
+    @staticmethod
+    def _superflow_actions_operations_getActionChoices(self, id):
+        """
+        :param id (number): the flow id
+        """
+        return self._wrapper._post('/superflow/actions/' + self._name + '/operations/getActionChoices', **{'id': id})
+
+    ### Recompute percentages in the current working Application Profile
+    @staticmethod
+    def _appProfile_operations_recompute(self):
+        """
+        Recompute percentages in the current working Application Profile
+        """
+        return self._wrapper._post('/appProfile/operations/recompute', **{})
+
+    ### null
+    @staticmethod
+    def _evasionProfile_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        :param searchString (string): Search evasion profile name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by. (name/createdBy ...)
+        :param sortorder (string): The sort order (ascending/descending)
+        :return results (list): 
+               list of object with fields
+                      name (string): 
+                      label (string): 
+                      createdBy (string): 
+                      revision (number): 
+                      description (string): 
+        """
+        return self._wrapper._post('/evasionProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Searches a strike inside all BPS strike database.To list all the available strikes, leave the arguments empty.
+    @staticmethod
+    def _strikes_operations_search(self, searchString='', limit=10, sort='name', sortorder='ascending', offset=0):
+        """
+        Searches a strike inside all BPS strike database.To list all the available strikes, leave the arguments empty.
+        :param searchString (string): The string used as a criteria to search a strike by.Example: 'strike_name', 'year:2019', 'path:strikes/xml..'
+        :param limit (number): The limit of rows to return. Use empty string or empty box to get all the available strikes.
+        :param sort (string): Parameter to sort by.
+        :param sortorder (string): The sort order (ascending/descending)
+        :param offset (number): The offset to begin from. Default is 0.
+        :return results (list): 
+               list of object with fields
+                      id (string): 
+                      protocol (string): 
+                      category (string): 
+                      direction (string): 
+                      keyword (string): 
+                      name (string): 
+                      path (string): 
+                      variants (number): 
+                      severity (string): 
+                      reference (string): 
+                      fileSize (string): 
+                      fileExtension (string): 
+                      year (string): 
+        """
+        return self._wrapper._post('/strikes/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder, 'offset': offset})
 
     ### Loads an existing network config by name.
     @staticmethod
@@ -1066,6 +502,257 @@ class BPS(object):
         """
         return self._wrapper._post('/network/operations/new', **{'template': template})
 
+    ### Removes a flow from the current working SuperFlow.
+    @staticmethod
+    def _superflow_operations_removeFlow(self, id):
+        """
+        Removes a flow from the current working SuperFlow.
+        :param id (number): The flow ID.
+        """
+        return self._wrapper._post('/superflow/operations/removeFlow', **{'id': id})
+
+    ### Lists all the component presets names.
+    @staticmethod
+    def _testmodel_component_operations_getComponentPresetNames(self, type='None'):
+        """
+        Lists all the component presets names.
+        :param type (string): The Component type.
+        All the component types are listed under the node testComponentTypesDescription.
+        If this argument is not set, all the presets will be listed.
+        :return result (list): 
+               list of object with fields
+                      id (string): 
+                      label (string): 
+                      type (string): 
+                      description (string): 
+        """
+        return self._wrapper._post('/testmodel/component/' + self._name + '/operations/getComponentPresetNames', **{'type': type})
+
+    ### Adds a list of strikes to the current working Strike List.([{id: 'b/b/v/f'}, {id: 'aa/f/h'}])
+    @staticmethod
+    def _strikeList_operations_add(self, strike):
+        """
+        Adds a list of strikes to the current working Strike List.([{id: 'b/b/v/f'}, {id: 'aa/f/h'}])
+        :param strike (list): The list of strikes to add.
+               list of object with fields
+                      id (string): Strike path.
+        """
+        return self._wrapper._post('/strikeList/operations/add', **{'strike': strike})
+
+    ### null
+    @staticmethod
+    def _superflow_flows_operations_getFlowChoices(self, id, name):
+        """
+        :param id (number): The flow id.
+        :param name (string): The flow type/name.
+        :return result (list): 
+        """
+        return self._wrapper._post('/superflow/flows/' + self._name + '/operations/getFlowChoices', **{'id': id, 'name': name})
+
+    ### Runs a Test.
+    @staticmethod
+    def _testmodel_operations_run(self, modelname, group, allowMalware=False):
+        """
+        Runs a Test.
+        :param modelname (string): Test Name to run
+        :param group (number): Group to run
+        :param allowMalware (bool): Enable this option to allow malware in test.
+        """
+        return self._wrapper._post('/testmodel/operations/run', **{'modelname': modelname, 'group': group, 'allowMalware': allowMalware})
+
+    ### Runs a Test.
+    @staticmethod
+    def _topology_operations_run(self, modelname, group, allowMalware=False):
+        """
+        Runs a Test.
+        :param modelname (string): Test Name to run
+        :param group (number): Group to run
+        :param allowMalware (bool): Enable this option to allow malware in test.
+        """
+        return self._wrapper._post('/topology/operations/run', **{'modelname': modelname, 'group': group, 'allowMalware': allowMalware})
+
+    ### Deletes a Test Report from the database.
+    @staticmethod
+    def _reports_operations_delete(self, runid):
+        """
+        Deletes a Test Report from the database.
+        :param runid (number): The test run id that generated the report you want to delete.
+        """
+        return self._wrapper._post('/reports/operations/delete', **{'runid': runid})
+
+    ### Create a new custom Load Profile.
+    @staticmethod
+    def _loadProfile_operations_createNewCustom(self, loadProfile):
+        """
+        Create a new custom Load Profile.
+        :param loadProfile (string): The Name of The load profile object to create.
+        """
+        return self._wrapper._post('/loadProfile/operations/createNewCustom', **{'loadProfile': loadProfile})
+
+    ### Saves the current working Test Model under specified name.
+    @staticmethod
+    def _testmodel_operations_saveAs(self, name, force):
+        """
+        Saves the current working Test Model under specified name.
+        :param name (string): The new name given for the current working Test Model
+        :param force (bool): Force to save the working Test Model using a new name.
+        """
+        return self._wrapper._post('/testmodel/operations/saveAs', **{'name': name, 'force': force})
+
+    ### Saves the working Test Model using the current name. No need to configure. The current name is used.
+    @staticmethod
+    def _testmodel_operations_save(self, name=None, force=True):
+        """
+        Saves the working Test Model using the current name. No need to configure. The current name is used.
+        :param name (string): The name of the template that should be empty.
+        :param force (bool): Force to save the working Test Model with the same name.
+        """
+        return self._wrapper._post('/testmodel/operations/save', **{'name': name, 'force': force})
+
+    ### Deletes a given Test Model from the database.
+    @staticmethod
+    def _testmodel_operations_delete(self, name):
+        """
+        Deletes a given Test Model from the database.
+        :param name (string): The name of the Test Model.
+        """
+        return self._wrapper._post('/testmodel/operations/delete', **{'name': name})
+
+    ### Load an existing Application Profile and sets it as the current one.
+    @staticmethod
+    def _appProfile_operations_load(self, template):
+        """
+        Load an existing Application Profile and sets it as the current one.
+        :param template (string): The name of the template application profile
+        """
+        return self._wrapper._post('/appProfile/operations/load', **{'template': template})
+
+    ### Creates a new Application Profile.
+    @staticmethod
+    def _appProfile_operations_new(self, template=None):
+        """
+        Creates a new Application Profile.
+        :param template (string): This argument must remain unset. Do not set any value for it.
+        """
+        return self._wrapper._post('/appProfile/operations/new', **{'template': template})
+
+    ### Saves the current working Strike List and gives it a new name.
+    @staticmethod
+    def _strikeList_operations_saveAs(self, name, force):
+        """
+        Saves the current working Strike List and gives it a new name.
+        :param name (string): The new name given for the current working Strike List
+        :param force (bool): Force to save the working Strike List using the given name.
+        """
+        return self._wrapper._post('/strikeList/operations/saveAs', **{'name': name, 'force': force})
+
+    ### Saves the current working Strike List using the current name
+    @staticmethod
+    def _strikeList_operations_save(self, name=None, force=True):
+        """
+        Saves the current working Strike List using the current name
+        :param name (string): The name of the template. Default is empty.
+        :param force (bool): Force to save the working Strike List with the same name.
+        """
+        return self._wrapper._post('/strikeList/operations/save', **{'name': name, 'force': force})
+
+    ### null
+    @staticmethod
+    def _testmodel_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        :param searchString (string): Search test name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by: 'createdOn'/'timestamp'/'bandwidth'/'result'/'lastrunby'/'createdBy'/'interfaces'/'testLabType'
+        :param sortorder (string): The sort order: ascending/descending 
+        :return results (list): 
+               list of object with fields
+                      name (string): 
+                      label (string): 
+                      createdBy (string): 
+                      network (string): 
+                      duration (number): 
+                      description (string): 
+        """
+        return self._wrapper._post('/testmodel/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Adds a list of SuperFlow to the current working Application Profile. ([{'superflow':'adadad', 'weight':'20'},{..}])
+    @staticmethod
+    def _appProfile_operations_add(self, add):
+        """
+        Adds a list of SuperFlow to the current working Application Profile. ([{'superflow':'adadad', 'weight':'20'},{..}])
+        :param add (list): 
+               list of object with fields
+                      superflow (string): The name of the super flow
+                      weight (string): The weight of the super flow
+        """
+        return self._wrapper._post('/appProfile/operations/add', **{'add': add})
+
+    ### Sets a User Preference.
+    @staticmethod
+    def _administration_userSettings_operations_changeUserSetting(self, name, value):
+        """
+        Sets a User Preference.
+        :param name (string): The setting name.
+        :param value (string): The new value for setting.
+        """
+        return self._wrapper._post('/administration/userSettings/' + self._name + '/operations/changeUserSetting', **{'name': name, 'value': value})
+
+    ### Imports an ATI License file (.lic) on a hardware platform. This operation is NOT recommended to be used on BPS Virtual platforms.
+    @staticmethod
+    def _administration_atiLicensing_operations_importAtiLicense(self, filename, name):
+        """
+        Imports an ATI License file (.lic) on a hardware platform. This operation is NOT recommended to be used on BPS Virtual platforms.
+        :param filename (string): import file path
+        :param name (string): the name of the license file
+        """
+        return self._wrapper._import('/administration/atiLicensing/operations/importAtiLicense', **{'filename': filename, 'name': name})
+
+    ### null
+    @staticmethod
+    def _strikeList_operations_search(self, searchString='', limit=10, sort='name', sortorder='ascending'):
+        """
+        :param searchString (string): Search strike list name matching the string given.
+        :param limit (number): The limit of rows to return
+        :param sort (string): Parameter to sort by. Default is by name.
+        :param sortorder (string): The sort order (ascending/descending). Default is ascending.
+        """
+        return self._wrapper._post('/strikeList/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Deletes a given Network Neighborhood Config from the database.
+    @staticmethod
+    def _network_operations_delete(self, name):
+        """
+        Deletes a given Network Neighborhood Config from the database.
+        :param name (string): The name of the Network Neighborhood Config.
+        """
+        return self._wrapper._post('/network/operations/delete', **{'name': name})
+
+    ### Removes a SuperFlow from the current working Application Profile. 
+    @staticmethod
+    def _appProfile_operations_remove(self, superflow):
+        """
+        Removes a SuperFlow from the current working Application Profile. 
+        :param superflow (string): The name of the super flow.
+        """
+        return self._wrapper._post('/appProfile/operations/remove', **{'superflow': superflow})
+
+    ### Returns stats series for a given component group stat output for a given timestamp
+    @staticmethod
+    def _results_operations_getHistoricalSeries(self, runid, componentid, dataindex, group):
+        """
+        Returns stats series for a given component group stat output for a given timestamp
+        :param runid (number): The test identifier
+        :param componentid (string): The component identifier. Each component has an id and can be get loading the testand checking it's components info
+        :param dataindex (number): The table index, equivalent with timestamp.
+        :param group (string): The data group or one of the BPS component main groups. The group name can be get by executing the operation 'getGroups' from results node.
+        :return results (list): 
+               list of object with fields
+                      name (string): 
+                      content (string): 
+                      datasetvals (string): 
+        """
+        return self._wrapper._post('/results/' + self._name + '/operations/getHistoricalSeries', **{'runid': runid, 'componentid': componentid, 'dataindex': dataindex, 'group': group})
+
     ### Returns main groups of statistics for a single BPS Test Component. These groups can be used then in requesting statistics values from the history of a test run.
     @staticmethod
     def _results_operations_getGroups(self, name, dynamicEnums=True, includeOutputs=True):
@@ -1081,6 +768,476 @@ class BPS(object):
                       groups (object): 
         """
         return self._wrapper._post('/results/' + self._name + '/operations/getGroups', **{'name': name, 'dynamicEnums': dynamicEnums, 'includeOutputs': includeOutputs})
+
+    ### Adds an action to the current working SuperFlow
+    @staticmethod
+    def _superflow_operations_addAction(self, flowid, type, actionid, source):
+        """
+        Adds an action to the current working SuperFlow
+        :param flowid (number): The flow id.
+        :param type (string): The type of the action definition.
+        :param actionid (number): The new action id.
+        :param source (string): The action source.
+        """
+        return self._wrapper._post('/superflow/operations/addAction', **{'flowid': flowid, 'type': type, 'actionid': actionid, 'source': source})
+
+    ### Exports a wanted test model by giving its name or its test run id.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _testmodel_operations_exportModel(self, name, attachments, filepath, runid=None):
+        """
+        Exports a wanted test model by giving its name or its test run id.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the test model to be exported.
+        :param attachments (bool): True if object attachments are needed.
+        :param filepath (string): The local path where to save the exported object.
+        :param runid (number): Test RUN ID
+        """
+        return self._wrapper._export('/testmodel/operations/exportModel', **{'name': name, 'attachments': attachments, 'filepath': filepath, 'runid': runid})
+
+    ### Load an existing test model template.
+    @staticmethod
+    def _testmodel_operations_load(self, template):
+        """
+        Load an existing test model template.
+        :param template (string): The name of the template testmodel
+        """
+        return self._wrapper._post('/testmodel/operations/load', **{'template': template})
+
+    ### Creates a new Test Model
+    @staticmethod
+    def _testmodel_operations_new(self, template=None):
+        """
+        Creates a new Test Model
+        :param template (string): The name of the template. In this case will be empty.
+        """
+        return self._wrapper._post('/testmodel/operations/new', **{'template': template})
+
+    ### Saves the current working Application Profiles and gives it a new name.
+    @staticmethod
+    def _superflow_operations_saveAs(self, name, force):
+        """
+        Saves the current working Application Profiles and gives it a new name.
+        :param name (string): The new name given for the current working Super Flow
+        :param force (bool): Force to save the working Super Flow using the given name.
+        """
+        return self._wrapper._post('/superflow/operations/saveAs', **{'name': name, 'force': force})
+
+    ### Saves the working Super Flow using the current name
+    @staticmethod
+    def _superflow_operations_save(self, name=None, force=True):
+        """
+        Saves the working Super Flow using the current name
+        :param name (string): The name of the template that should be empty.
+        :param force (bool): Force to save the working Super Flow with the same name.
+        """
+        return self._wrapper._post('/superflow/operations/save', **{'name': name, 'force': force})
+
+    ### Exports an Application profile and all of its dependencies.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _appProfile_operations_exportAppProfile(self, name, attachments, filepath):
+        """
+        Exports an Application profile and all of its dependencies.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the test model to be exported.
+        :param attachments (bool): True if object attachments are needed.
+        :param filepath (string): The local path where to save the exported object.
+        """
+        return self._wrapper._export('/appProfile/operations/exportAppProfile', **{'name': name, 'attachments': attachments, 'filepath': filepath})
+
+    ### Exports the Strike List identified by its name and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _strikeList_operations_exportStrikeList(self, name, filepath):
+        """
+        Exports the Strike List identified by its name and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the strike list to be exported.
+        :param filepath (string): The local path where to save the exported object. The file should have .bap extension
+        """
+        return self._wrapper._export('/strikeList/operations/exportStrikeList', **{'name': name, 'filepath': filepath})
+
+    ### null
+    @staticmethod
+    def _administration_operations_logs(self, error=False, messages=False, web=False, all=False, audit=False, info=False, system=False, lines=20, drop=0):
+        """
+        :param error (bool): 
+        :param messages (bool): 
+        :param web (bool): 
+        :param all (bool): 
+        :param audit (bool): 
+        :param info (bool): 
+        :param system (bool): 
+        :param lines (number): number lines to return
+        :param drop (number): number lines to drop
+        """
+        return self._wrapper._post('/administration/operations/logs', **{'error': error, 'messages': messages, 'web': web, 'all': all, 'audit': audit, 'info': info, 'system': system, 'lines': lines, 'drop': drop})
+
+    ### null
+    @staticmethod
+    def _reports_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        :param searchString (string): Search test name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by: 'name'/'endTime'/'duration'/'result'/'startTime'/'iteration'/'network'/'dut'/'user'/'size'
+        :param sortorder (string): The sort order: ascending/descending 
+        """
+        return self._wrapper._post('/reports/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Load an existing Super Flow and sets it as the current one.
+    @staticmethod
+    def _superflow_operations_load(self, template):
+        """
+        Load an existing Super Flow and sets it as the current one.
+        :param template (string): The name of the existing Super Flow template
+        """
+        return self._wrapper._post('/superflow/operations/load', **{'template': template})
+
+    ### Creates a new Super Flow.
+    @staticmethod
+    def _superflow_operations_new(self, template=None):
+        """
+        Creates a new Super Flow.
+        :param template (string): The name of the template. In this case will be empty.
+        """
+        return self._wrapper._post('/superflow/operations/new', **{'template': template})
+
+    ### Deletes a given Strike List from the database.
+    @staticmethod
+    def _strikeList_operations_delete(self, name):
+        """
+        Deletes a given Strike List from the database.
+        :param name (string): The name of the Strike List to be deleted.
+        """
+        return self._wrapper._post('/strikeList/operations/delete', **{'name': name})
+
+    ### Gives abbreviated information about all Canned Flow Names.
+    @staticmethod
+    def _superflow_flows_operations_getCannedFlows(self):
+        """
+        Gives abbreviated information about all Canned Flow Names.
+        :return results (list): 
+               list of object with fields
+                      name (string): 
+                      label (string): 
+        """
+        return self._wrapper._post('/superflow/flows/' + self._name + '/operations/getCannedFlows', **{})
+
+    ### Deletes a given Super Flow from the database.
+    @staticmethod
+    def _superflow_operations_delete(self, name):
+        """
+        Deletes a given Super Flow from the database.
+        :param name (string): The name of the Super Flow.
+        """
+        return self._wrapper._post('/superflow/operations/delete', **{'name': name})
+
+    ### null
+    @staticmethod
+    def _results_operations_getHistoricalResultSize(self, runid, componentid, group):
+        """
+        :param runid (number): The test run id
+        :param componentid (string): The component identifier
+        :param group (string): The data group or one of the BPS component main groups. The group name can be get by executing the operation 'getGroups' from results node
+        :return result (string): 
+        """
+        return self._wrapper._post('/results/' + self._name + '/operations/getHistoricalResultSize', **{'runid': runid, 'componentid': componentid, 'group': group})
+
+    ### Adds a note to given port.
+    @staticmethod
+    def _topology_operations_addPortNote(self, interface, note):
+        """
+        Adds a note to given port.
+        :param interface (object): Slot and Port ID.
+               object of object with fields
+                      slot (number): 
+                      port (number): 
+        :param note (string): Note info.
+        """
+        return self._wrapper._post('/topology/operations/addPortNote', **{'interface': interface, 'note': note})
+
+    ### Search Networks.
+    @staticmethod
+    def _network_operations_search(self, searchString, userid, clazz, sortorder, sort, limit, offset):
+        """
+        Search Networks.
+        :param searchString (string): Search networks matching the string given.
+        :param userid (string): The owner to search for
+        :param clazz (string): The 'class' of the object (usually 'canned' or 'custom')
+        :param sortorder (string): The order in which to sort: ascending/descending
+        :param sort (string): Parameter to sort by: 'name'/'class'/'createdBy'/'interfaces'/'timestamp'
+        :param limit (number): The limit of network elements to return
+        :param offset (number): The offset to begin from.
+        :return results (list): 
+               list of object with fields
+                      name (string): 
+                      label (string): 
+                      createdBy (string): 
+                      revision (number): 
+                      description (string): 
+        """
+        return self._wrapper._post('/network/operations/search', **{'searchString': searchString, 'userid': userid, 'clazz': clazz, 'sortorder': sortorder, 'sort': sort, 'limit': limit, 'offset': offset})
+
+    ### Retrieves the real time statistics for the running test, by giving the run id.
+    @staticmethod
+    def _testmodel_operations_realTimeStats(self, runid, rtsgroup, numSeconds, numDataPoints=1):
+        """
+        Retrieves the real time statistics for the running test, by giving the run id.
+        :param runid (number): Test RUN ID
+        :param rtsgroup (string): Real Time Stats group name. Values for this can be get from 'statistics' node, inside 'statNames' from each component at 'realtime Group' key/column. Examples: l7STats, all, bpslite, summary, clientStats etc.
+        :param numSeconds (number): The number of seconds.  If negative, means from the end
+        :param numDataPoints (number): The number of data points, the default is 1.
+        :return result (object): 
+               object of object with fields
+                      testStuck (bool): 
+                      time (number): 
+                      progress (number): 
+                      values (string): 
+        """
+        return self._wrapper._post('/testmodel/operations/realTimeStats', **{'runid': runid, 'rtsgroup': rtsgroup, 'numSeconds': numSeconds, 'numDataPoints': numDataPoints})
+
+    ### Imports a capture file to the systemThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _capture_operations_importCapture(self, name, filename, force):
+        """
+        Imports a capture file to the systemThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the capture being imported
+        :param filename (string): The file containing the capture object
+        :param force (bool): Force to import the file and the object having the same name will be replaced.
+        """
+        return self._wrapper._import('/capture/operations/importCapture', **{'name': name, 'filename': filename, 'force': force})
+
+    ### Reboots the card. Only available for PerfectStorm and CloudStorm cards.
+    @staticmethod
+    def _topology_operations_reboot(self, board):
+        """
+        Reboots the card. Only available for PerfectStorm and CloudStorm cards.
+        :param board (number): 
+        """
+        return self._wrapper._post('/topology/operations/reboot', **{'board': board})
+
+    ### Saves the current working Application Profiles and gives it a new name.
+    @staticmethod
+    def _appProfile_operations_saveAs(self, name, force):
+        """
+        Saves the current working Application Profiles and gives it a new name.
+        :param name (string): The new name given for the current working Application Profile
+        :param force (bool): Force to save the working Application Profile using the given name.
+        """
+        return self._wrapper._post('/appProfile/operations/saveAs', **{'name': name, 'force': force})
+
+    ### Saves the current working application profile using the current name. No need to use any parameter.
+    @staticmethod
+    def _appProfile_operations_save(self, name=None, force=True):
+        """
+        Saves the current working application profile using the current name. No need to use any parameter.
+        :param name (string): The name of the template. No need to configure. The current name is used.
+        :param force (bool): Force to save the working Application Profile with the same name. No need to configure. The default is used.
+        """
+        return self._wrapper._post('/appProfile/operations/save', **{'name': name, 'force': force})
+
+    ### Get information about an action in the current working Superflow, retrieving also the choices for each action setting.
+    @staticmethod
+    def _superflow_actions_operations_getActionInfo(self, id):
+        """
+        Get information about an action in the current working Superflow, retrieving also the choices for each action setting.
+        :param id (number): The action id
+        :return result (list): 
+               list of object with fields
+                      label (string): 
+                      name (string): 
+                      description (string): 
+                      choice (object): 
+        """
+        return self._wrapper._post('/superflow/actions/' + self._name + '/operations/getActionInfo', **{'id': id})
+
+    ### null
+    @staticmethod
+    def _topology_operations_reserve(self, reservation, force=False):
+        """
+        :param reservation (list): 
+               list of object with fields
+                      group (number): 
+                      slot (number): 
+                      port (number): 
+                      capture (bool): 
+        :param force (bool): 
+        """
+        return self._wrapper._post('/topology/operations/reserve', **{'reservation': reservation, 'force': force})
+
+    ### Removes an action from the current working SuperFlow.
+    @staticmethod
+    def _superflow_operations_removeAction(self, id):
+        """
+        Removes an action from the current working SuperFlow.
+        :param id (number): The action ID.
+        """
+        return self._wrapper._post('/superflow/operations/removeAction', **{'id': id})
+
+    ### Adds a flow to the current working SuperFlow
+    @staticmethod
+    def _superflow_operations_addFlow(self, flowParams):
+        """
+        Adds a flow to the current working SuperFlow
+        :param flowParams (object): The flow object to add.
+               object of object with fields
+                      name (string): The name of the flow
+                      from (string): Traffic initiator.
+                      to (string): Traffic responder.
+        """
+        return self._wrapper._post('/superflow/operations/addFlow', **{'flowParams': flowParams})
+
+    ### Imports a list of strikes residing in a file.
+    @staticmethod
+    def _strikeList_operations_importStrikeList(self, name, filename, force):
+        """
+        Imports a list of strikes residing in a file.
+        :param name (string): The name of the object being imported
+        :param filename (string): The file containing the object to be imported.
+        :param force (bool): Force to import the file and the object having the same name will be replaced.
+        """
+        return self._wrapper._import('/strikeList/operations/importStrikeList', **{'name': name, 'filename': filename, 'force': force})
+
+    ### null
+    @staticmethod
+    def _network_operations_list(self, userid, clazz, sortorder, sort, limit, offset):
+        """
+        :param userid (string): 
+        :param clazz (string): 
+        :param sortorder (string): 
+        :param sort (string): 
+        :param limit (number): 
+        :param offset (number): 
+        :return returnArg (list): 
+               list of object with fields
+                      name (string): 
+                      type (string): 
+                      author (string): 
+                      createdOn (string): 
+        """
+        return self._wrapper._post('/network/operations/list', **{'userid': userid, 'clazz': clazz, 'sortorder': sortorder, 'sort': sort, 'limit': limit, 'offset': offset})
+
+    ### Exports everything including test models, network configurations and others from system.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _administration_operations_exportAllTests(self, filepath):
+        """
+        Exports everything including test models, network configurations and others from system.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param filepath (string): The local path where to save the compressed file with all the models. The path must contain the file name and extension (.tar.gz): '/d/c/f/AllTests.tar.gz'
+        """
+        return self._wrapper._export('/administration/operations/exportAllTests', **{'filepath': filepath})
+
+    ### Retrieves all the security options
+    @staticmethod
+    def _evasionProfile_StrikeOptions_operations_getStrikeOptions(self):
+        """
+        Retrieves all the security options
+        :return result (list): 
+        """
+        return self._wrapper._post('/evasionProfile/StrikeOptions/operations/getStrikeOptions', **{})
+
+    ### Saves the working network config and gives it a new name.
+    @staticmethod
+    def _network_operations_saveAs(self, name, regenerateOldStyle=True, force=False):
+        """
+        Saves the working network config and gives it a new name.
+        :param name (string): The new name given for the current working network config
+        :param regenerateOldStyle (bool): Force to apply the changes made on the loaded network configuration. Force to generate a network from the old one.
+        :param force (bool): Force to save the network config. It replaces a pre-existing config having the same name.
+        """
+        return self._wrapper._post('/network/operations/saveAs', **{'name': name, 'regenerateOldStyle': regenerateOldStyle, 'force': force})
+
+    ### Save the current working network config.
+    @staticmethod
+    def _network_operations_save(self, name=None, regenerateOldStyle=True, force=True):
+        """
+        Save the current working network config.
+        :param name (string): The new name given for the current working network config. No need to configure. The current name is used.
+        :param regenerateOldStyle (bool): No need to configure. The default is used.
+        :param force (bool): No need to configure. The default is used.
+        """
+        return self._wrapper._post('/network/operations/save', **{'name': name, 'regenerateOldStyle': regenerateOldStyle, 'force': force})
+
+    ### null
+    @staticmethod
+    def _appProfile_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        :param searchString (string): Search application profile name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by.
+        :param sortorder (string): The sort order (ascending/descending)
+        :return results (list): 
+               list of object with fields
+                      name (string): 
+                      label (string): 
+                      createdBy (string): 
+                      revision (number): 
+                      description (string): 
+        """
+        return self._wrapper._post('/appProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Removes a strike from the current working  Strike List.([{id: 'bb/c/d'}, {id: 'aa/f/g'}])
+    @staticmethod
+    def _strikeList_operations_remove(self, strike):
+        """
+        Removes a strike from the current working  Strike List.([{id: 'bb/c/d'}, {id: 'aa/f/g'}])
+        :param strike (list): The list of strike ids to remove. The strike id is in fact the it's path.
+               list of object with fields
+                      id (string): 
+        """
+        return self._wrapper._post('/strikeList/operations/remove', **{'strike': strike})
+
+    ### Load an existing Evasion Profile and sets it as the current one.
+    @staticmethod
+    def _evasionProfile_operations_load(self, template):
+        """
+        Load an existing Evasion Profile and sets it as the current one.
+        :param template (string): The name of an Evasion profile template.
+        """
+        return self._wrapper._post('/evasionProfile/operations/load', **{'template': template})
+
+    ### Creates a new Evasion Profile.
+    @staticmethod
+    def _evasionProfile_operations_new(self, template=None):
+        """
+        Creates a new Evasion Profile.
+        :param template (string): The name should be empty to create a new object.
+        """
+        return self._wrapper._post('/evasionProfile/operations/new', **{'template': template})
+
+    ### Removes a component from the current working Test Model.
+    @staticmethod
+    def _testmodel_operations_remove(self, id):
+        """
+        Removes a component from the current working Test Model.
+        :param id (string): The component id.
+        """
+        return self._wrapper._post('/testmodel/operations/remove', **{'id': id})
+
+    ### Exports the result report of a test, identified by its run id and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _reports_operations_exportReport(self, filepath, runid, reportType, sectionIds='', dataType='ALL'):
+        """
+        Exports the result report of a test, identified by its run id and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param filepath (string): The local path where to export the report, including the report name.
+        :param runid (number): Test RUN ID
+        :param reportType (string): Report file format to be exported in.
+        :param sectionIds (string): Chapter Ids. Can be extracted a chapter or many, a sub-chapter or many or the entire report: (sectionIds='6' / sectionIds='5,6,7' / sectionIds='7.4,8.5.2,8.6.3.1' / sectionIds=''(to export the entire report))
+        :param dataType (string): Report content data type to export. Default value is 'all data'. For tabular only use 'TABLE' and for graphs only use 'CHARTS'.
+        """
+        return self._wrapper._export('/reports/operations/exportReport', **{'filepath': filepath, 'runid': runid, 'reportType': reportType, 'sectionIds': sectionIds, 'dataType': dataType})
+
+    ### Exports a port capture from a test run.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _topology_operations_exportCapture(self, filepath, args):
+        """
+        Exports a port capture from a test run.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param filepath (string): The local path where to save the exported object.
+        :param args (object): Export filters. The Possible values for: 'dir'(direction) are 'tx','rx','both';for 'sizetype' and 'starttype'(units for size and start) are 'megabytes' or 'frames'
+               object of object with fields
+                      port (number): Port number
+                      slot (number): Slot number
+                      dir (string): Capturing direction (rx, tx, both)
+                      size (number): The size of the capture to be exported.
+                      start (number): Start at point.
+                      sizetype (string): The size unit: megabytes or frames.
+                      starttype (string): The start unit: megabytes or frames.
+        """
+        return self._wrapper._export('/topology/operations/exportCapture', **{'filepath': filepath, 'args': args})
 
     ### Returns the report Table of Contents using the test run id.
     @staticmethod
@@ -1107,106 +1264,28 @@ class BPS(object):
         """
         return self._wrapper._post('/reports/operations/getReportTable', **{'runid': runid, 'sectionId': sectionId})
 
-    ### Reboots the card. Only available for PerfectStorm and CloudStorm cards.
-    @staticmethod
-    def _topology_operations_reboot(self, board):
-        """
-        Reboots the card. Only available for PerfectStorm and CloudStorm cards.
-        :param board (number): 
-        """
-        return self._wrapper._post('/topology/operations/reboot', **{'board': board})
-
-    ### Deletes a given Super Flow from the database.
-    @staticmethod
-    def _superflow_operations_delete(self, name):
-        """
-        Deletes a given Super Flow from the database.
-        :param name (string): The name of the Super Flow.
-        """
-        return self._wrapper._post('/superflow/operations/delete', **{'name': name})
-
-    ### Imports a capture file to the systemThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-    @staticmethod
-    def _capture_operations_importCapture(self, name, filename, force):
-        """
-        Imports a capture file to the systemThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param name (string): The name of the capture being imported
-        :param filename (string): The file containing the capture object
-        :param force (bool): Force to import the file and the object having the same name will be replaced.
-        """
-        return self._wrapper._import('/capture/operations/importCapture', **{'name': name, 'filename': filename, 'force': force})
-
-    ### Adds a list of strikes to the current working Strike List.([{id: 'b/b/v/f'}, {id: 'aa/f/h'}])
-    @staticmethod
-    def _strikeList_operations_add(self, strike):
-        """
-        Adds a list of strikes to the current working Strike List.([{id: 'b/b/v/f'}, {id: 'aa/f/h'}])
-        :param strike (list): The list of strikes to add.
-               list of object with fields
-                      id (string): Strike path.
-        """
-        return self._wrapper._post('/strikeList/operations/add', **{'strike': strike})
-
     ### null
     @staticmethod
-    def _reports_operations_search(self, searchString, limit, sort, sortorder):
-        """
-        :param searchString (string): Search test name matching the string given.
-        :param limit (string): The limit of rows to return
-        :param sort (string): Parameter to sort by: 'name'/'endTime'/'duration'/'result'/'startTime'/'iteration'/'network'/'dut'/'user'/'size'
-        :param sortorder (string): The sort order: ascending/descending 
-        """
-        return self._wrapper._post('/reports/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+    def _loadProfile_operations_save(self):
+        return self._wrapper._post('/loadProfile/operations/save', **{})
 
-    ### Imports a list of strikes residing in a file.
+    ### Save the active editing LoadProfile under specified name
     @staticmethod
-    def _strikeList_operations_importStrikeList(self, name, filename, force):
+    def _loadProfile_operations_saveAs(self, name):
         """
-        Imports a list of strikes residing in a file.
-        :param name (string): The name of the object being imported
-        :param filename (string): The file containing the object to be imported.
-        :param force (bool): Force to import the file and the object having the same name will be replaced.
+        Save the active editing LoadProfile under specified name
+        :param name (string): 
         """
-        return self._wrapper._import('/strikeList/operations/importStrikeList', **{'name': name, 'filename': filename, 'force': force})
+        return self._wrapper._post('/loadProfile/operations/saveAs', **{'name': name})
 
-    ### Adds a new test component to the current working test model
+    ### Deletes a specified load profile from the database.
     @staticmethod
-    def _testmodel_operations_add(self, name, component, type, active):
+    def _loadProfile_operations_delete(self, name):
         """
-        Adds a new test component to the current working test model
-        :param name (string): Component Name
-        :param component (string): Component template, preset.
-        :param type (string): Component Type: appsim, sesionsender ..
-        :param active (bool): Set component enable (by default is active) or disable
+        Deletes a specified load profile from the database.
+        :param name (string): The name of the loadProfile object to delete.
         """
-        return self._wrapper._post('/testmodel/operations/add', **{'name': name, 'component': component, 'type': type, 'active': active})
-
-    ### Load an existing test model template.
-    @staticmethod
-    def _testmodel_operations_load(self, template):
-        """
-        Load an existing test model template.
-        :param template (string): The name of the template testmodel
-        """
-        return self._wrapper._post('/testmodel/operations/load', **{'template': template})
-
-    ### Creates a new Test Model
-    @staticmethod
-    def _testmodel_operations_new(self, template=None):
-        """
-        Creates a new Test Model
-        :param template (string): The name of the template. In this case will be empty.
-        """
-        return self._wrapper._post('/testmodel/operations/new', **{'template': template})
-
-    ### Removes an action from the current working SuperFlow.
-    @staticmethod
-    def _superflow_operations_removeAction(self, id):
-        """
-        Removes an action from the current working SuperFlow.
-        :param id (number): The action ID.
-        """
-        return self._wrapper._post('/superflow/operations/removeAction', **{'id': id})
+        return self._wrapper._post('/loadProfile/operations/delete', **{'name': name})
 
     ### null
     @staticmethod
@@ -1232,325 +1311,26 @@ class BPS(object):
         """
         return self._wrapper._post('/capture/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
-    ### Gives abbreviated information about all Canned Flow Names.
+    ### Load an existing Strike List and sets it as the current one.
     @staticmethod
-    def _superflow_flows_operations_getCannedFlows(self):
+    def _strikeList_operations_load(self, template):
         """
-        Gives abbreviated information about all Canned Flow Names.
-        :return results (list): 
-               list of object with fields
-                      name (string): 
-                      label (string): 
+        Load an existing Strike List and sets it as the current one.
+        :param template (string): The name of the Strike List template
         """
-        return self._wrapper._post('/superflow/flows/' + self._name + '/operations/getCannedFlows', **{})
+        return self._wrapper._post('/strikeList/operations/load', **{'template': template})
 
-    ### Saves the current working Test Model under specified name.
+    ### Creates a new Strike List.
     @staticmethod
-    def _testmodel_operations_saveAs(self, name, force):
+    def _strikeList_operations_new(self, template=None):
         """
-        Saves the current working Test Model under specified name.
-        :param name (string): The new name given for the current working Test Model
-        :param force (bool): Force to save the working Test Model using a new name.
+        Creates a new Strike List.
+        :param template (string): The name of the template. In this case will be empty.
         """
-        return self._wrapper._post('/testmodel/operations/saveAs', **{'name': name, 'force': force})
-
-    ### Saves the working Test Model using the current name. No need to configure. The current name is used.
-    @staticmethod
-    def _testmodel_operations_save(self, name=None, force=True):
-        """
-        Saves the working Test Model using the current name. No need to configure. The current name is used.
-        :param name (string): The name of the template that should be empty.
-        :param force (bool): Force to save the working Test Model with the same name.
-        """
-        return self._wrapper._post('/testmodel/operations/save', **{'name': name, 'force': force})
-
-    ### null
-    @staticmethod
-    def _network_operations_list(self, userid, clazz, sortorder, sort, limit, offset):
-        """
-        :param userid (string): 
-        :param clazz (string): 
-        :param sortorder (string): 
-        :param sort (string): 
-        :param limit (number): 
-        :param offset (number): 
-        :return returnArg (list): 
-               list of object with fields
-                      name (string): 
-                      type (string): 
-                      author (string): 
-                      createdOn (string): 
-        """
-        return self._wrapper._post('/network/operations/list', **{'userid': userid, 'clazz': clazz, 'sortorder': sortorder, 'sort': sort, 'limit': limit, 'offset': offset})
-
-    ### Saves the current working Application Profiles and gives it a new name.
-    @staticmethod
-    def _superflow_operations_saveAs(self, name, force):
-        """
-        Saves the current working Application Profiles and gives it a new name.
-        :param name (string): The new name given for the current working Super Flow
-        :param force (bool): Force to save the working Super Flow using the given name.
-        """
-        return self._wrapper._post('/superflow/operations/saveAs', **{'name': name, 'force': force})
-
-    ### Saves the working Super Flow using the current name
-    @staticmethod
-    def _superflow_operations_save(self, name=None, force=True):
-        """
-        Saves the working Super Flow using the current name
-        :param name (string): The name of the template that should be empty.
-        :param force (bool): Force to save the working Super Flow with the same name.
-        """
-        return self._wrapper._post('/superflow/operations/save', **{'name': name, 'force': force})
-
-    ### null
-    @staticmethod
-    def _administration_operations_logs(self, error=False, messages=False, web=False, all=False, audit=False, info=False, system=False, lines=20, drop=0):
-        """
-        :param error (bool): 
-        :param messages (bool): 
-        :param web (bool): 
-        :param all (bool): 
-        :param audit (bool): 
-        :param info (bool): 
-        :param system (bool): 
-        :param lines (number): number lines to return
-        :param drop (number): number lines to drop
-        """
-        return self._wrapper._post('/administration/operations/logs', **{'error': error, 'messages': messages, 'web': web, 'all': all, 'audit': audit, 'info': info, 'system': system, 'lines': lines, 'drop': drop})
-
-    ### Adds a list of SuperFlow to the current working Application Profile. ([{'superflow':'adadad', 'weight':'20'},{..}])
-    @staticmethod
-    def _appProfile_operations_add(self, add):
-        """
-        Adds a list of SuperFlow to the current working Application Profile. ([{'superflow':'adadad', 'weight':'20'},{..}])
-        :param add (list): 
-               list of object with fields
-                      superflow (string): The name of the super flow
-                      weight (string): The weight of the super flow
-        """
-        return self._wrapper._post('/appProfile/operations/add', **{'add': add})
+        return self._wrapper._post('/strikeList/operations/new', **{'template': template})
 
 class DataModelMeta(type):
     _dataModel = {
-        'reports': {
-            'endtime': {
-            },
-            'starttime': {
-            },
-            'label': {
-            },
-            'testname': {
-            },
-            'network': {
-            },
-            'duration': {
-            },
-            'result': {
-            },
-            'size': {
-            },
-            'isPartOfResiliency': {
-            },
-            'name': {
-            },
-            'iteration': {
-            },
-            'testid': {
-            },
-            'user': {
-            },
-            'operations': {
-                'delete': [{
-                }],
-                'exportReport': [{
-                }],
-                'getReportContents': [{
-                }],
-                'getReportTable': [{
-                }],
-                'search': [{
-                }]
-            }
-        },
-        'administration': {
-            'atiLicensing': {
-                'license': [{
-                    'expires': {
-                    },
-                    'issuedBy': {
-                    },
-                    'name': {
-                    },
-                    'boardserialno': {
-                    },
-                    'issued': {
-                    },
-                    'serialno': {
-                    }
-                }],
-                'operations': {
-                    'importAtiLicense': [{
-                    }]
-                }
-            },
-            'userSettings': [{
-                'name': {
-                },
-                'content': {
-                },
-                'operations': {
-                    'changeUserSetting': [{
-                    }]
-                }
-            }],
-            'systemSettings': {
-                'strikepackUpdate': {
-                    'password': {
-                    },
-                    'interval': {
-                    },
-                    'check': {
-                    },
-                    'username': {
-                    }
-                },
-                'author': {
-                },
-                'description': {
-                },
-                'label': {
-                },
-                'guardrailSettings': {
-                    'enableStrictMode': {
-                    },
-                    'testStop': {
-                    },
-                    'testStatusWarning': {
-                    },
-                    'stopOnLinkdown': {
-                    },
-                    'testStartPrevention': {
-                    }
-                },
-                'createdOn': {
-                },
-                'revision': {
-                },
-                'vacuumSettings': {
-                    'vacuumWindowHigh': {
-                    },
-                    'autoVacuum': {
-                    },
-                    'vacuumWindowLow': {
-                    },
-                    'vacuumWindowTZ': {
-                    }
-                },
-                'lockedBy': {
-                },
-                'createdBy': {
-                },
-                'softwareUpdate': {
-                    'password': {
-                    },
-                    'interval': {
-                    },
-                    'check': {
-                    },
-                    'username': {
-                    }
-                },
-                'contentType': {
-                }
-            },
-            'operations': {
-                'exportAllTests': [{
-                }],
-                'logs': [{
-                }]
-            }
-        },
-        'appProfile': {
-            'weightType': {
-            },
-            'lockedBy': {
-            },
-            'createdBy': {
-            },
-            'author': {
-            },
-            'name': {
-            },
-            'superflow': [{
-                'percentFlows': {
-                },
-                'seed': {
-                },
-                'author': {
-                },
-                'estimate_bytes': {
-                },
-                'estimate_flows': {
-                },
-                'weight': {
-                },
-                'description': {
-                },
-                'label': {
-                },
-                'createdOn': {
-                },
-                'revision': {
-                },
-                'lockedBy': {
-                },
-                'generated': {
-                },
-                'createdBy': {
-                },
-                'percentBandwidth': {
-                },
-                'name': {
-                },
-                'contentType': {
-                }
-            }],
-            'description': {
-            },
-            'label': {
-            },
-            'createdOn': {
-            },
-            'contentType': {
-            },
-            'revision': {
-            },
-            'operations': {
-                'importAppProfile': [{
-                }],
-                'delete': [{
-                }],
-                'recompute': [{
-                }],
-                'exportAppProfile': [{
-                }],
-                'load': [{
-                }],
-                'new': [{
-                }],
-                'saveAs': [{
-                }],
-                'save': [{
-                }],
-                'search': [{
-                }],
-                'remove': [{
-                }],
-                'add': [{
-                }]
-            }
-        },
         'evasionProfile': {
             'lockedBy': {
             },
@@ -2085,13 +1865,13 @@ class DataModelMeta(type):
             'revision': {
             },
             'operations': {
-                'search': [{
-                }],
                 'delete': [{
                 }],
                 'saveAs': [{
                 }],
                 'save': [{
+                }],
+                'search': [{
                 }],
                 'load': [{
                 }],
@@ -2099,73 +1879,1359 @@ class DataModelMeta(type):
                 }]
             }
         },
-        'superflow': {
-            'actions': [{
-                'actionInfo': [{
-                    'name': {
+        'reports': {
+            'endtime': {
+            },
+            'starttime': {
+            },
+            'label': {
+            },
+            'testname': {
+            },
+            'network': {
+            },
+            'duration': {
+            },
+            'result': {
+            },
+            'size': {
+            },
+            'isPartOfResiliency': {
+            },
+            'name': {
+            },
+            'iteration': {
+            },
+            'testid': {
+            },
+            'user': {
+            },
+            'operations': {
+                'delete': [{
+                }],
+                'search': [{
+                }],
+                'exportReport': [{
+                }],
+                'getReportContents': [{
+                }],
+                'getReportTable': [{
+                }]
+            }
+        },
+        'capture': {
+            'pcapFilesize': {
+            },
+            'avgPacketSize': {
+            },
+            'author': {
+            },
+            'udpPackets': {
+            },
+            'description': {
+            },
+            'label': {
+            },
+            'createdOn': {
+            },
+            'name': {
+            },
+            'revision': {
+            },
+            'duration': {
+            },
+            'ipv4Packets': {
+            },
+            'ipv6Packets': {
+            },
+            'lockedBy': {
+            },
+            'tcpPackets': {
+            },
+            'createdBy': {
+            },
+            'avgFlowLength': {
+            },
+            'totalPackets': {
+            },
+            'contentType': {
+            },
+            'operations': {
+                'importCapture': [{
+                }],
+                'search': [{
+                }]
+            }
+        },
+        'network': {
+            'lockedBy': {
+            },
+            'createdBy': {
+            },
+            'author': {
+            },
+            'name': {
+            },
+            'interfaceCount': {
+            },
+            'description': {
+            },
+            'label': {
+            },
+            'networkModel': {
+                'enodeb': [{
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'psn': {
+                    },
+                    'psn_netmask': {
+                    },
+                    'sctp_over_udp': {
+                    },
+                    'enodebs': [{
+                        'mme_ip_address': {
+                        },
+                        'enodebCount': {
+                        },
+                        'ip_address': {
+                        }
+                    }],
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'sctp_sport': {
+                    }
+                }],
+                'ip_router': [{
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'ip_address': {
+                    }
+                }],
+                'ip6_router': [{
+                    'hosts_ip_alloc_container': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'ip_address': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'ue_info': [{
+                    'imsi_base': {
+                    },
+                    'secret_key_step': {
+                    },
+                    'count': {
+                    },
+                    'operator_variant': {
+                    },
+                    'secret_key': {
+                    },
+                    'imei_base': {
+                    },
+                    'msisdn_base': {
+                    },
+                    'maxmbps_per_ue': {
+                    },
+                    'mobility_session_infos': [{
+                        'id': {
+                        },
+                        'value': {
+                        }
+                    }],
+                    'id': {
+                    }
+                }],
+                'ip_ldap_server': [{
+                    'auth_timeout': {
+                    },
+                    'ldap_username_start_tag': {
+                    },
+                    'ldap_user_min': {
+                    },
+                    'ldap_user_count': {
+                    },
+                    'authentication_rate': {
+                    },
+                    'ldap_password_start_tag': {
+                    },
+                    'ldap_user_max': {
+                    },
+                    'id': {
+                    },
+                    'ldap_server_address': {
+                    },
+                    'dn_fixed_val': {
+                    }
+                }],
+                'mme_sgw_pgw6': [{
+                    'ue_info': {
+                    },
+                    'max_sessions': {
+                    },
+                    'lease_address': {
+                    },
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_address': {
+                    },
+                    'sgw_advertised_sgw': {
+                    },
+                    'sgw_advertised_pgw': {
+                    },
+                    'lease_address_v6': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'mobility_session_info': [{
+                    'password': {
+                    },
+                    'bearers': [{
+                        'qci_label': {
+                        }
+                    }],
+                    'id': {
+                    },
+                    'access_point_name': {
+                    },
+                    'username': {
+                    },
+                    'initiated_dedicated_bearers': {
+                    }
+                }],
+                'ggsn6': [{
+                    'lease_address': {
+                    },
+                    'count': {
+                    },
+                    'dns': {
+                    },
+                    'ggsn_advertised_control_ip_address': {
+                    },
+                    'ip_address': {
+                    },
+                    'ggsn_advertised_data_ip_address': {
+                    },
+                    'lease_address_v6': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'ip_external_hosts': [{
+                    'proxy': {
+                    },
+                    'count': {
+                    },
+                    'id': {
+                    },
+                    'ip_address': {
+                    },
+                    'behind_snapt': {
+                    },
+                    'tags': {
+                    }
+                }],
+                'ip_static_hosts': [{
+                    'mpls_list': [{
+                        'id': {
+                        },
+                        'value': {
+                        }
+                    }],
+                    'ip_selection_type': {
+                    },
+                    'count': {
+                    },
+                    'dns': {
+                    },
+                    'psn': {
+                    },
+                    'psn_netmask': {
+                    },
+                    'ip_address': {
+                    },
+                    'tags': {
+                    },
+                    'proxy': {
+                    },
+                    'maxmbps_per_host': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'ldap': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'dns_proxy': {
+                    },
+                    'behind_snapt': {
+                    },
+                    'enable_stats': {
+                    }
+                }],
+                'ggsn': [{
+                    'lease_address': {
+                    },
+                    'count': {
+                    },
+                    'dns': {
+                    },
+                    'ggsn_advertised_control_ip_address': {
+                    },
+                    'ip_address': {
+                    },
+                    'ggsn_advertised_data_ip_address': {
+                    },
+                    'lease_address_v6': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    }
+                }],
+                'interface': [{
+                    'ignore_pause_frames': {
+                    },
+                    'duplicate_mac_address': {
                     },
                     'description': {
                     },
-                    'realtimeGroup': {
-                    },
-                    'label': {
-                    },
-                    'units': {
-                    },
-                    'choice': [{
-                        'name': {
+                    'packet_filter': {
+                        'not_dest_port': {
                         },
-                        'description': {
+                        'not_src_ip': {
                         },
-                        'label': {
+                        'filter': {
+                        },
+                        'src_ip': {
+                        },
+                        'src_port': {
+                        },
+                        'vlan': {
+                        },
+                        'not_vlan': {
+                        },
+                        'dest_ip': {
+                        },
+                        'not_dest_ip': {
+                        },
+                        'dest_port': {
+                        },
+                        'not_src_port': {
                         }
-                    }]
+                    },
+                    'impairments': {
+                        'drop': {
+                        },
+                        'corrupt_lt64': {
+                        },
+                        'rate': {
+                        },
+                        'corrupt_lt256': {
+                        },
+                        'corrupt_rand': {
+                        },
+                        'corrupt_chksum': {
+                        },
+                        'corrupt_gt256': {
+                        },
+                        'frack': {
+                        }
+                    },
+                    'mtu': {
+                    },
+                    'vlan_key': {
+                    },
+                    'number': {
+                    },
+                    'use_vnic_mac_address': {
+                    },
+                    'mac_address': {
+                    },
+                    'id': {
+                    }
                 }],
-                'flowlabel': {
+                'ds_lite_b4': [{
+                    'aftr_addr': {
+                    },
+                    'count': {
+                    },
+                    'ip_address': {
+                    },
+                    'host_ip_base_addr': {
+                    },
+                    'ipv6_addr_alloc_mode': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'aftr_count': {
+                    },
+                    'hosts_ip_increment': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    },
+                    'host_ip_addr_alloc_mode': {
+                    }
+                }],
+                'ue': [{
+                    'allocation_rate': {
+                    },
+                    'mobility_interval_ms': {
+                    },
+                    'ue_info': {
+                    },
+                    'dns': {
+                    },
+                    'mobility_action': {
+                    },
+                    'tags': {
+                    },
+                    'proxy': {
+                    },
+                    'default_container': {
+                    },
+                    'mobility_with_traffic': {
+                    },
+                    'id': {
+                    },
+                    'behind_snapt': {
+                    },
+                    'request_ipv6': {
+                    },
+                    'enable_stats': {
+                    }
+                }],
+                'ip_dns_proxy': [{
+                    'dns_proxy_ip_count': {
+                    },
+                    'dns_proxy_src_ip_base': {
+                    },
+                    'id': {
+                    },
+                    'dns_proxy_ip_base': {
+                    },
+                    'dns_proxy_src_ip_count': {
+                    }
+                }],
+                'enodeb_mme_sgw6': [{
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_allocation_mode': {
+                    },
+                    'mme_ip_address': {
+                    },
+                    'pgw_ip_address': {
+                    },
+                    'ue_address': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'ip6_dns_proxy': [{
+                    'dns_proxy_ip_count': {
+                    },
+                    'dns_proxy_src_ip_base': {
+                    },
+                    'id': {
+                    },
+                    'dns_proxy_ip_base': {
+                    },
+                    'dns_proxy_src_ip_count': {
+                    }
+                }],
+                'vlan': [{
+                    'tpid': {
+                    },
+                    'duplicate_mac_address': {
+                    },
+                    'description': {
+                    },
+                    'mtu': {
+                    },
+                    'outer_vlan': {
+                    },
+                    'inner_vlan': {
+                    },
+                    'mac_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    }
+                }],
+                'mme_sgw_pgw': [{
+                    'ue_info': {
+                    },
+                    'max_sessions': {
+                    },
+                    'lease_address': {
+                    },
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_address': {
+                    },
+                    'sgw_advertised_sgw': {
+                    },
+                    'sgw_advertised_pgw': {
+                    },
+                    'lease_address_v6': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    }
+                }],
+                'ds_lite_aftr': [{
+                    'count': {
+                    },
+                    'ip_address': {
+                    },
+                    'ipv6_addr_alloc_mode': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'b4_count': {
+                    },
+                    'b4_ip_address': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'ipsec_router': [{
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'ipsec': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'ip_address': {
+                    },
+                    'ike_peer_ip_address': {
+                    }
+                }],
+                'dhcpv6c_req_opts_cfg': [{
+                    'dhcpv6v_req_preference': {
+                    },
+                    'dhcpv6v_req_dns_list': {
+                    },
+                    'dhcpv6v_req_dns_resolvers': {
+                    },
+                    'dhcpv6v_req_server_id': {
+                    },
+                    'id': {
+                    }
+                }],
+                'sgsn': [{
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'ggsn_ip_address': {
+                    },
+                    'id': {
+                    },
+                    'ip_address': {
+                    }
+                }],
+                'path_advanced': [{
+                    'destination_port_count': {
+                    },
+                    'destination_port_base': {
+                    },
+                    'source_port_base': {
+                    },
+                    'tags': {
+                    },
+                    'enable_external_file': {
+                    },
+                    'source_container': {
+                    },
+                    'source_port_algorithm': {
+                    },
+                    'tuple_limit': {
+                    },
+                    'file': {
+                    },
+                    'destination_port_algorithm': {
+                    },
+                    'destination_container': {
+                    },
+                    'source_port_count': {
+                    },
+                    'xor_bits': {
+                    },
+                    'stream_group': {
+                    },
+                    'id': {
+                    }
+                }],
+                'path_basic': [{
+                    'source_container': {
+                    },
+                    'destination_container': {
+                    },
+                    'id': {
+                    }
+                }],
+                'enodeb_mme6': [{
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_allocation_mode': {
+                    },
+                    'enodebs': [{
+                        'gateway_ip_address': {
+                        },
+                        'default_container': {
+                        },
+                        'enodebCount': {
+                        },
+                        'ip_address': {
+                        },
+                        'prefix_length': {
+                        }
+                    }],
+                    'mme_ip_address': {
+                    },
+                    'pgw_ip_address': {
+                    },
+                    'ue_address': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'sgw_ip_address': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'pgw': [{
+                    'max_sessions': {
+                    },
+                    'lease_address': {
+                    },
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_address': {
+                    },
+                    'lease_address_v6': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    }
+                }],
+                'pgw6': [{
+                    'max_sessions': {
+                    },
+                    'lease_address': {
+                    },
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_address': {
+                    },
+                    'lease_address_v6': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'sgsn6': [{
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'ggsn_ip_address': {
+                    },
+                    'id': {
+                    },
+                    'ip_address': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'ip6_static_hosts': [{
+                    'mpls_list': [{
+                        'id': {
+                        },
+                        'value': {
+                        }
+                    }],
+                    'ip_alloc_container': {
+                    },
+                    'ip_selection_type': {
+                    },
+                    'count': {
+                    },
+                    'dns': {
+                    },
+                    'ip_address': {
+                    },
+                    'tags': {
+                    },
+                    'proxy': {
+                    },
+                    'maxmbps_per_host': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'host_ipv6_addr_alloc_mode': {
+                    },
+                    'prefix_length': {
+                    },
+                    'dns_proxy': {
+                    },
+                    'behind_snapt': {
+                    },
+                    'enable_stats': {
+                    }
+                }],
+                'plmn': [{
+                    'mnc': {
+                    },
+                    'description': {
+                    },
+                    'id': {
+                    },
+                    'mcc': {
+                    }
+                }],
+                'enodeb_mme_sgw': [{
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_allocation_mode': {
+                    },
+                    'mme_ip_address': {
+                    },
+                    'pgw_ip_address': {
+                    },
+                    'ue_address': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    }
+                }],
+                'sgw_pgw': [{
+                    'max_sessions': {
+                    },
+                    'lease_address': {
+                    },
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_address': {
+                    },
+                    'sgw_advertised_sgw': {
+                    },
+                    'sgw_advertised_pgw': {
+                    },
+                    'lease_address_v6': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    }
+                }],
+                'ip6_dhcp_server': [{
+                    'ia_type': {
+                    },
+                    'pool_size': {
+                    },
+                    'ip_address': {
+                    },
+                    'pool_prefix_length': {
+                    },
+                    'offer_lifetime': {
+                    },
+                    'max_lease_time': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'pool_base_address': {
+                    },
+                    'default_lease_time': {
+                    },
+                    'pool_dns_address1': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    },
+                    'pool_dns_address2': {
+                    }
+                }],
+                'enodeb6': [{
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'sctp_over_udp': {
+                    },
+                    'enodebs': [{
+                        'mme_ip_address': {
+                        },
+                        'enodebCount': {
+                        },
+                        'ip_address': {
+                        }
+                    }],
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    },
+                    'sctp_sport': {
+                    }
+                }],
+                'slaac_cfg': [{
+                    'use_rand_addr': {
+                    },
+                    'enable_dad': {
+                    },
+                    'id': {
+                    },
+                    'stateless_dhcpv6c_cfg': {
+                    },
+                    'fallback_ip_address': {
+                    }
+                }],
+                'ip6_external_hosts': [{
+                    'proxy': {
+                    },
+                    'count': {
+                    },
+                    'id': {
+                    },
+                    'ip_address': {
+                    },
+                    'behind_snapt': {
+                    },
+                    'tags': {
+                    }
+                }],
+                'ip_dns_config': [{
+                    'dns_domain': {
+                    },
+                    'id': {
+                    },
+                    'dns_server_address': {
+                    }
+                }],
+                'dhcpv6c_tout_and_retr_cfg': [{
+                    'dhcp6c_inforeq_attempts': {
+                    },
+                    'dhcp6c_initial_rebind_tout': {
+                    },
+                    'dhcp6c_sol_attempts': {
+                    },
+                    'dhcp6c_max_rebind_tout': {
+                    },
+                    'dhcp6c_release_attempts': {
+                    },
+                    'dhcp6c_initial_release_tout': {
+                    },
+                    'dhcp6c_req_attempts': {
+                    },
+                    'dhcp6c_max_req_tout': {
+                    },
+                    'dhcp6c_max_renew_tout': {
+                    },
+                    'dhcp6c_max_sol_tout': {
+                    },
+                    'dhcp6c_initial_req_tout': {
+                    },
+                    'dhcp6c_max_inforeq_tout': {
+                    },
+                    'dhcp6c_initial_sol_tout': {
+                    },
+                    'dhcp6c_initial_renew_tout': {
+                    },
+                    'dhcp6c_initial_inforeq_tout': {
+                    },
+                    'id': {
+                    }
+                }],
+                'ip_dhcp_server': [{
+                    'lease_address': {
+                    },
+                    'count': {
+                    },
+                    'dns': {
+                    },
+                    'ip_address': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'lease_time': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'accept_local_requests_only': {
+                    }
+                }],
+                'ip6_dns_config': [{
+                    'dns_domain': {
+                    },
+                    'id': {
+                    },
+                    'dns_server_address': {
+                    }
+                }],
+                'sgw_pgw6': [{
+                    'max_sessions': {
+                    },
+                    'lease_address': {
+                    },
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_address': {
+                    },
+                    'sgw_advertised_sgw': {
+                    },
+                    'sgw_advertised_pgw': {
+                    },
+                    'lease_address_v6': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'default_container': {
+                    },
+                    'id': {
+                    },
+                    'prefix_length': {
+                    }
+                }],
+                'mpls_settings': [{
+                    'mpls_tags': [{
+                        'mpls_ttl': {
+                        },
+                        'mpls_label': {
+                        },
+                        'mpls_exp': {
+                        }
+                    }],
+                    'id': {
+                    }
+                }],
+                'ipsec_config': [{
+                    'ike_dh': {
+                    },
+                    'ipsec_lifetime': {
+                    },
+                    'ike_pfs': {
+                    },
+                    'ike_mode': {
+                    },
+                    'ike_1to1': {
+                    },
+                    'nat_traversal': {
+                    },
+                    'xauth_username': {
+                    },
+                    'ike_encr_alg': {
+                    },
+                    'psk': {
+                    },
+                    'dpd_enabled': {
+                    },
+                    'dpd_timeout': {
+                    },
+                    'init_rate': {
+                    },
+                    'setup_timeout': {
+                    },
+                    'esp_encr_alg': {
+                    },
+                    'ike_lifetime': {
+                    },
+                    'ike_version': {
+                    },
+                    'id': {
+                    },
+                    'left_id': {
+                    },
+                    'ike_prf_alg': {
+                    },
+                    'esp_auth_alg': {
+                    },
+                    'dpd_delay': {
+                    },
+                    'xauth_password': {
+                    },
+                    'initial_contact': {
+                    },
+                    'debug_log': {
+                    },
+                    'wildcard_tsr': {
+                    },
+                    'rekey_margin': {
+                    },
+                    'ike_auth_alg': {
+                    },
+                    'right_id': {
+                    },
+                    'max_outstanding': {
+                    },
+                    'retrans_interval': {
+                    },
+                    'enable_xauth': {
+                    }
+                }],
+                'dhcpv6c_cfg': [{
+                    'dhcp6c_max_outstanding': {
+                    },
+                    'dhcp6c_duid_type': {
+                    },
+                    'dhcp6c_ia_type': {
+                    },
+                    'dhcp6c_req_opts_config': {
+                    },
+                    'dhcp6c_tout_and_retr_config': {
+                    },
+                    'dhcp6c_renew_timer': {
+                    },
+                    'dhcp6c_ia_t2': {
+                    },
+                    'id': {
+                    },
+                    'dhcp6c_ia_t1': {
+                    },
+                    'dhcp6c_initial_srate': {
+                    }
+                }],
+                'sixrd_ce': [{
+                    'sixrd_prefix': {
+                    },
+                    'count': {
+                    },
+                    'dns': {
+                    },
+                    'sixrd_prefix_length': {
+                    },
+                    'ip_address': {
+                    },
+                    'tags': {
+                    },
+                    'br_ip_address': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'hosts_per_ce': {
+                    },
+                    'ip4_mask_length': {
+                    },
+                    'id': {
+                    },
+                    'enable_stats': {
+                    }
+                }],
+                'ip_dhcp_hosts': [{
+                    'allocation_rate': {
+                    },
+                    'count': {
+                    },
+                    'tags': {
+                    },
+                    'proxy': {
+                    },
+                    'ldap': {
+                    },
+                    'default_container': {
+                    },
+                    'accept_local_offers_only': {
+                    },
+                    'id': {
+                    },
+                    'behind_snapt': {
+                    },
+                    'dns_proxy': {
+                    },
+                    'enable_stats': {
+                    }
+                }],
+                'enodeb_mme': [{
+                    'dns': {
+                    },
+                    'plmn': {
+                    },
+                    'ip_allocation_mode': {
+                    },
+                    'enodebs': [{
+                        'gateway_ip_address': {
+                        },
+                        'netmask': {
+                        },
+                        'default_container': {
+                        },
+                        'enodebCount': {
+                        },
+                        'ip_address': {
+                        }
+                    }],
+                    'mme_ip_address': {
+                    },
+                    'pgw_ip_address': {
+                    },
+                    'ue_address': {
+                    },
+                    'gateway_ip_address': {
+                    },
+                    'netmask': {
+                    },
+                    'default_container': {
+                    },
+                    'sgw_ip_address': {
+                    },
+                    'id': {
+                    }
+                }]
+            },
+            'createdOn': {
+            },
+            'contentType': {
+            },
+            'revision': {
+            },
+            'operations': {
+                'importNetwork': [{
+                }],
+                'load': [{
+                }],
+                'new': [{
+                }],
+                'delete': [{
+                }],
+                'search': [{
+                }],
+                'list': [{
+                }],
+                'saveAs': [{
+                }],
+                'save': [{
+                }]
+            }
+        },
+        'topology': {
+            'ixoslicensed': {
+            },
+            'ixos': {
+            },
+            'runningTest': [{
+                'phase': {
                 },
-                'gotoBlock': {
+                'timeRemaining': {
                 },
-                'exflows': {
-                },
-                'matchBlock': {
-                },
-                'id': {
-                },
-                'source': {
+                'runtime': {
                 },
                 'label': {
                 },
-                'type': {
+                'completed': {
                 },
-                'params': {
+                'initProgress': {
                 },
-                'flowid': {
+                'result': {
                 },
-                'operations': {
-                    'getActionInfo': [{
-                        'name': {
-                        },
-                        'description': {
-                        },
-                        'realtimeGroup': {
-                        },
-                        'label': {
-                        },
-                        'units': {
-                        },
-                        'choice': [{
-                            'name': {
-                            },
-                            'description': {
-                            },
-                            'label': {
-                            }
-                        }]
-                    }],
-                    'getActionChoices': [{
-                    }]
+                'port': [{
+                }],
+                'capturing': {
+                },
+                'progress': {
+                },
+                'testid': {
+                },
+                'state': {
+                },
+                'user': {
+                },
+                'currentTest': {
                 }
             }],
+            'model': {
+            },
+            'slot': [{
+                'port': [{
+                    'owner': {
+                    },
+                    'number': {
+                    },
+                    'note': {
+                    },
+                    'exportProgress': {
+                    },
+                    'reservedBy': {
+                    },
+                    'capturing': {
+                    },
+                    'model': {
+                    },
+                    'id': {
+                    },
+                    'group': {
+                    },
+                    'link': {
+                    },
+                    'state': {
+                    },
+                    'speed': {
+                    }
+                }],
+                'mode': {
+                },
+                'model': {
+                },
+                'state': {
+                },
+                'id': {
+                },
+                'serialNumber': {
+                }
+            }],
+            'serialNumber': {
+            },
+            'operations': {
+                'unreserve': [{
+                }],
+                'setCardMode': [{
+                }],
+                'setCardSpeed': [{
+                }],
+                'setCardFanout': [{
+                }],
+                'setPerfAcc': [{
+                }],
+                'stopRun': [{
+                }],
+                'run': [{
+                }],
+                'addPortNote': [{
+                }],
+                'reboot': [{
+                }],
+                'reserve': [{
+                }],
+                'exportCapture': [{
+                }]
+            }
+        },
+        'superflow': {
             'percentFlows': {
             },
             'seed': {
@@ -2248,358 +3314,28 @@ class DataModelMeta(type):
             },
             'name': {
             },
-            'contentType': {
-            },
-            'operations': {
-                'addFlow': [{
-                }],
-                'search': [{
-                }],
-                'removeFlow': [{
-                }],
-                'load': [{
-                }],
-                'new': [{
-                }],
-                'addHost': [{
-                }],
-                'addAction': [{
-                }],
-                'delete': [{
-                }],
-                'removeAction': [{
-                }],
-                'saveAs': [{
-                }],
-                'save': [{
-                }]
-            }
-        },
-        'strikes': {
-            'severity': {
-            },
-            'year': {
-            },
-            'variants': {
-            },
-            'reference': [{
-                'label': {
+            'actions': [{
+                'flowlabel': {
                 },
-                'type': {
+                'gotoBlock': {
                 },
-                'value': {
-                }
-            }],
-            'path': {
-            },
-            'protocol': {
-            },
-            'fileSize': {
-            },
-            'fileExtension': {
-            },
-            'name': {
-            },
-            'id': {
-            },
-            'category': {
-            },
-            'keyword': [{
-                'name': {
-                }
-            }],
-            'direction': {
-            },
-            'operations': {
-                'search': [{
-                }]
-            }
-        },
-        'loadProfile': {
-            'phase': [{
-                'duration': {
+                'exflows': {
                 },
-                'phaseId': {
-                },
-                'type': {
-                },
-                'sessions.max': {
-                },
-                'sessions.maxPerSecond': {
-                },
-                'rateDist.unit': {
-                },
-                'rateDist.min': {
-                },
-                'rampDist.steadyBehavior': {
-                },
-                'rateDist.type': {
-                },
-                'rateDist.scope': {
-                }
-            }],
-            'author': {
-            },
-            'regen': {
-            },
-            'description': {
-            },
-            'label': {
-            },
-            'createdOn': {
-            },
-            'summaryData': {
-                'deviceType': {
-                },
-                'unknownUdpAppNames': {
-                },
-                'unknownSslSuperflowName': {
-                },
-                'magicNumber': {
-                },
-                'downloadBytesSum': {
-                },
-                'version': {
-                },
-                'phaseDuration': {
-                },
-                'unknownTcpAppNames': {
-                },
-                'uploadBytesSum': {
-                },
-                'summaryName': {
-                },
-                'basisOfRegeneration': {
-                },
-                'activeFlowsSum': {
-                },
-                'miniSlotDuration': {
-                },
-                'unknownSslAppNames': {
-                },
-                'dynamicSuperflowName': {
-                },
-                'appStat': [{
-                }],
-                'startTime': {
-                },
-                'endTime': {
-                },
-                'dynamicAppNames': {
-                }
-            },
-            'revision': {
-            },
-            'lockedBy': {
-            },
-            'createdBy': {
-            },
-            'name': {
-            },
-            'contentType': {
-            },
-            'presets': [{
-                'phase': [{
-                    'duration': {
-                    },
-                    'phaseId': {
-                    },
-                    'type': {
-                    },
-                    'sessions.max': {
-                    },
-                    'sessions.maxPerSecond': {
-                    },
-                    'rateDist.unit': {
-                    },
-                    'rateDist.min': {
-                    },
-                    'rampDist.steadyBehavior': {
-                    },
-                    'rateDist.type': {
-                    },
-                    'rateDist.scope': {
-                    }
-                }],
-                'author': {
-                },
-                'regen': {
-                },
-                'description': {
-                },
-                'label': {
-                },
-                'createdOn': {
-                },
-                'summaryData': {
-                    'deviceType': {
-                    },
-                    'unknownUdpAppNames': {
-                    },
-                    'unknownSslSuperflowName': {
-                    },
-                    'magicNumber': {
-                    },
-                    'downloadBytesSum': {
-                    },
-                    'version': {
-                    },
-                    'phaseDuration': {
-                    },
-                    'unknownTcpAppNames': {
-                    },
-                    'uploadBytesSum': {
-                    },
-                    'summaryName': {
-                    },
-                    'basisOfRegeneration': {
-                    },
-                    'activeFlowsSum': {
-                    },
-                    'miniSlotDuration': {
-                    },
-                    'unknownSslAppNames': {
-                    },
-                    'dynamicSuperflowName': {
-                    },
-                    'appStat': [{
-                    }],
-                    'startTime': {
-                    },
-                    'endTime': {
-                    },
-                    'dynamicAppNames': {
-                    }
-                },
-                'revision': {
-                },
-                'lockedBy': {
-                },
-                'createdBy': {
-                },
-                'name': {
-                },
-                'contentType': {
-                }
-            }],
-            'operations': {
-                'createNewCustom': [{
-                }],
-                'delete': [{
-                }],
-                'save': [{
-                }],
-                'saveAs': [{
-                }],
-                'load': [{
-                }]
-            }
-        },
-        'topology': {
-            'ixoslicensed': {
-            },
-            'ixos': {
-            },
-            'runningTest': [{
-                'phase': {
-                },
-                'timeRemaining': {
-                },
-                'runtime': {
-                },
-                'label': {
-                },
-                'completed': {
-                },
-                'initProgress': {
-                },
-                'result': {
-                },
-                'port': [{
-                }],
-                'capturing': {
-                },
-                'progress': {
-                },
-                'testid': {
-                },
-                'state': {
-                },
-                'user': {
-                },
-                'currentTest': {
-                }
-            }],
-            'model': {
-            },
-            'slot': [{
-                'port': [{
-                    'owner': {
-                    },
-                    'number': {
-                    },
-                    'note': {
-                    },
-                    'exportProgress': {
-                    },
-                    'reservedBy': {
-                    },
-                    'capturing': {
-                    },
-                    'model': {
-                    },
-                    'id': {
-                    },
-                    'group': {
-                    },
-                    'link': {
-                    },
-                    'state': {
-                    },
-                    'speed': {
-                    }
-                }],
-                'mode': {
-                },
-                'model': {
-                },
-                'state': {
+                'matchBlock': {
                 },
                 'id': {
                 },
-                'serialNumber': {
-                }
-            }],
-            'serialNumber': {
-            },
-            'operations': {
-                'reserve': [{
-                }],
-                'run': [{
-                }],
-                'addPortNote': [{
-                }],
-                'unreserve': [{
-                }],
-                'stopRun': [{
-                }],
-                'setCardMode': [{
-                }],
-                'setCardSpeed': [{
-                }],
-                'setCardFanout': [{
-                }],
-                'setPerfAcc': [{
-                }],
-                'exportCapture': [{
-                }],
-                'reboot': [{
-                }]
-            }
-        },
-        'statistics': {
-            'component': [{
-                'statNames': [{
+                'source': {
+                },
+                'label': {
+                },
+                'type': {
+                },
+                'params': {
+                },
+                'flowid': {
+                },
+                'actionInfo': [{
                     'name': {
                     },
                     'description': {
@@ -2619,69 +3355,59 @@ class DataModelMeta(type):
                         }
                     }]
                 }],
-                'type': {
-                },
-                'label': {
+                'operations': {
+                    'getActionChoices': [{
+                    }],
+                    'getActionInfo': [{
+                        'name': {
+                        },
+                        'description': {
+                        },
+                        'realtimeGroup': {
+                        },
+                        'label': {
+                        },
+                        'units': {
+                        },
+                        'choice': [{
+                            'name': {
+                            },
+                            'description': {
+                            },
+                            'label': {
+                            }
+                        }]
+                    }]
                 }
-            }]
-        },
-        'capture': {
-            'pcapFilesize': {
-            },
-            'avgPacketSize': {
-            },
-            'author': {
-            },
-            'udpPackets': {
-            },
-            'description': {
-            },
-            'label': {
-            },
-            'createdOn': {
-            },
-            'name': {
-            },
-            'revision': {
-            },
-            'duration': {
-            },
-            'ipv4Packets': {
-            },
-            'ipv6Packets': {
-            },
-            'lockedBy': {
-            },
-            'tcpPackets': {
-            },
-            'createdBy': {
-            },
-            'avgFlowLength': {
-            },
-            'totalPackets': {
-            },
+            }],
             'contentType': {
             },
             'operations': {
-                'importCapture': [{
-                }],
                 'search': [{
+                }],
+                'addHost': [{
+                }],
+                'removeFlow': [{
+                }],
+                'addAction': [{
+                }],
+                'saveAs': [{
+                }],
+                'save': [{
+                }],
+                'load': [{
+                }],
+                'new': [{
+                }],
+                'delete': [{
+                }],
+                'removeAction': [{
+                }],
+                'addFlow': [{
                 }]
             }
         },
         'testmodel': {
-            'testComponentTypesDescription': [{
-                'template': {
-                },
-                'name': {
-                },
-                'description': {
-                },
-                'label': {
-                },
-                'type': {
-                }
-            }],
             'lastrunby': {
             },
             'summaryInfo': {
@@ -4472,38 +5198,210 @@ class DataModelMeta(type):
             },
             'contentType': {
             },
+            'testComponentTypesDescription': [{
+                'template': {
+                },
+                'name': {
+                },
+                'description': {
+                },
+                'label': {
+                },
+                'type': {
+                }
+            }],
             'operations': {
+                'clone': [{
+                }],
                 'importModel': [{
                 }],
-                'run': [{
-                }],
-                'realTimeStats': [{
-                }],
-                'remove': [{
-                }],
-                'exportModel': [{
-                }],
-                'search': [{
+                'add': [{
                 }],
                 'stopRun': [{
                 }],
+                'run': [{
+                }],
+                'saveAs': [{
+                }],
+                'save': [{
+                }],
                 'delete': [{
                 }],
-                'clone': [{
+                'search': [{
                 }],
-                'add': [{
+                'exportModel': [{
                 }],
                 'load': [{
                 }],
                 'new': [{
                 }],
-                'saveAs': [{
+                'realTimeStats': [{
                 }],
-                'save': [{
+                'remove': [{
                 }]
             }
         },
-        'network': {
+        'administration': {
+            'atiLicensing': {
+                'license': [{
+                    'expires': {
+                    },
+                    'issuedBy': {
+                    },
+                    'name': {
+                    },
+                    'boardserialno': {
+                    },
+                    'issued': {
+                    },
+                    'serialno': {
+                    }
+                }],
+                'operations': {
+                    'importAtiLicense': [{
+                    }]
+                }
+            },
+            'systemSettings': {
+                'strikepackUpdate': {
+                    'password': {
+                    },
+                    'interval': {
+                    },
+                    'check': {
+                    },
+                    'username': {
+                    }
+                },
+                'author': {
+                },
+                'description': {
+                },
+                'label': {
+                },
+                'guardrailSettings': {
+                    'enableStrictMode': {
+                    },
+                    'testStop': {
+                    },
+                    'testStatusWarning': {
+                    },
+                    'stopOnLinkdown': {
+                    },
+                    'testStartPrevention': {
+                    }
+                },
+                'createdOn': {
+                },
+                'revision': {
+                },
+                'vacuumSettings': {
+                    'vacuumWindowHigh': {
+                    },
+                    'autoVacuum': {
+                    },
+                    'vacuumWindowLow': {
+                    },
+                    'vacuumWindowTZ': {
+                    }
+                },
+                'lockedBy': {
+                },
+                'createdBy': {
+                },
+                'softwareUpdate': {
+                    'password': {
+                    },
+                    'interval': {
+                    },
+                    'check': {
+                    },
+                    'username': {
+                    }
+                },
+                'contentType': {
+                }
+            },
+            'userSettings': [{
+                'name': {
+                },
+                'content': {
+                },
+                'operations': {
+                    'changeUserSetting': [{
+                    }]
+                }
+            }],
+            'operations': {
+                'logs': [{
+                }],
+                'exportAllTests': [{
+                }]
+            }
+        },
+        'results': [{
+            'name': {
+            },
+            'content': {
+            },
+            'datasetvals': {
+            },
+            'operations': {
+                'getHistoricalSeries': [{
+                }],
+                'getGroups': [{
+                    'lockedBy': {
+                    },
+                    'createdBy': {
+                    },
+                    'author': {
+                    },
+                    'description': {
+                    },
+                    'label': {
+                    },
+                    'createdOn': {
+                    },
+                    'contentType': {
+                    },
+                    'revision': {
+                    }
+                }],
+                'getHistoricalResultSize': [{
+                }]
+            }
+        }],
+        'statistics': {
+            'component': [{
+                'statNames': [{
+                    'name': {
+                    },
+                    'description': {
+                    },
+                    'realtimeGroup': {
+                    },
+                    'label': {
+                    },
+                    'units': {
+                    },
+                    'choice': [{
+                        'name': {
+                        },
+                        'description': {
+                        },
+                        'label': {
+                        }
+                    }]
+                }],
+                'type': {
+                },
+                'label': {
+                }
+            }]
+        },
+        'appProfile': {
+            'weightType': {
+            },
             'lockedBy': {
             },
             'createdBy': {
@@ -4512,1137 +5410,43 @@ class DataModelMeta(type):
             },
             'name': {
             },
-            'interfaceCount': {
-            },
+            'superflow': [{
+                'percentFlows': {
+                },
+                'seed': {
+                },
+                'author': {
+                },
+                'estimate_bytes': {
+                },
+                'estimate_flows': {
+                },
+                'weight': {
+                },
+                'description': {
+                },
+                'label': {
+                },
+                'createdOn': {
+                },
+                'revision': {
+                },
+                'lockedBy': {
+                },
+                'generated': {
+                },
+                'createdBy': {
+                },
+                'percentBandwidth': {
+                },
+                'name': {
+                },
+                'contentType': {
+                }
+            }],
             'description': {
             },
             'label': {
-            },
-            'networkModel': {
-                'enodeb': [{
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'psn': {
-                    },
-                    'psn_netmask': {
-                    },
-                    'sctp_over_udp': {
-                    },
-                    'enodebs': [{
-                        'mme_ip_address': {
-                        },
-                        'enodebCount': {
-                        },
-                        'ip_address': {
-                        }
-                    }],
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'sctp_sport': {
-                    }
-                }],
-                'ip_router': [{
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'ip_address': {
-                    }
-                }],
-                'ip6_router': [{
-                    'hosts_ip_alloc_container': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'ip_address': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'ue_info': [{
-                    'imsi_base': {
-                    },
-                    'secret_key_step': {
-                    },
-                    'count': {
-                    },
-                    'operator_variant': {
-                    },
-                    'secret_key': {
-                    },
-                    'imei_base': {
-                    },
-                    'msisdn_base': {
-                    },
-                    'maxmbps_per_ue': {
-                    },
-                    'mobility_session_infos': [{
-                        'id': {
-                        },
-                        'value': {
-                        }
-                    }],
-                    'id': {
-                    }
-                }],
-                'ip_ldap_server': [{
-                    'auth_timeout': {
-                    },
-                    'ldap_username_start_tag': {
-                    },
-                    'ldap_user_min': {
-                    },
-                    'ldap_user_count': {
-                    },
-                    'authentication_rate': {
-                    },
-                    'ldap_password_start_tag': {
-                    },
-                    'ldap_user_max': {
-                    },
-                    'id': {
-                    },
-                    'ldap_server_address': {
-                    },
-                    'dn_fixed_val': {
-                    }
-                }],
-                'mme_sgw_pgw6': [{
-                    'ue_info': {
-                    },
-                    'max_sessions': {
-                    },
-                    'lease_address': {
-                    },
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_address': {
-                    },
-                    'sgw_advertised_sgw': {
-                    },
-                    'sgw_advertised_pgw': {
-                    },
-                    'lease_address_v6': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'mobility_session_info': [{
-                    'password': {
-                    },
-                    'bearers': [{
-                        'qci_label': {
-                        }
-                    }],
-                    'id': {
-                    },
-                    'access_point_name': {
-                    },
-                    'username': {
-                    },
-                    'initiated_dedicated_bearers': {
-                    }
-                }],
-                'ggsn6': [{
-                    'lease_address': {
-                    },
-                    'count': {
-                    },
-                    'dns': {
-                    },
-                    'ggsn_advertised_control_ip_address': {
-                    },
-                    'ip_address': {
-                    },
-                    'ggsn_advertised_data_ip_address': {
-                    },
-                    'lease_address_v6': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'ip_external_hosts': [{
-                    'proxy': {
-                    },
-                    'count': {
-                    },
-                    'id': {
-                    },
-                    'ip_address': {
-                    },
-                    'behind_snapt': {
-                    },
-                    'tags': {
-                    }
-                }],
-                'ip_static_hosts': [{
-                    'mpls_list': [{
-                        'id': {
-                        },
-                        'value': {
-                        }
-                    }],
-                    'ip_selection_type': {
-                    },
-                    'count': {
-                    },
-                    'dns': {
-                    },
-                    'psn': {
-                    },
-                    'psn_netmask': {
-                    },
-                    'ip_address': {
-                    },
-                    'tags': {
-                    },
-                    'proxy': {
-                    },
-                    'maxmbps_per_host': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'ldap': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'dns_proxy': {
-                    },
-                    'behind_snapt': {
-                    },
-                    'enable_stats': {
-                    }
-                }],
-                'ggsn': [{
-                    'lease_address': {
-                    },
-                    'count': {
-                    },
-                    'dns': {
-                    },
-                    'ggsn_advertised_control_ip_address': {
-                    },
-                    'ip_address': {
-                    },
-                    'ggsn_advertised_data_ip_address': {
-                    },
-                    'lease_address_v6': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    }
-                }],
-                'interface': [{
-                    'ignore_pause_frames': {
-                    },
-                    'duplicate_mac_address': {
-                    },
-                    'description': {
-                    },
-                    'packet_filter': {
-                        'not_dest_port': {
-                        },
-                        'not_src_ip': {
-                        },
-                        'filter': {
-                        },
-                        'src_ip': {
-                        },
-                        'src_port': {
-                        },
-                        'vlan': {
-                        },
-                        'not_vlan': {
-                        },
-                        'dest_ip': {
-                        },
-                        'not_dest_ip': {
-                        },
-                        'dest_port': {
-                        },
-                        'not_src_port': {
-                        }
-                    },
-                    'impairments': {
-                        'drop': {
-                        },
-                        'corrupt_lt64': {
-                        },
-                        'rate': {
-                        },
-                        'corrupt_lt256': {
-                        },
-                        'corrupt_rand': {
-                        },
-                        'corrupt_chksum': {
-                        },
-                        'corrupt_gt256': {
-                        },
-                        'frack': {
-                        }
-                    },
-                    'mtu': {
-                    },
-                    'vlan_key': {
-                    },
-                    'number': {
-                    },
-                    'use_vnic_mac_address': {
-                    },
-                    'mac_address': {
-                    },
-                    'id': {
-                    }
-                }],
-                'ds_lite_b4': [{
-                    'aftr_addr': {
-                    },
-                    'count': {
-                    },
-                    'ip_address': {
-                    },
-                    'host_ip_base_addr': {
-                    },
-                    'ipv6_addr_alloc_mode': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'aftr_count': {
-                    },
-                    'hosts_ip_increment': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    },
-                    'host_ip_addr_alloc_mode': {
-                    }
-                }],
-                'ue': [{
-                    'allocation_rate': {
-                    },
-                    'mobility_interval_ms': {
-                    },
-                    'ue_info': {
-                    },
-                    'dns': {
-                    },
-                    'mobility_action': {
-                    },
-                    'tags': {
-                    },
-                    'proxy': {
-                    },
-                    'default_container': {
-                    },
-                    'mobility_with_traffic': {
-                    },
-                    'id': {
-                    },
-                    'behind_snapt': {
-                    },
-                    'request_ipv6': {
-                    },
-                    'enable_stats': {
-                    }
-                }],
-                'ip_dns_proxy': [{
-                    'dns_proxy_ip_count': {
-                    },
-                    'dns_proxy_src_ip_base': {
-                    },
-                    'id': {
-                    },
-                    'dns_proxy_ip_base': {
-                    },
-                    'dns_proxy_src_ip_count': {
-                    }
-                }],
-                'enodeb_mme_sgw6': [{
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_allocation_mode': {
-                    },
-                    'mme_ip_address': {
-                    },
-                    'pgw_ip_address': {
-                    },
-                    'ue_address': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'ip6_dns_proxy': [{
-                    'dns_proxy_ip_count': {
-                    },
-                    'dns_proxy_src_ip_base': {
-                    },
-                    'id': {
-                    },
-                    'dns_proxy_ip_base': {
-                    },
-                    'dns_proxy_src_ip_count': {
-                    }
-                }],
-                'vlan': [{
-                    'tpid': {
-                    },
-                    'duplicate_mac_address': {
-                    },
-                    'description': {
-                    },
-                    'mtu': {
-                    },
-                    'outer_vlan': {
-                    },
-                    'inner_vlan': {
-                    },
-                    'mac_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    }
-                }],
-                'mme_sgw_pgw': [{
-                    'ue_info': {
-                    },
-                    'max_sessions': {
-                    },
-                    'lease_address': {
-                    },
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_address': {
-                    },
-                    'sgw_advertised_sgw': {
-                    },
-                    'sgw_advertised_pgw': {
-                    },
-                    'lease_address_v6': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    }
-                }],
-                'ds_lite_aftr': [{
-                    'count': {
-                    },
-                    'ip_address': {
-                    },
-                    'ipv6_addr_alloc_mode': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'b4_count': {
-                    },
-                    'b4_ip_address': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'ipsec_router': [{
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'ipsec': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'ip_address': {
-                    },
-                    'ike_peer_ip_address': {
-                    }
-                }],
-                'dhcpv6c_req_opts_cfg': [{
-                    'dhcpv6v_req_preference': {
-                    },
-                    'dhcpv6v_req_dns_list': {
-                    },
-                    'dhcpv6v_req_dns_resolvers': {
-                    },
-                    'dhcpv6v_req_server_id': {
-                    },
-                    'id': {
-                    }
-                }],
-                'sgsn': [{
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'ggsn_ip_address': {
-                    },
-                    'id': {
-                    },
-                    'ip_address': {
-                    }
-                }],
-                'path_advanced': [{
-                    'destination_port_count': {
-                    },
-                    'destination_port_base': {
-                    },
-                    'source_port_base': {
-                    },
-                    'tags': {
-                    },
-                    'enable_external_file': {
-                    },
-                    'source_container': {
-                    },
-                    'source_port_algorithm': {
-                    },
-                    'tuple_limit': {
-                    },
-                    'file': {
-                    },
-                    'destination_port_algorithm': {
-                    },
-                    'destination_container': {
-                    },
-                    'source_port_count': {
-                    },
-                    'xor_bits': {
-                    },
-                    'stream_group': {
-                    },
-                    'id': {
-                    }
-                }],
-                'path_basic': [{
-                    'source_container': {
-                    },
-                    'destination_container': {
-                    },
-                    'id': {
-                    }
-                }],
-                'enodeb_mme6': [{
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_allocation_mode': {
-                    },
-                    'enodebs': [{
-                        'gateway_ip_address': {
-                        },
-                        'default_container': {
-                        },
-                        'enodebCount': {
-                        },
-                        'ip_address': {
-                        },
-                        'prefix_length': {
-                        }
-                    }],
-                    'mme_ip_address': {
-                    },
-                    'pgw_ip_address': {
-                    },
-                    'ue_address': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'sgw_ip_address': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'pgw': [{
-                    'max_sessions': {
-                    },
-                    'lease_address': {
-                    },
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_address': {
-                    },
-                    'lease_address_v6': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    }
-                }],
-                'pgw6': [{
-                    'max_sessions': {
-                    },
-                    'lease_address': {
-                    },
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_address': {
-                    },
-                    'lease_address_v6': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'sgsn6': [{
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'ggsn_ip_address': {
-                    },
-                    'id': {
-                    },
-                    'ip_address': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'ip6_static_hosts': [{
-                    'mpls_list': [{
-                        'id': {
-                        },
-                        'value': {
-                        }
-                    }],
-                    'ip_alloc_container': {
-                    },
-                    'ip_selection_type': {
-                    },
-                    'count': {
-                    },
-                    'dns': {
-                    },
-                    'ip_address': {
-                    },
-                    'tags': {
-                    },
-                    'proxy': {
-                    },
-                    'maxmbps_per_host': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'host_ipv6_addr_alloc_mode': {
-                    },
-                    'prefix_length': {
-                    },
-                    'dns_proxy': {
-                    },
-                    'behind_snapt': {
-                    },
-                    'enable_stats': {
-                    }
-                }],
-                'plmn': [{
-                    'mnc': {
-                    },
-                    'description': {
-                    },
-                    'id': {
-                    },
-                    'mcc': {
-                    }
-                }],
-                'enodeb_mme_sgw': [{
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_allocation_mode': {
-                    },
-                    'mme_ip_address': {
-                    },
-                    'pgw_ip_address': {
-                    },
-                    'ue_address': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    }
-                }],
-                'sgw_pgw': [{
-                    'max_sessions': {
-                    },
-                    'lease_address': {
-                    },
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_address': {
-                    },
-                    'sgw_advertised_sgw': {
-                    },
-                    'sgw_advertised_pgw': {
-                    },
-                    'lease_address_v6': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    }
-                }],
-                'ip6_dhcp_server': [{
-                    'ia_type': {
-                    },
-                    'pool_size': {
-                    },
-                    'ip_address': {
-                    },
-                    'pool_prefix_length': {
-                    },
-                    'offer_lifetime': {
-                    },
-                    'max_lease_time': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'pool_base_address': {
-                    },
-                    'default_lease_time': {
-                    },
-                    'pool_dns_address1': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    },
-                    'pool_dns_address2': {
-                    }
-                }],
-                'enodeb6': [{
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'sctp_over_udp': {
-                    },
-                    'enodebs': [{
-                        'mme_ip_address': {
-                        },
-                        'enodebCount': {
-                        },
-                        'ip_address': {
-                        }
-                    }],
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    },
-                    'sctp_sport': {
-                    }
-                }],
-                'slaac_cfg': [{
-                    'use_rand_addr': {
-                    },
-                    'enable_dad': {
-                    },
-                    'id': {
-                    },
-                    'stateless_dhcpv6c_cfg': {
-                    },
-                    'fallback_ip_address': {
-                    }
-                }],
-                'ip6_external_hosts': [{
-                    'proxy': {
-                    },
-                    'count': {
-                    },
-                    'id': {
-                    },
-                    'ip_address': {
-                    },
-                    'behind_snapt': {
-                    },
-                    'tags': {
-                    }
-                }],
-                'ip_dns_config': [{
-                    'dns_domain': {
-                    },
-                    'id': {
-                    },
-                    'dns_server_address': {
-                    }
-                }],
-                'dhcpv6c_tout_and_retr_cfg': [{
-                    'dhcp6c_inforeq_attempts': {
-                    },
-                    'dhcp6c_initial_rebind_tout': {
-                    },
-                    'dhcp6c_sol_attempts': {
-                    },
-                    'dhcp6c_max_rebind_tout': {
-                    },
-                    'dhcp6c_release_attempts': {
-                    },
-                    'dhcp6c_initial_release_tout': {
-                    },
-                    'dhcp6c_req_attempts': {
-                    },
-                    'dhcp6c_max_req_tout': {
-                    },
-                    'dhcp6c_max_renew_tout': {
-                    },
-                    'dhcp6c_max_sol_tout': {
-                    },
-                    'dhcp6c_initial_req_tout': {
-                    },
-                    'dhcp6c_max_inforeq_tout': {
-                    },
-                    'dhcp6c_initial_sol_tout': {
-                    },
-                    'dhcp6c_initial_renew_tout': {
-                    },
-                    'dhcp6c_initial_inforeq_tout': {
-                    },
-                    'id': {
-                    }
-                }],
-                'ip_dhcp_server': [{
-                    'lease_address': {
-                    },
-                    'count': {
-                    },
-                    'dns': {
-                    },
-                    'ip_address': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'lease_time': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'accept_local_requests_only': {
-                    }
-                }],
-                'ip6_dns_config': [{
-                    'dns_domain': {
-                    },
-                    'id': {
-                    },
-                    'dns_server_address': {
-                    }
-                }],
-                'sgw_pgw6': [{
-                    'max_sessions': {
-                    },
-                    'lease_address': {
-                    },
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_address': {
-                    },
-                    'sgw_advertised_sgw': {
-                    },
-                    'sgw_advertised_pgw': {
-                    },
-                    'lease_address_v6': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'default_container': {
-                    },
-                    'id': {
-                    },
-                    'prefix_length': {
-                    }
-                }],
-                'mpls_settings': [{
-                    'mpls_tags': [{
-                        'mpls_ttl': {
-                        },
-                        'mpls_label': {
-                        },
-                        'mpls_exp': {
-                        }
-                    }],
-                    'id': {
-                    }
-                }],
-                'ipsec_config': [{
-                    'ike_dh': {
-                    },
-                    'ipsec_lifetime': {
-                    },
-                    'ike_pfs': {
-                    },
-                    'ike_mode': {
-                    },
-                    'ike_1to1': {
-                    },
-                    'nat_traversal': {
-                    },
-                    'xauth_username': {
-                    },
-                    'ike_encr_alg': {
-                    },
-                    'psk': {
-                    },
-                    'dpd_enabled': {
-                    },
-                    'dpd_timeout': {
-                    },
-                    'init_rate': {
-                    },
-                    'setup_timeout': {
-                    },
-                    'esp_encr_alg': {
-                    },
-                    'ike_lifetime': {
-                    },
-                    'ike_version': {
-                    },
-                    'id': {
-                    },
-                    'left_id': {
-                    },
-                    'ike_prf_alg': {
-                    },
-                    'esp_auth_alg': {
-                    },
-                    'dpd_delay': {
-                    },
-                    'xauth_password': {
-                    },
-                    'initial_contact': {
-                    },
-                    'debug_log': {
-                    },
-                    'wildcard_tsr': {
-                    },
-                    'rekey_margin': {
-                    },
-                    'ike_auth_alg': {
-                    },
-                    'right_id': {
-                    },
-                    'max_outstanding': {
-                    },
-                    'retrans_interval': {
-                    },
-                    'enable_xauth': {
-                    }
-                }],
-                'dhcpv6c_cfg': [{
-                    'dhcp6c_max_outstanding': {
-                    },
-                    'dhcp6c_duid_type': {
-                    },
-                    'dhcp6c_ia_type': {
-                    },
-                    'dhcp6c_req_opts_config': {
-                    },
-                    'dhcp6c_tout_and_retr_config': {
-                    },
-                    'dhcp6c_renew_timer': {
-                    },
-                    'dhcp6c_ia_t2': {
-                    },
-                    'id': {
-                    },
-                    'dhcp6c_ia_t1': {
-                    },
-                    'dhcp6c_initial_srate': {
-                    }
-                }],
-                'sixrd_ce': [{
-                    'sixrd_prefix': {
-                    },
-                    'count': {
-                    },
-                    'dns': {
-                    },
-                    'sixrd_prefix_length': {
-                    },
-                    'ip_address': {
-                    },
-                    'tags': {
-                    },
-                    'br_ip_address': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'hosts_per_ce': {
-                    },
-                    'ip4_mask_length': {
-                    },
-                    'id': {
-                    },
-                    'enable_stats': {
-                    }
-                }],
-                'ip_dhcp_hosts': [{
-                    'allocation_rate': {
-                    },
-                    'count': {
-                    },
-                    'tags': {
-                    },
-                    'proxy': {
-                    },
-                    'ldap': {
-                    },
-                    'default_container': {
-                    },
-                    'accept_local_offers_only': {
-                    },
-                    'id': {
-                    },
-                    'behind_snapt': {
-                    },
-                    'dns_proxy': {
-                    },
-                    'enable_stats': {
-                    }
-                }],
-                'enodeb_mme': [{
-                    'dns': {
-                    },
-                    'plmn': {
-                    },
-                    'ip_allocation_mode': {
-                    },
-                    'enodebs': [{
-                        'gateway_ip_address': {
-                        },
-                        'netmask': {
-                        },
-                        'default_container': {
-                        },
-                        'enodebCount': {
-                        },
-                        'ip_address': {
-                        }
-                    }],
-                    'mme_ip_address': {
-                    },
-                    'pgw_ip_address': {
-                    },
-                    'ue_address': {
-                    },
-                    'gateway_ip_address': {
-                    },
-                    'netmask': {
-                    },
-                    'default_container': {
-                    },
-                    'sgw_ip_address': {
-                    },
-                    'id': {
-                    }
-                }]
             },
             'createdOn': {
             },
@@ -5651,25 +5455,273 @@ class DataModelMeta(type):
             'revision': {
             },
             'operations': {
-                'importNetwork': [{
-                }],
                 'delete': [{
+                }],
+                'importAppProfile': [{
+                }],
+                'recompute': [{
+                }],
+                'load': [{
+                }],
+                'new': [{
+                }],
+                'add': [{
+                }],
+                'remove': [{
+                }],
+                'exportAppProfile': [{
                 }],
                 'saveAs': [{
                 }],
                 'save': [{
                 }],
                 'search': [{
+                }]
+            }
+        },
+        'strikes': {
+            'severity': {
+            },
+            'year': {
+            },
+            'variants': {
+            },
+            'reference': [{
+                'label': {
+                },
+                'type': {
+                },
+                'value': {
+                }
+            }],
+            'path': {
+            },
+            'protocol': {
+            },
+            'fileSize': {
+            },
+            'fileExtension': {
+            },
+            'name': {
+            },
+            'id': {
+            },
+            'category': {
+            },
+            'keyword': [{
+                'name': {
+                }
+            }],
+            'direction': {
+            },
+            'operations': {
+                'search': [{
+                }]
+            }
+        },
+        'loadProfile': {
+            'phase': [{
+                'duration': {
+                },
+                'phaseId': {
+                },
+                'type': {
+                },
+                'sessions.max': {
+                },
+                'sessions.maxPerSecond': {
+                },
+                'rateDist.unit': {
+                },
+                'rateDist.min': {
+                },
+                'rampDist.steadyBehavior': {
+                },
+                'rateDist.type': {
+                },
+                'rateDist.scope': {
+                }
+            }],
+            'author': {
+            },
+            'regen': {
+            },
+            'description': {
+            },
+            'label': {
+            },
+            'createdOn': {
+            },
+            'summaryData': {
+                'deviceType': {
+                },
+                'unknownUdpAppNames': {
+                },
+                'unknownSslSuperflowName': {
+                },
+                'magicNumber': {
+                },
+                'downloadBytesSum': {
+                },
+                'version': {
+                },
+                'phaseDuration': {
+                },
+                'unknownTcpAppNames': {
+                },
+                'uploadBytesSum': {
+                },
+                'summaryName': {
+                },
+                'basisOfRegeneration': {
+                },
+                'activeFlowsSum': {
+                },
+                'miniSlotDuration': {
+                },
+                'unknownSslAppNames': {
+                },
+                'dynamicSuperflowName': {
+                },
+                'appStat': [{
                 }],
+                'startTime': {
+                },
+                'endTime': {
+                },
+                'dynamicAppNames': {
+                }
+            },
+            'revision': {
+            },
+            'lockedBy': {
+            },
+            'createdBy': {
+            },
+            'name': {
+            },
+            'contentType': {
+            },
+            'presets': [{
+                'phase': [{
+                    'duration': {
+                    },
+                    'phaseId': {
+                    },
+                    'type': {
+                    },
+                    'sessions.max': {
+                    },
+                    'sessions.maxPerSecond': {
+                    },
+                    'rateDist.unit': {
+                    },
+                    'rateDist.min': {
+                    },
+                    'rampDist.steadyBehavior': {
+                    },
+                    'rateDist.type': {
+                    },
+                    'rateDist.scope': {
+                    }
+                }],
+                'author': {
+                },
+                'regen': {
+                },
+                'description': {
+                },
+                'label': {
+                },
+                'createdOn': {
+                },
+                'summaryData': {
+                    'deviceType': {
+                    },
+                    'unknownUdpAppNames': {
+                    },
+                    'unknownSslSuperflowName': {
+                    },
+                    'magicNumber': {
+                    },
+                    'downloadBytesSum': {
+                    },
+                    'version': {
+                    },
+                    'phaseDuration': {
+                    },
+                    'unknownTcpAppNames': {
+                    },
+                    'uploadBytesSum': {
+                    },
+                    'summaryName': {
+                    },
+                    'basisOfRegeneration': {
+                    },
+                    'activeFlowsSum': {
+                    },
+                    'miniSlotDuration': {
+                    },
+                    'unknownSslAppNames': {
+                    },
+                    'dynamicSuperflowName': {
+                    },
+                    'appStat': [{
+                    }],
+                    'startTime': {
+                    },
+                    'endTime': {
+                    },
+                    'dynamicAppNames': {
+                    }
+                },
+                'revision': {
+                },
+                'lockedBy': {
+                },
+                'createdBy': {
+                },
+                'name': {
+                },
+                'contentType': {
+                }
+            }],
+            'operations': {
                 'load': [{
                 }],
-                'new': [{
+                'createNewCustom': [{
                 }],
-                'list': [{
+                'save': [{
+                }],
+                'saveAs': [{
+                }],
+                'delete': [{
                 }]
             }
         },
         'strikeList': {
+            'author': {
+            },
+            'description': {
+            },
+            'label': {
+            },
+            'queryString': {
+            },
+            'createdOn': {
+            },
+            'revision': {
+            },
+            'lockedBy': {
+            },
+            'createdBy': {
+            },
+            'name': {
+            },
+            'contentType': {
+            },
+            'numStrikes': {
+            },
             'strikes': [{
                 'severity': {
                 },
@@ -5706,83 +5758,29 @@ class DataModelMeta(type):
                 'direction': {
                 }
             }],
-            'author': {
-            },
-            'description': {
-            },
-            'label': {
-            },
-            'queryString': {
-            },
-            'createdOn': {
-            },
-            'revision': {
-            },
-            'lockedBy': {
-            },
-            'createdBy': {
-            },
-            'name': {
-            },
-            'contentType': {
-            },
-            'numStrikes': {
-            },
             'operations': {
-                'exportStrikeList': [{
-                }],
-                'remove': [{
-                }],
-                'delete': [{
-                }],
-                'search': [{
+                'add': [{
                 }],
                 'saveAs': [{
                 }],
                 'save': [{
                 }],
+                'search': [{
+                }],
+                'exportStrikeList': [{
+                }],
+                'delete': [{
+                }],
+                'importStrikeList': [{
+                }],
+                'remove': [{
+                }],
                 'load': [{
                 }],
                 'new': [{
-                }],
-                'add': [{
-                }],
-                'importStrikeList': [{
                 }]
             }
-        },
-        'results': [{
-            'name': {
-            },
-            'content': {
-            },
-            'datasetvals': {
-            },
-            'operations': {
-                'getHistoricalResultSize': [{
-                }],
-                'getHistoricalSeries': [{
-                }],
-                'getGroups': [{
-                    'lockedBy': {
-                    },
-                    'createdBy': {
-                    },
-                    'author': {
-                    },
-                    'description': {
-                    },
-                    'label': {
-                    },
-                    'createdOn': {
-                    },
-                    'contentType': {
-                    },
-                    'revision': {
-                    }
-                }]
-            }
-        }]
+        }
     }
 
     @staticmethod
@@ -5800,6 +5798,17 @@ class DataModelMeta(type):
         return (model_path, model_data)
 
     @staticmethod
+    def _decorate_model_object_operations(data_model, data_model_path, obj):
+        if 'operations' not in data_model:
+           return
+        for operation in data_model['operations']:
+           if obj.__full_path__().replace("/", "") == '':
+               continue
+           method_name = data_model_path.replace("/", "_") + '_operations_' + operation
+           setattr(obj, operation, obj._wrapper.__getattribute__(method_name).__get__(obj))
+           setattr(getattr(obj, operation).__func__, '__name__', operation)
+
+    @staticmethod
     def _decorate_model_object(obj):
         obj_name = obj._name
         (data_model_path, data_model) = DataModelMeta._get_from_model(obj.__data_model_path__())
@@ -5808,19 +5817,14 @@ class DataModelMeta(type):
         if isinstance(data_model, list):
             setattr(obj, '_getitem_', lambda x: DataModelProxy(wrapper=obj._wrapper, name=str(x), path=obj.__full_path__(), model_path=obj.__data_model_path__()))
             if data_model_path.endswith(obj_name):
+                DataModelMeta._decorate_model_object_operations(data_model[0], data_model_path, obj)
                 return obj
             else:
                 data_model = data_model[0]
+        DataModelMeta._decorate_model_object_operations(data_model, data_model_path,  obj)
         for key in data_model:
-            if key.startswith("@"):
+            if key.startswith("@") or key == 'operations':
                 continue
-            if key == 'operations':
-                for operation in data_model[key]:
-                    if obj.__full_path__().replace("/", "") == '':
-                        continue
-                    method_name = data_model_path.replace("/", "_") + '_operations_' + operation
-                    setattr(obj, operation, obj._wrapper.__getattribute__(method_name).__get__(obj))
-                    setattr(getattr(obj, operation).__func__, '__name__', operation)
             setattr(obj, key, DataModelProxy(wrapper=obj._wrapper, name=key, path=obj.__full_path__(), model_path=obj.__data_model_path__()))
         if obj_name not in data_model:
             for key in data_model:

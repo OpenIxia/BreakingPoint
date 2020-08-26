@@ -124,7 +124,7 @@ for p in port_list:
     bps.topology.exportCapture('tescap%s.cap' % p ,\
          {"port": p,"slot": slot_number,"dir": "both","size": 100,"start": 0, "sizetype": "megabytes",  "starttype": "megabytes" } )
 
-print "Waiting 5 secs"
+print ("Waiting 5 secs")
 time.sleep(5)
 ########################################
 print("Unreserve ports")

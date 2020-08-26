@@ -71,7 +71,7 @@ print ('Finished adding IPv4_Router:')
 for vr in bps.network.networkModel.ip_router.get():
     print (vr)
 
-print "Moving corresponding ip_static_hosts to virtual Router and  deleting unused."
+print ("Moving corresponding ip_static_hosts to virtual Router and  deleting unused.")
 ip_ranges=bps.network.networkModel.ip_static_hosts.get()
 for ip_range in ip_ranges:
     iprange_id = ip_range['id']

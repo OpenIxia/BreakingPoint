@@ -31,11 +31,11 @@ from bps_restpy.bpsVELicense import BPSVELicenseManagement
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.83.188'
+bps_system  = '10.36.83.135'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
-mainLicenseServer = '10.36.82.203'
+mainLicenseServer = '10.36.83.135'
 activationCode = 'E61B-A9F7-C4BE-01D9'
 
 ########################################

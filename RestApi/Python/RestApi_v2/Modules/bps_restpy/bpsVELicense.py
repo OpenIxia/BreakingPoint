@@ -135,6 +135,7 @@ class BPSVELicenseManagement:
         jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({"host": licenseServer, "isActive": True})
         r = self.session.post(service, headers=jheaders, data=jdata, verify=False)
+        op = ""
         if(enableRequestPrints):
             self.pretty_print_requests(r)
         if(r.status_code == 200):
@@ -203,6 +204,10 @@ class BPSVELicenseManagement:
             result = self.waitOnFinish(service)
         else:
             raise Exception("activateActivationCode failed: %s - %s" % (r, r.content))
+        if not result:
+            raise Exception ("activateActivationCode : Something did not go well went trying to activate. No response. Try manually from UI")
+        if not 'resultUrl' in result: 
+            raise Exception ("activateActivationCode Error: \n" + str(result))
         return self.getFromResponseUrl(result['resultUrl'])
 
 
