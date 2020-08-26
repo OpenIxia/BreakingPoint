@@ -13,4 +13,4 @@ Use the below links to get started with the Python wrapper.
 
 
 ## Contents
- * **create_bps_execution_based_on_json_definition** python module using bpsrestpy used to transpose am agnostic json test definition to BreakingPoint test configuration.  
+ * **create_bps_execution_based_on_json_definition** python module using bpsrestpy  created for  transposing an agnostic json test definition to BreakingPoint test configuration.  
