@@ -145,10 +145,7 @@ pp(bps.testmodel.realTimeStats(int(run_id), "summary", -1))
 print("Stats from second 3:")
 pp(bps.testmodel.realTimeStats(int(run_id), "summary", 3))
 
-#getting 3.4 Section: Synopsis Summary of Results from the Report
-print ("Execution synopsis from respective report section:")
-tabledata = bps.reports.getReportTable(runid=run_id, sectionId="3.4")
-pp(tabledata)
+
 print ("\n")
 
 ########################################

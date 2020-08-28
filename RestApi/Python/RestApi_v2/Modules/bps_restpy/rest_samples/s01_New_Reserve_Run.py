@@ -53,7 +53,6 @@ port_list   = [0, 1]
 # Login to BPS box
 bps = BPS(bps_system, bpsuser, bpspass)
 #used for disabling all prints and setting external logging to critical messages only
-bps.disablePrints(disable=False)
 bps.login()
 
 
@@ -90,9 +89,6 @@ results = bps.reports.search(searchString=canned_test_name, limit=10, sort="endT
 result = results[0]
 print("%s execution duration %s ended with status: %s " % (result['name'], result['duration'], result['result']) )
 
-#getting 3.4 Section: Synopsys Summary of Results from the Report
-tabledata = bps.reports.getReportTable(runid=testid, sectionId="3.4")
-pp(tabledata)
 
 print("Unreserving the ports")
 for p in port_list:
