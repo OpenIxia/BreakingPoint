@@ -38,7 +38,7 @@ pp = pprint.PrettyPrinter(indent=1).pprint
 class TlsAdapter(HTTPAdapter):
 
     def init_poolmanager(self, connections, maxsize, block):
-        self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block,ssl_version=ssl.PROTOCOL_TLSv1_1)
+        self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block)
 
 ### this BPS REST API wrapper is generated for version: 9.00.101.13
 class BPS(object):
