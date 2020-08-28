@@ -24,11 +24,15 @@ canned_network_name = 'BreakingPoint Switching'
 new_network_name    = 's04_example_nn'
 new_testmodel_name  = 's04_example_tm'
 #bps system info
-bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-bpsuser     = 'bps user'
-bpspass     = 'bps pass'
+# bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+# bpsuser     = 'bps user'
+# bpspass     = 'bps pass'
+bps_system  = '10.36.83.74'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 
-slot_number = 1
+
+slot_number = 4
 port_list   = [0, 1]
 
 ########################################
@@ -71,7 +75,7 @@ print ('Finished adding IPv4_Router:')
 for vr in bps.network.networkModel.ip_router.get():
     print (vr)
 
-print "Moving corresponding ip_static_hosts to virtual Router and  deleting unused."
+print ("Moving corresponding ip_static_hosts to virtual Router and  deleting unused.")
 ip_ranges=bps.network.networkModel.ip_static_hosts.get()
 for ip_range in ip_ranges:
     iprange_id = ip_range['id']
@@ -95,4 +99,3 @@ print ('Saving  testmodel as : %s' % new_testmodel_name)
 bps.testmodel.saveAs(new_testmodel_name,force= True)
 
 bps.logout()
-

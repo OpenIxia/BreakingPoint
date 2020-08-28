@@ -32,9 +32,12 @@ new_strikeList_name = "CreatedStrikeList"
 new_smart_strikeList_name = "CreatedStrikeList"
 new_testmodel_name  = "s06_security_rest_example"
 #bps system info
-bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-bpsuser     = 'bps user'
-bpspass     = 'bps pass'
+# bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+# bpsuser     = 'bps user'
+# bpspass     = 'bps pass'
+bps_system  = '10.36.81.89'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 
 
 slot_number = 1
@@ -121,6 +124,11 @@ for p in port_list:
 
 
 ########################################
+#To be able to run the test the following option needs to be enabled
+#This will allow malware traffic to be executed on the test ports 
+bps.administration.userSettings.changeUserSetting(name = 'allowMalware' , value = True)
+
+########################################
 print("Run test and Get Stats:")
 test_id_json = bps.testmodel.run(modelname=new_testmodel_name, group=2)
 testid = str( test_id_json["runid"] )
@@ -141,6 +149,10 @@ while run_id in runningTests_Ids:
      #update the current running tests
      runningTests_Ids = [test['id'] for  test in bps.topology.runningTest.get()] 
 
+#####################
+#Do not allow malware traffic on the test ports  - anymore without conmfirmation
+bps.administration.userSettings.changeUserSetting(name = 'allowMalware' , value = False)
+######################
 print("~The test finished the execution.")
 results = bps.reports.search(searchString=new_testmodel_name, limit=10, sort="endTime", sortorder="descending")
 result  = results[0]

@@ -27,22 +27,25 @@ from bps_restpy.bps import BPS,pp
 
 ########################################
 # Demo script global variables
-bpt_filename_to_import = "Sample_AppSim_template.bpt"
+bpt_filename_to_import = os.path.dirname(__file__) + "/Sample_AppSim_template.bpt"
 importAsTestName       = "sample_ImportedTestModel"
 new_testmodel_name     = "testModel_Edited"
 
-networkfile_to_import  = "nn_sample.bpt"
+networkfile_to_import  = os.path.dirname(__file__) + "/nn_sample.bpt"
 importAsNetworkName    = "sample_ImportedNetwork"
 new_Network_name       = "new_network_name"
 
 runTime     = 30
 #bps system info
-bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-bpsuser     = 'bps user'
-bpspass     = 'bps pass'
+# bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+# bpsuser     = 'bps user'
+# bpspass     = 'bps pass'
+bps_system  = '10.36.83.74'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 
 
-slot_number = 2
+slot_number = 4
 port_list   = [0, 1]
 
 ########################################
@@ -165,5 +168,3 @@ for p in port_list:
 ########################################
 print("Session logout")
 bps.logout()
-
-
