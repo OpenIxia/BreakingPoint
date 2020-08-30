@@ -24,11 +24,15 @@ canned_network_name = 'BreakingPoint Switching'
 new_network_name    = 's04_example_nn'
 new_testmodel_name  = 's04_example_tm'
 #bps system info
-bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-bpsuser     = 'bps user'
-bpspass     = 'bps pass'
+# bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+# bpsuser     = 'bps user'
+# bpspass     = 'bps pass'
+bps_system  = '10.36.83.74'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 
-slot_number = 1
+
+slot_number = 4
 port_list   = [0, 1]
 
 ########################################
@@ -95,4 +99,3 @@ print ('Saving  testmodel as : %s' % new_testmodel_name)
 bps.testmodel.saveAs(new_testmodel_name,force= True)
 
 bps.logout()
-

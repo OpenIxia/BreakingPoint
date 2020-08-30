@@ -40,11 +40,11 @@ new_evasion_profile                = 'Evasion_100Variants_' + new_testmodel_name
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.83.194'
+bps_system  = '10.36.83.74'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
-slot_number = 3
+slot_number = 4
 port_list   = [0, 1]
 
 ########################################

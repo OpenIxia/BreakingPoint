@@ -18,7 +18,6 @@ import sys
 import os
 import logging
 
-
 # Add bps_restpy libpath *required if the library is not installed
 libpath = os.path.abspath(__file__+"/../../..")
 sys.path.insert(0, libpath)
@@ -37,28 +36,26 @@ canned_test_name = 'AppSim'
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.81.87'
+bps_system  = '10.36.83.74'
 bpsuser     = 'admin'
 bpspass     = 'admin'
-slot_number = 3
+
+slot_number = 4
 port_list   = [0, 1]
-
 ########################################
 
 
 ########################################
-########################################
+
 script_log = logging.getLogger(__name__)
 
 ########################################
 # Login to BPS box
 bps = BPS(bps_system, bpsuser, bpspass)
-#fisable module level output but still leave script level logs
+#disable module level output but still leave script level logs
 bps.disablePrints(True)
 script_log.setLevel(logging.INFO)
-
 bps.login()
-
 ########################################
 script_log.info("Load a canned test: ")
 bps.testmodel.load(canned_test_name)
@@ -99,6 +96,7 @@ script_log.info("%s execution duration %s ended with status: %s " % (result['nam
 #getting 3.4 Section: Synopsys Summary of Results from the Report
 tabledata = bps.reports.getReportTable(runid=testid, sectionId="3.4")
 pp(tabledata)
+
 
 script_log.info("Unreserving the ports")
 for p in port_list:

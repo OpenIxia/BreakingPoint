@@ -26,12 +26,16 @@ from bps_restpy.bps import BPS,pp
 # Demo script global variables
 new_testmodel_name  = 's05_testModel'
 #bps system info
-bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-bpsuser     = 'bps user'
-bpspass     = 'bps pass'
+# bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+# bpsuser     = 'bps user'
+# bpspass     = 'bps pass'
+bps_system  = '10.36.83.74'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 
-slot_number = 5
-port_list   = [0, 4]
+
+slot_number = 4
+port_list   = [0, 1]
 
 ########################################
 
@@ -50,11 +54,10 @@ bps.testmodel.clone(template = component['id'], type = component['type'], active
 clone = bps.testmodel.component.get()[-1]
 cloneid = clone['id']
 bps.testmodel.component[cloneid].label.set('clonnedAppsim')
-bps.testmodel
 #increase steady for all appsim components to 100s
 for component in  bps.testmodel.component.get():
     comp_id = component['id']
-    bps.testmodel.component[comp_id].rampDist.steady.set('100')
+    bps.testmodel.component[comp_id].set({"rampDist":{"steady":"00:01:40"}})
 
 ########################################
 print("Save test:")
@@ -134,4 +137,3 @@ for p in port_list:
 ########################################
 print("Session logout")
 bps.logout()
-
