@@ -1,4 +1,4 @@
-# REST-API BreakingPoint - Ixia a Keysight Business 
+# REST-API BreakingPoint - Ixia a Keysight Business (Recomended BreakingPoint Framework Version 9.10)
 
 Welcome to the BreakingPoint Official Comunity Github. 
 This location has the purpose to aggregate various scripts that can get you started on cloud or on prem viurtualization deployment , administration , execution and result analysis.
@@ -8,3 +8,5 @@ Network testing with  [BreakingPoint®](https://www.ixiacom.com/products/network
 More details:
 
 [BreakinPoint Page](https://www.ixiacom.com/resources/ixia-breakingpoint-overview)
+
+**NOTE**: We try to improve and extend the RESTAPI every release. The Python wrapper library is dynamically created based on the RESTAPIs available in a specific release version. Backwards compatibility will be maintained for the high level RESTAPI calls and the high level Python functions. To benefit from the latest API enhancements and bugfixes users should upgrade their BPS RESTAPI PYTHON Module to the corresponding wrapper from the branch. (Using a newer python wrapper library than the BPS framework might raise some issues as some functions expect the changes of the API made in the corresponding release.)
