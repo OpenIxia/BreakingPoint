@@ -66,7 +66,7 @@ bps.testmodel.saveAs(new_testmodel_name, force = True)
 ########################################
 print("Reserve Ports")
 for p in port_list:
-    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 20}])
+    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 20, 'capture': True}])
 
 
 ########################################

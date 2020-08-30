@@ -27,6 +27,7 @@ new_appprofile_name =  "CreatedAppProfile"
 new_testmodel_name  =  "TestModel_Edited"
 
 #bps system info
+############################################
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
@@ -132,7 +133,8 @@ print("Handshake timeout: %s  and the decrypt mode: %s" %
 print("Save superflow")
 bps.superflow.save()
 
-print("Create a new appProfile")
+
+print ("Create a new appProfile")
 bps.appProfile.new()
 bps.appProfile.name.set(new_appprofile_name)
 
