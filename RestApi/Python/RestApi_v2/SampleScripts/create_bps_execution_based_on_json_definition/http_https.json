@@ -1,0 +1,82 @@
+{
+  "protocolMix": {
+    "HTTP": {
+      "percentage": "30",
+	  "Objective": "Bandwidth",
+      "version": "1.1",
+	  "requestsPerConnection": "10",
+      "Config": {
+        "Client": {
+          "command": "GET http://NetSecOpen.com/index.html",
+          "Headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "ExtendedHeaders": [
+              {
+                "Accept": "*/*"
+              },
+              {
+                "Accept-Language": "en-us"
+              },
+              {
+                "Accept-Encoding": "gzip, deflate, compress"
+              }
+            ]
+          }
+        },
+        "Server": {
+          "Port": "80",
+          "CloseMethod": "FIN",
+          "defTxnProfile": "transaction profile",
+          "cookieExpiresDateTime": "Mon, 05 Jan 1970 00:00:00 GMT",
+          "serverType": "Microsoft-IIS/8.5"
+        },
+        "TransactionProfiles": {
+          "bodyBytes": "50000",
+          "bodyType": "ascii"
+        }
+      }
+    },
+	"HTTPS": {
+      "percentage": "70",
+	  "Objective": "Bandwidth",
+      "tlsConfig": {
+        "tlsVersion": "1.2",
+        "cipher": "ECDHE-RSA-AES128-GCM-SHA256",
+        "tlsRecordSize": "16383"
+      },
+	  "version": "1.1",
+	  "requestsPerConnection": "10",
+	  "Config": {
+		"Client": {
+          "command": "GET https://NetSecOpen.com/index.html",
+          "requestsPerConnection": "5",
+          "Headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "ExtendedHeaders": [
+              {
+                "Accept": "*/*"
+              },
+              {
+                "Accept-Language": "en-us"
+              },
+              {
+                "Accept-Encoding": "gzip, deflate, compress"
+              }
+            ]
+          }
+        },
+        "Server": {
+          "Port": "80",
+          "CloseMethod": "FIN",
+          "defTxnProfile": "transaction profile",
+          "cookieExpiresDateTime": "Mon, 05 Jan 1970 00:00:00 GMT",
+          "serverType": "Microsoft-IIS/8.5"
+        },
+		"TransactionProfiles": {
+          "bodyBytes": "100000",
+          "bodyType": "ascii"
+        }
+      }
+    }
+  }
+}
