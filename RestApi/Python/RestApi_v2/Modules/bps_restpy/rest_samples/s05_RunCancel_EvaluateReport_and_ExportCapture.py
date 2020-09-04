@@ -29,12 +29,12 @@ new_testmodel_name  = 's05_testModel'
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.83.74'
+bps_system  = '10.36.81.55'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
 
-slot_number = 4
+slot_number = 1
 port_list   = [0, 1]
 
 ########################################
@@ -119,7 +119,9 @@ for section in contents:
         for index in range(table_row_count):
             print ("%s: %s " % (tabledata[0]['Measurement'][index], tabledata[1]['Value'][index]) )
         break
-
+#workarround for the ocasional capture not being ready imediatly after the test execution being finished
+print ('Waiting 10 seconds for the capture to be ready.')
+time.sleep(10)
 #export capture
 print ('Exporting the capture for the ports')
 for p in port_list:
