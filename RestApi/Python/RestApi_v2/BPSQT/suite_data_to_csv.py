@@ -5,9 +5,11 @@
 #   2. Based on the QT_SUITE_RUNID get each test result
 #   3. Extract aditional data from the bps legacy  report for the specific test (REPORT_SECTIONS)
 #   4. write all to csv: OUT_RESULTS_CSV
+#   5. Optionally export BPS Legacy configuration for all iterations. Change below EXPORT_BPTS = True
 # ================
 
 import re
+import os
 from pytz import timezone
 from datetime import datetime, timedelta
 from bps_restpy.bps import BPS
@@ -16,13 +18,13 @@ from bps_restpy.bps import BPS
 ########################################
 # Demo script global variables
 # bps system info
-bps_system  = '10.36.83.240' # bpsqt system ip 
+bps_system  = 'my.system_ip_or_url' # bpsqt system ip 
 bpsuser     = 'admin' # system username
 bpspass     = 'admin' # system password
 
 # go to BPSQT suite result that you are interested in
 # set QT_SUITE_RUNID to the number found at the end of the link
-QT_SUITE_RUNID = '692' # https://<chassisip>/bpse/ui/suites/netsecOpen/runSummary/692
+QT_SUITE_RUNID = '451' # https://<chassisip>/bpse/ui/suites/netsecOpen/runSummary/692
 #sections that should be extracted from BPS legacy report
 REPORT_SECTIONS = [ 'Application Response Time',
                     'Application First Byte Time',
@@ -30,6 +32,7 @@ REPORT_SECTIONS = [ 'Application Response Time',
                     ]
 #results file output
 OUT_RESULTS_CSV = 'QT_NSO_RESULT_ID' + QT_SUITE_RUNID + '.csv'
+EXPORT_BPTS = False
 ########################################
 # Login to BPS box
 bps = BPS(bps_system, bpsuser, bpspass)
@@ -128,6 +131,12 @@ def get_app_times(testname, suiteStartTime, suiteDuration):
               )
         if test_start_date >= suite_start_date and test_start_date <= suite_end_date:
             avg_timings = get_reports_data(bps, result['runid'])
+            if EXPORT_BPTS:
+                folder = 'configs'
+                if not os.path.exists(folder):
+                    os.makedirs(folder)
+                filepath  = os.path.join(folder, result['name'].replace('@','_') + '.bpt')
+                bps.testmodel.exportModel(result['name'], attachments=True, filepath=filepath ,runid=result['runid'])
             break
     return avg_timings
 #################################
