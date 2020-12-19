@@ -245,9 +245,16 @@ class BPS_Updates:
 
 class BPS_Storrage:
     def __init__(self,bps):
-        self.ipstr = bps.ipstr
-        self.username = bps.username
-        self.password = bps.password
+        #if by any chance someone is still using the resv1 lib
+        if hasattr(bps, 'ipstr'):
+            self.ipstr = bps.ipstr
+            self.username = bps.username
+            self.password = bps.password
+        else:
+            self.ipstr = bps.host
+            self.username = bps.user
+            self.password = bps.password
+
         self.session = bps.session
         self.bps = bps
         self.api_key = bps.session.headers['X-API-KEY']  
@@ -347,7 +354,7 @@ class BPS_Storrage:
             return True 
         
     #delete all execution results reports    
-    def purgeReports (self,versionId, enableRequestPrints = False):
+    def purgeReports (self, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/purge'
         jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({'removeReports' : 'true' })
@@ -368,7 +375,7 @@ class BPS_Storrage:
         return True
     
     #compact the database after deleting reports   
-    def compactStorage (self,versionId, enableRequestPrints = False):
+    def compactStorage (self, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/compact'
         jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({})
