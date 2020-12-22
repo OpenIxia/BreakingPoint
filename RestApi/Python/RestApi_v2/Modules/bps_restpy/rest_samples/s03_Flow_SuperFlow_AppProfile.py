@@ -100,16 +100,16 @@ if 'tls_ciphers5' in bps.superflow.actions[0].get():
 
     #get all availlable action parameters dictionary with values
     actionParams = bps.superflow.actions[0].params.get()
-    print ("tls_ciphers2 : %s" % actionParams["tls_ciphers2"])
-    #get description of the action with all parameter availlable
+    print ("tls_ciphers3 : %s" % actionParams["tls_ciphers3"])
+    #get description of the action with all parameter availlable and all availlable parm values with descriptions
     actionOptions = bps.superflow.actions[0].getActionInfo(1)
     #extract from above actionOptions the availlable settings for all params with tls_cipher in the name
     all_tls_options = [param for param in actionOptions['settings'] if  'tls_ciphers3' in param['name']]
     #pick  one of the availlable posible settings for the parameter
     tls_options = all_tls_options[0]['choice']
     print ("Selecting" + str(tls_options[2]) )
+     #set value and re-enable parameter
     bps.superflow.actions[0].patch({'tls_ciphers3': tls_options[2]['name']})
-    #re-enable parameter just by setting a new value
     bps.superflow.actions[0].patch({'tls_ciphers3':{"delete":False}})
     actionParams = bps.superflow.actions[0].params.get()
     print ("tls_ciphers3 : %s" % actionParams["tls_ciphers3"])
