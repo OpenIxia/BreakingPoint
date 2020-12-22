@@ -31,7 +31,7 @@ new_testmodel_name  =  "TestModel_Edited"
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.83.74'
+bps_system  = '10.36.81.87'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
@@ -74,6 +74,11 @@ bps.superflow.addFlow(
 print("Add action 1")
 bps.superflow.addAction(flowid = 1, type = "tls_accept", actionid = 1, source = "server")
 
+
+#limitation note: most action parameters that are disabled in the canned flows are not visible for editing from REST
+#to edit this parameters please load the superflow once in UI and save it with a different name
+
+
 #disable from action 1 parameters the tlsCiphers options not used
 disableParameters = {
 'tls_ciphers2':{"delete":True},
@@ -84,8 +89,38 @@ disableParameters = {
 if 'tls_ciphers5' in bps.superflow.actions[0].get():
     bps.superflow.actions[0].patch(disableParameters)
 
+    #get all availlable action parameters dictionary with values
+    actionParams = bps.superflow.actions[0].params.get()
+    print ("tls_ciphers2 : %s" % actionParams["tls_ciphers2"])
+
+    #re-enable parameter with the original value
+    bps.superflow.actions[0].patch({'tls_ciphers2':{"delete":False}})
+    actionParams = bps.superflow.actions[0].params.get()
+    print ("tls_ciphers2 : %s" % actionParams["tls_ciphers2"])
+
+    #get all availlable action parameters dictionary with values
+    actionParams = bps.superflow.actions[0].params.get()
+    print ("tls_ciphers2 : %s" % actionParams["tls_ciphers2"])
+    #get description of the action with all parameter availlable
+    actionOptions = bps.superflow.actions[0].getActionInfo(1)
+    #extract from above actionOptions the availlable settings for all params with tls_cipher in the name
+    all_tls_options = [param for param in actionOptions['settings'] if  'tls_ciphers3' in param['name']]
+    #pick  one of the availlable posible settings for the parameter
+    tls_options = all_tls_options[0]['choice']
+    print ("Selecting" + str(tls_options[2]) )
+    bps.superflow.actions[0].patch({'tls_ciphers3': tls_options[2]['name']})
+    #re-enable parameter just by setting a new value
+    bps.superflow.actions[0].patch({'tls_ciphers3':{"delete":False}})
+    actionParams = bps.superflow.actions[0].params.get()
+    print ("tls_ciphers3 : %s" % actionParams["tls_ciphers3"])
+
 #set action 1 TLS version to TLSv1.2 -> internal name 'TLS_VERSION_3_3' (visible when in  UI when mouse hovering over the action parameter value)
 bps.superflow.actions[0].set({'tls_max_version':'TLS_VERSION_3_3'})
+
+
+#get action parameter dictionary
+actionParams = bps.superflow.actions[0].params.get()
+print ("tls_ciphers2 : %s" % actionParams["tls_ciphers2"])
 
 #display action 1 parameters after being set
 pp (bps.superflow.actions[0].get())
