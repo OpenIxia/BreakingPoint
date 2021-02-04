@@ -31,7 +31,7 @@ new_testmodel_name  =  "TestModel_Edited"
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.83.74'
+bps_system  = '1.2.3.4'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 

@@ -40,7 +40,7 @@ class TlsAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block):
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block)
 
-### this BPS REST API wrapper is generated for version: 9.10.110.25
+### this BPS REST API wrapper is generated for version: 9.10.110.81 (9.10 Update2)
 class BPS(object):
 
     def __init__(self, host, user, password):
@@ -76,7 +76,7 @@ class BPS(object):
             log.setLevel(logging.INFO)
             logging.getLogger("requests").setLevel(logging.ERROR)
             logging.getLogger("urllib3").setLevel(logging.ERROR)
-
+    
     ### connect to the system
     def __connect(self):
         r = self.session.post(url='https://' + self.host + '/bps/api/v1/auth/session', data=json.dumps({'username': self.user, 'password': self.password}), headers={'content-type': 'application/json'}, verify=False)
