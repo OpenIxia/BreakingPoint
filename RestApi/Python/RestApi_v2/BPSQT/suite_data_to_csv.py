@@ -129,6 +129,7 @@ def get_app_times(testname, suiteStartTime, suiteDuration):
                                                      suite_end_date.strftime('%Y-%m-%dT%H:%M:%S')
                                                     ) 
               )
+        avg_timings = ''
         if test_start_date >= suite_start_date and test_start_date <= suite_end_date:
             avg_timings = get_reports_data(bps, result['runid'])
             if EXPORT_BPTS:
@@ -180,7 +181,10 @@ for category in suite['categories']:
                     durations_to_strings = ['%.2f' % d for d in durations[section]]
                 except TypeError:
                     durations_to_strings = durations[section]
+                except:
+                    durations_to_strings = ','.join(['NA', 'NA', 'NA']
                 test_csv_line = test_csv_line + ',' + ','.join(durations_to_strings)
+                
             else:
                 test_csv_line = test_csv_line + ',' + ','.join(['0', '0', '0'])
         print(test_csv_line)
