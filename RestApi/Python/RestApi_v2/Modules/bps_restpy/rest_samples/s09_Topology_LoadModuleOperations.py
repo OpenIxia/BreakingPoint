@@ -22,11 +22,11 @@ import re
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.83.74'
+bps_system  = '10.36.66.31'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
-slot_number = 4
+slot_number = 6
 port_list   = [0, 1]
 ########################################
 # utility procedure to wait for long operations like card change mode, reboot, speed change
