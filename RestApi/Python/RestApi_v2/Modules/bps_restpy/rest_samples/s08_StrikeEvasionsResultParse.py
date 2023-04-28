@@ -37,14 +37,14 @@ testmodel_for_allowed_strikes      = "Strikes_allowed_" + new_testmodel_name
 network_configuration              = 'BreakingPoint Switching Minimal'
 new_evasion_profile                = 'Evasion_100Variants_' + new_testmodel_name
 #bps system info
-# bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-# bpsuser     = 'bps user'
-# bpspass     = 'bps pass'
-bps_system  = '10.36.83.74'
+bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+bpsuser     = 'bps user'
+bpspass     = 'bps pass'
+bps_system  = '10.36.81.90'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
-slot_number = 4
+slot_number = 1
 port_list   = [0, 1]
 
 ########################################
@@ -155,13 +155,10 @@ pset={"attackPlan": new_strikeList_name, "attackPlanIterations": 1, "attackProfi
 cmpid = bps.testmodel.component.get()[0]['id']
 #set the profile on the component
 bps.testmodel.component[cmpid].patch(pset)
-# save model
-bps.testmodel.saveAs(new_testmodel_name, force = True)
 
-#####################
-#Do not allow malware traffic on the test ports  - anymore without conmfirmation
-bps.administration.userSettings.changeUserSetting(name = 'allowMalware' , value = True)
-######################
+
+
+bps.testmodel.saveAs(new_testmodel_name, force = True)
 
 ########################################
 print("Reserve Ports")
@@ -194,7 +191,7 @@ while( int(init_progress) <= 100 and runningTests["progress"] == None):
 
 print ("~Test is running. We will do real time report search in this time and also print attack related stats.")
 progress = bps.topology.runningTest['TEST-%s'%run_id].progress.get()
-while(type(progress) == str and int(progress) <= 100):
+while(type(progress) == int and int(progress) <= 100):
     print (bps.testmodel.realTimeStats(int(run_id), "attackStats", -1) )
     #check report for failed variants
     update_strikeResult(run_id, bps)
@@ -247,16 +244,10 @@ if strikeListToAdd:
     bps.testmodel.saveAs(testmodel_for_allowed_strikes, force = True)
     
 
+
+
 print ("Unreserving the ports")
-time.sleep(3)
 for p in port_list:
     bps.topology.unreserve([{'slot': slot_number, 'port': p, 'group': 2}])
-
-######################
-# Do not allow malware traffic on the test ports  - anymore without conmfirmation
-bps.administration.userSettings.changeUserSetting(name = 'allowMalware' , value = False)
-######################
-
-
 
 bps.logout()

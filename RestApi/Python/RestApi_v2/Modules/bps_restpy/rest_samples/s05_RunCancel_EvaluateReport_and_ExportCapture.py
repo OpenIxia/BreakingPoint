@@ -26,16 +26,12 @@ from bps_restpy.bps import BPS,pp
 # Demo script global variables
 new_testmodel_name  = 's05_testModel'
 #bps system info
-# bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-# bpsuser     = 'bps user'
-# bpspass     = 'bps pass'
-bps_system  = '10.36.81.55'
-bpsuser     = 'admin'
-bpspass     = 'admin'
+bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+bpsuser     = 'bps user'
+bpspass     = 'bps pass'
 
-
-slot_number = 1
-port_list   = [0, 1]
+slot_number = 5
+port_list   = [0, 4]
 
 ########################################
 
@@ -54,10 +50,11 @@ bps.testmodel.clone(template = component['id'], type = component['type'], active
 clone = bps.testmodel.component.get()[-1]
 cloneid = clone['id']
 bps.testmodel.component[cloneid].label.set('clonnedAppsim')
+bps.testmodel
 #increase steady for all appsim components to 100s
 for component in  bps.testmodel.component.get():
     comp_id = component['id']
-    bps.testmodel.component[comp_id].set({"rampDist":{"steady":"00:01:40"}})
+    bps.testmodel.component[comp_id].rampDist.steady.set('100')
 
 ########################################
 print("Save test:")
@@ -66,7 +63,7 @@ bps.testmodel.saveAs(new_testmodel_name, force = True)
 ########################################
 print("Reserve Ports")
 for p in port_list:
-    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 20, 'capture': True}])
+    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 20}])
 
 
 ########################################
@@ -92,7 +89,7 @@ while( int(init_progress) <= 100 and runningTests["progress"] == None):
 
 print("~Test is running untill 30% progress. Get  l4Stats stats at every 2 seconds.")
 progress = bps.topology.runningTest['TEST-%s'%run_id].progress.get()
-while(type(progress) == str and int(progress) <= 30):
+while(type(progress) == int and int(progress) <= 30):
     pp(bps.testmodel.realTimeStats(int(run_id), " l4Stats", -1))
     progress = bps.topology.runningTest['TEST-%s'%run_id].progress.get()
     time.sleep(2)
@@ -119,9 +116,7 @@ for section in contents:
         for index in range(table_row_count):
             print ("%s: %s " % (tabledata[0]['Measurement'][index], tabledata[1]['Value'][index]) )
         break
-#workarround for the ocasional capture not being ready imediatly after the test execution being finished
-print ('Waiting 10 seconds for the capture to be ready.')
-time.sleep(10)
+
 #export capture
 print ('Exporting the capture for the ports')
 for p in port_list:
@@ -129,7 +124,7 @@ for p in port_list:
     bps.topology.exportCapture('tescap%s.cap' % p ,\
          {"port": p,"slot": slot_number,"dir": "both","size": 100,"start": 0, "sizetype": "megabytes",  "starttype": "megabytes" } )
 
-print ("Waiting 5 secs")
+print("Waiting 5 secs") 
 time.sleep(5)
 ########################################
 print("Unreserve ports")
@@ -139,3 +134,4 @@ for p in port_list:
 ########################################
 print("Session logout")
 bps.logout()
+
