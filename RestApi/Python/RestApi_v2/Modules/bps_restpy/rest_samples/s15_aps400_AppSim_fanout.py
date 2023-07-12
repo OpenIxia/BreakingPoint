@@ -28,15 +28,15 @@ from bps_restpy.bps import BPS,pp
 # Demo script global variables
 canned_test_name = 'AppSim'
 #bps system info
-bps_system  = '10.36.83.18'
+bps_system  = '10.36.83.31'
 bpsuser     = 'admin'
 bpspass     = 'admin'
 
 
 slot_number = 1
-port_list   = [30, 40]
-port_list_postFanout = [30,40]
-l47_resource = [0,1,2,3,4,5]
+port_list   = [3, 4]
+port_list_postFanout = [3,4]
+l47_resource = [2,3]
 
 ########################################
 
@@ -50,7 +50,10 @@ bps.login()
 ########################################
 print("Load a canned test: ")
 bps.testmodel.load(canned_test_name)
-
+print("Disable L23 resource auto-reservation.")
+bps.administration.userSettings.changeUserSetting("autoreserve.l23","0")
+print("Disable L47 resource auto-reservation.")
+bps.administration.userSettings.changeUserSetting("autoreserve.l47","0")
 ########################################
 print("Fanout the ports")
 fanout_result = bps.topology.getPortAvailableModes(slot_number, 40)
