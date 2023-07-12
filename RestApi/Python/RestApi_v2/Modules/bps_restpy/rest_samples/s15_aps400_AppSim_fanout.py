@@ -34,9 +34,10 @@ bpspass     = 'admin'
 
 
 slot_number = 1
-port_list   = [3, 4]
-port_list_postFanout = [3,4]
+port_list   = [3.0,4.0]
+port_list_postFanout = [3.2,4.2]
 l47_resource = [2,3]
+testGroup = 2
 
 ########################################
 
@@ -56,7 +57,7 @@ print("Disable L47 resource auto-reservation.")
 bps.administration.userSettings.changeUserSetting("autoreserve.l47","0")
 ########################################
 print("Fanout the ports")
-fanout_result = bps.topology.getPortAvailableModes(slot_number, 40)
+fanout_result = bps.topology.getPortAvailableModes(slot_number, port_list[0])
 print("The list of Fanout options:")
 for li in fanout_result["modes"]:
     print("The available fanout mode {0}".format(li["name"]))
@@ -93,17 +94,16 @@ for p in port_list:
 print("All ports fanout completed!")
 time.sleep(3)
 #######################################
+print("Reserve Ports")
+for p in port_list_postFanout:
+    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': testGroup}])
+
 print("Reserve L47 resources...")
 for r in l47_resource:
-    bps.topology.reserveResource(group = 2, resourceId = r, resourceType = "l47")
-
-print("Reserve Ports")
-for p in port_list:
-    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 2}])
-
+    bps.topology.reserveResource(group = testGroup, resourceId = r, resourceType = "l47")
 ########################################
 print("Run test and Get Stats:")
-test_id_json = bps.testmodel.run(modelname=canned_test_name, group=2)
+test_id_json = bps.testmodel.run(modelname=canned_test_name, group=testGroup)
 testid = str( test_id_json["runid"] )
 run_id = 'TEST-' + testid
 print("Test Run Id: %s"%run_id)
@@ -129,13 +129,13 @@ print ("%s execution duration %s ended with status: %s " % (result['name'], resu
 tabledata = bps.reports.getReportTable(runid=testid, sectionId="3.4")
 pp(tabledata)
 
+print ("Unreserving the ports")
+for p in port_list_postFanout:
+    bps.topology.unreserve([{'slot': slot_number, 'port': p, 'group': testGroup}])
+
 print("Releasing resources...")
 for r in l47_resource:
-    bps.topology.releaseResource(group = 2, resourceId = r, resourceType = "l47")
-
-print ("Unreserving the ports")
-for p in port_list:
-    bps.topology.unreserve([{'slot': slot_number, 'port': p, 'group': 2}])
+    bps.topology.releaseResource(group = testGroup, resourceId = r, resourceType = "l47")
 
 bps.logout()
 
