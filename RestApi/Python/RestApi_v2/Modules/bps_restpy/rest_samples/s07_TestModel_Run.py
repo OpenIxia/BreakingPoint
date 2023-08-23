@@ -14,20 +14,12 @@
 
 
 
-# import time, sys, os
-# # Add bps_restpy libpath *required if the library is not installed
-# libpath = os.path.abspath(__file__+"/../../..")
-# sys.path.insert(0,libpath)
-
-# from bps_restpy.bps import BPS,pp
-
-####
-
-import time, sys, os, traceback
+import time, sys, os
 # Add bps_restpy libpath *required if the library is not installed
-sys.path.append(os.path.join(os.path.dirname(__file__), r"../lib"))
+libpath = os.path.abspath(__file__+"/../../..")
+sys.path.insert(0,libpath)
 
-from restPyWrapper3 import *
+from bps_restpy.bps import BPS,pp
 
 
 ########################################
