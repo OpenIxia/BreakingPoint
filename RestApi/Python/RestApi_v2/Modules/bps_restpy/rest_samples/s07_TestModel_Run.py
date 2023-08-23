@@ -14,13 +14,20 @@
 
 
 
-import time, sys, os
+# import time, sys, os
+# # Add bps_restpy libpath *required if the library is not installed
+# libpath = os.path.abspath(__file__+"/../../..")
+# sys.path.insert(0,libpath)
+
+# from bps_restpy.bps import BPS,pp
+
+####
+
+import time, sys, os, traceback
 # Add bps_restpy libpath *required if the library is not installed
-libpath = os.path.abspath(__file__+"/../../..")
-sys.path.insert(0,libpath)
+sys.path.append(os.path.join(os.path.dirname(__file__), r"../lib"))
 
-from bps_restpy.bps import BPS,pp
-
+from restPyWrapper3 import *
 
 
 ########################################
@@ -30,11 +37,11 @@ rr_component_name     = "tempRR"
 test_name             = "Test_Model"
 
 #bps system info
-bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-bpsuser     = 'bps user'
-bpspass     = 'bps pass'
+bps_system  = '10.36.66.31'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 
-slot_number = 1
+slot_number = 9
 port_list   = [0, 1]
 
 ########################################
@@ -113,10 +120,25 @@ while( int(init_progress) <= 100 and runningTests["progress"] == None):
 
 print("~Test is running. Get stats at every 2 seconds.") 
 progress = bps.topology.runningTest['TEST-%s'%run_id].progress.get()
-while(type(progress) == int and int(progress) <= 100):
-    pp(bps.testmodel.realTimeStats(int(run_id), "summary", -1))
-    progress = bps.topology.runningTest['TEST-%s'%run_id].progress.get()
-    time.sleep(2)
+retry_count = 0
+while(type(progress) == int and int(progress) <= 100) and retry_count <= 3:
+        try:
+            pp(bps.testmodel.realTimeStats(int(run_id), "summary", -1))
+            progress = bps.topology.runningTest['TEST-%s'%run_id].progress.get()
+            time.sleep(2)
+        except Exception as err:
+            if retry_count == 3:
+                bps.logout()
+                raise Exception("Exceeded the Retry limitation!")
+            if type(err) == dict and "status_code" in err.keys() and err["status_code"] in [500, 503]:
+                print("Retry the stats retrieiving in 5 seconds...")
+                time.sleep(5)
+                retry_count += 1
+                continue
+            else:
+                bps.logout()
+                raise Exception(err)
+
 
 
 ########################################
@@ -134,6 +156,5 @@ for p in port_list:
 ########################################
 print("Session logout")
 bps.logout()
-
 
 
