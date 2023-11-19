@@ -20,10 +20,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE. 
-*Created with Breaking Point build :  9.00v9.00.108.12"""
+*Created with Breaking Point build :  9.38v9.38.1.57"""
 import sys,os
 #sys.path.insert(0,os.path.abspath(__file__+"/../.."))
 if sys.version_info[0] >= 3:
-    from restPyWrapper3 import BPS, pp
+    from .restPyWrapper3 import BPS, pp
 else:
-	from restPyWrapper import BPS, pp
+    from restPyWrapper import BPS, pp
