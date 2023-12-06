@@ -25,7 +25,7 @@ class BPS(object):
         self.sessionId = None
         self.session = requests.Session()
         self.session.mount('https://', TlsAdapter())
-        self.clientVersion = '0.0'
+        self.clientVersion = '10.0'
         self.serverVersions = None
         self.checkVersion = checkVersion
         self.printRequests = False
