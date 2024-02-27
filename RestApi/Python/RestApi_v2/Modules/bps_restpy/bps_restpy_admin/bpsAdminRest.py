@@ -348,7 +348,8 @@ class BPS_Storrage:
         
     #delete all execution results reports    
     def purgeReports (self,versionId, enableRequestPrints = False):
-        service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/compact'
+        # APS/VE might have diffrent API: https://<bps-system>/bps/api/v1/admin/database/operations/clean
+        service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/purge'
         jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({'removeReports' : 'true' })
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
@@ -363,7 +364,7 @@ class BPS_Storrage:
             print("Waiting for purgeReports to complete")
             self.waitOnFinish( service )
         else:
-            print("Uninstall failed: %s - %s" % (r, r.content))
+            print("Purge failed: %s - %s" % (r, r.content))
             return False
         return True
     
