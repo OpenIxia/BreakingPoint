@@ -6,8 +6,8 @@ Run the script and get the synced output from the report
 - Provide the system info: IP / Domain name , credentials
 - Provide the path of interest from report in a list, separated by "\\".
   - E.g, "Detailed Summarized Statistics \ IP \ TCP Sessions"
-- Provide the report internal id. Open the report page, it will be the value of the last parameter from the URL.
   - Section ID will be generated automatically
+- Provide the report internal id. Open the report page, it will be the value of the last parameter from the URL.
 - Dependency lib path in the script is a , the path to the wrapper library is: RestApi/Python/RestApi_v2/Modules/bps_restpy
 
   - [restPyWrapper](https://github.com/OpenIxia/BreakingPoint/blob/master/RestApi/Python/RestApi_v2/Modules/bps_restpy/restPyWrapper.py)
