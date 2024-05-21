@@ -33,11 +33,8 @@ new_testmodel_name  =  "TestModel_Edited"
 bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
-bps_system  = '10.36.81.90'
-bpsuser     = 'admin'
-bpspass     = 'admin'
 
-slot_number = 1
+slot_number = 3
 port_list   = [0, 1]
 
 ########################################

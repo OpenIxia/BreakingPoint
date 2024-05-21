@@ -30,8 +30,8 @@ bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
 
-slot_number = 5
-port_list   = [0, 4]
+slot_number = 3
+port_list   = [0, 1]
 
 ########################################
 
@@ -63,7 +63,7 @@ bps.testmodel.saveAs(new_testmodel_name, force = True)
 ########################################
 print("Reserve Ports")
 for p in port_list:
-    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 20}])
+    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 20,  "capture": True}])
 
 
 ########################################
@@ -105,7 +105,14 @@ while 'TEST-%s'%run_id in bps.topology.runningTest.get():
     time.sleep(1)
     print("stop progress:   %s%s" % (init_progress, '%'))
 
-
+#export capture
+print ('Exporting the capture for the ports')
+for p in port_list:
+    print ('Exporting tescap%s.pcap....' % p)
+    time.sleep(10)
+    bps.topology.exportCapture('tescap%s.pcap' % p ,\
+         {"port": p,"slot": slot_number,"dir": "both","size": 100000,"start": 0, "sizetype": "megabytes",  "starttype": "megabytes" } )
+    
 #getReportContents 1st 'IP Summary' section
 contents=bps.reports.getReportContents(runid=run_id)
 for section in contents:
@@ -116,13 +123,6 @@ for section in contents:
         for index in range(table_row_count):
             print ("%s: %s " % (tabledata[0]['Measurement'][index], tabledata[1]['Value'][index]) )
         break
-
-#export capture
-print ('Exporting the capture for the ports')
-for p in port_list:
-    print ('Exporting tescap%s.cap....' % p)
-    bps.topology.exportCapture('tescap%s.cap' % p ,\
-         {"port": p,"slot": slot_number,"dir": "both","size": 100,"start": 0, "sizetype": "megabytes",  "starttype": "megabytes" } )
 
 print("Waiting 5 secs") 
 time.sleep(5)

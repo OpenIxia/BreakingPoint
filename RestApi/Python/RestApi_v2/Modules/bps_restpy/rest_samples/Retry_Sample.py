@@ -15,7 +15,7 @@
 ########################################
 import time, sys, os, traceback
 # Add bps_restpy libpath *required if the library is not installed
-sys.path.append(os.path.join(os.path.dirname(__file__), r"../lib"))
+sys.path.append(os.path.join(os.path.dirname(__file__), r"../"))
 
 from restPyWrapper3 import *
 
@@ -28,13 +28,13 @@ from restPyWrapper3 import *
 # Demo script global variables
 canned_test_name = 'AppSim'
 #bps system info
-bps_system  = '10.36.83.70'
-bpsuser     = 'admin'
-bpspass     = 'admin'
+bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+bpsuser     = 'bps user'
+bpspass     = 'bps pass'
 testGroup = 1
 
 slot_number = 1
-port_list   = [1.0, 2.0]
+port_list   = ["1.0", "2.0"]
 l47_resource = [0 , 1]
 ########################################
 

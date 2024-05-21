@@ -29,15 +29,15 @@ rr_component_name     = "tempRR"
 test_name             = "Test_Model"
 
 #bps system info
-bps_system  = 'aps-m8400-us23051001.lbj.is.keysight.com'
-bpsuser     = 'admin'
-bpspass     = 'admin'
+bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+bpsuser     = 'bps user'
+bpspass     = 'bps pass'
 
 ########################################
 #session inactivity - introduced in BreakingPoint 9.38 
 inactivityTimeout = 180
 
-slot_number = 9
+slot_number = 3
 port_list   = [0, 1]
 
 ########################################

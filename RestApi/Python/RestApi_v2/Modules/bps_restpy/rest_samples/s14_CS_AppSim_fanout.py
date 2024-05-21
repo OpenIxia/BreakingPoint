@@ -28,13 +28,12 @@ from bps_restpy.bps import BPS,pp
 # Demo script global variables
 canned_test_name = 'AppSim'
 #bps system info
-bps_system  = '10.36.66.31'
-bpsuser     = 'admin'
-bpspass     = 'admin'
+bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+bpsuser     = 'bps user'
+bpspass     = 'bps pass'
 
-
-slot_number = 9
-port_list   = [0, 4]
+slot_number = 3
+port_list   = [0, 1]
 
 ########################################
 

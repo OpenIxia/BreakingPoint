@@ -15,7 +15,7 @@ class TlsAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block):
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block)
 
-### this BPS REST API wrapper is generated for version: 0.0.14+20231204.064306.06705625
+### this BPS REST API wrapper is generated for version: 10.00.1.33
 class BPS(object):
 
     def __init__(self, host, user, password, checkVersion=True):
@@ -25,24 +25,24 @@ class BPS(object):
         self.sessionId = None
         self.session = requests.Session()
         self.session.mount('https://', TlsAdapter())
-        self.clientVersion = '10.0'
+        self.clientVersion = BPS.__lver('10.00')
         self.serverVersions = None
         self.checkVersion = checkVersion
         self.printRequests = False
         self.topology = DataModelProxy(wrapper=self, name='topology')
-        self.statistics = DataModelProxy(wrapper=self, name='statistics')
         self.reports = DataModelProxy(wrapper=self, name='reports')
-        self.administration = DataModelProxy(wrapper=self, name='administration')
         self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
-        self.network = DataModelProxy(wrapper=self, name='network')
-        self.superflow = DataModelProxy(wrapper=self, name='superflow')
-        self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
-        self.strikes = DataModelProxy(wrapper=self, name='strikes')
-        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
+        self.administration = DataModelProxy(wrapper=self, name='administration')
         self.evasionProfile = DataModelProxy(wrapper=self, name='evasionProfile')
-        self.results = DataModelProxy(wrapper=self, name='results')
-        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
         self.capture = DataModelProxy(wrapper=self, name='capture')
+        self.superflow = DataModelProxy(wrapper=self, name='superflow')
+        self.network = DataModelProxy(wrapper=self, name='network')
+        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
+        self.results = DataModelProxy(wrapper=self, name='results')
+        self.statistics = DataModelProxy(wrapper=self, name='statistics')
+        self.strikes = DataModelProxy(wrapper=self, name='strikes')
+        self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
+        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
         self.remote = DataModelProxy(wrapper=self, name='remote')
 
     ### connect to the system
@@ -143,6 +143,17 @@ class BPS(object):
             return r.json()
         except:
             return r.content.decode() if r.content is not None else None
+
+    @staticmethod
+    def __lver(v, count=2):
+        x = [0, 0]
+        p = lambda s: int(s) if s.isdigit() else -1
+        try:
+            z = [a for a in map(p, (v.split(".")[:count]))]; x[:len(z)] = z
+            x[:len(z)] = z
+        except:
+            pass
+        return x
 
     ### OPTIONS request
     def __options(self, path):
@@ -545,6 +556,27 @@ class BPS(object):
         :param name (string): The name of the Network Neighborhood Config.
         """
         return self._wrapper.__post('/network/operations/delete', **{'name': name})
+
+    ### Exports a network neighborhood model in CSV format.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _network_operations_exportCSV(self, name, filepath):
+        """
+        Exports a network neighborhood model in CSV format.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the network model to be exported.
+        :param filepath (string): The local path where to save the exported object.
+        """
+        return self._wrapper.__export('/network/operations/exportCSV', **{'name': name, 'filepath': filepath})
+
+    ### Export a network neighborhood model in BPT format.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _network_operations_exportNetwork(self, name, attachments, filepath):
+        """
+        Export a network neighborhood model in BPT format.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the network to be exported.
+        :param attachments (bool): True if object attachments are needed.
+        :param filepath (string): The local path where to save the exported object.
+        """
+        return self._wrapper.__export('/network/operations/exportNetwork', **{'name': name, 'attachments': attachments, 'filepath': filepath})
 
     ### Imports a network neighborhood model, given as a file.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
@@ -1512,17 +1544,14 @@ class BPS(object):
         r = self.session.post(url='https://' + self.host + '/bps/api/v2/core/auth/login', data=json.dumps(loginData), headers={'content-type': 'application/json'}, verify=False)
         if(r.status_code == 200):
             self.serverVersions = self.__json_load(r)
-            apiServerVersion = 'N/A'
-            if self.serverVersions != None and 'apiServer' in self.serverVersions:
-                apiServerVersion = self.serverVersions['apiServer']
+            apiServerVersion = BPS.__lver(self.serverVersions['apiServer'] if self.serverVersions and 'apiServer' in self.serverVersions else '0.0')
             if self.checkVersion:
-                if not apiServerVersion.startswith(self.clientVersion):
-                    if self.serverVersions and apiServerVersion > self.clientVersion:
-                        self.logout()
-                        #self.printVersions()
-                        raise Exception('Keysight Python REST-API Wrapper version is older than the BPS server version.\nThis is not a supported combination.\nPlease use the updated version of the wrapper provided with BPS system.')
-                    if not self.serverVersions or apiServerVersion < self.clientVersion:
-                        print("Warning: Keysight Python REST-API Wrapper version is newer than the BPS server version.\nSome of the functionalities included in the Python wrapper might not be supported by the REST API.")
+                if apiServerVersion > self.clientVersion:
+                    self.logout()
+                    #self.printVersions()
+                    raise Exception('Keysight Python REST-API Wrapper version is older than the BPS server version.\nThis is not a supported combination.\nPlease use the updated version of the wrapper provided with BPS system.')
+                if apiServerVersion < self.clientVersion:
+                    print("Warning: Keysight Python REST-API Wrapper version is newer than the BPS server version.\nSome of the functionalities included in the Python wrapper might not be supported by the REST API.")
             #print('Login successful.\nWelcome %s. \nYour session id is %s' % (self.user, self.sessionId))
         else:
             raise Exception('Login failed.\ncode:%s, content:%s' % (r.status_code, r.content))
@@ -3815,6 +3844,10 @@ class DataModelMeta(type):
             },
             'operations': {
                 'delete': [{
+                }],
+                'exportCSV': [{
+                }],
+                'exportNetwork': [{
                 }],
                 'importNetwork': [{
                 }],
