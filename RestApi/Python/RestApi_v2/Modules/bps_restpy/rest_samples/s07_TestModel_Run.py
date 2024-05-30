@@ -29,11 +29,15 @@ rr_component_name     = "tempRR"
 test_name             = "Test_Model"
 
 #bps system info
-bps_system  = '10.36.66.31'
-bpsuser     = 'admin'
-bpspass     = 'admin'
+bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+bpsuser     = 'bps user'
+bpspass     = 'bps pass'
 
-slot_number = 9
+########################################
+#session inactivity - introduced in BreakingPoint 9.38 
+inactivityTimeout = 180
+
+slot_number = 3
 port_list   = [0, 1]
 
 ########################################
@@ -42,8 +46,16 @@ port_list   = [0, 1]
 ########################################
 # Login to BPS box
 bps = BPS(bps_system, bpsuser, bpspass)
-bps.login()
+bps.login(inactivityTimeout = inactivityTimeout)
 
+#session management 
+sessionList = bps.administration.sessions.list()
+for session in sessionList:
+    if  session['user'] == bpsuser:
+        print ( f'Current user : {bpsuser} session {session["session"]} with\
+                inactivity {session["inactivity"]} out of {session["inactivityTimeout"]} seconds')
+        ##if needed could be closed
+        #session.close(session=session["session"])
 
 ########################################
 print("Create a new test: ")

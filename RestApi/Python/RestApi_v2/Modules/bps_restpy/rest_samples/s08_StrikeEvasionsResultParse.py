@@ -40,11 +40,8 @@ new_evasion_profile                = 'Evasion_100Variants_' + new_testmodel_name
 bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
-bps_system  = '10.36.81.90'
-bpsuser     = 'admin'
-bpspass     = 'admin'
 
-slot_number = 1
+slot_number = 3
 port_list   = [0, 1]
 
 ########################################
@@ -70,10 +67,10 @@ def update_strikeResult(run_id, bps):
                 strike_variant = strike_name.split('-')[-1]
                 strike_name    = variantMatch.group(1)
                 #keep history of strike results allready analyzed
-                if not strikeVaiantResult.has_key(strike_name):
+                if strike_name not in strikeVaiantResult:
                     strikeVaiantResult[strike_name] = {'Allowed' : False}                
                 #print only if is a new entry 
-                if not strikeVaiantResult[strike_name].has_key(strike_variant):
+                if strike_variant not in strikeVaiantResult[strike_name]:
                     strikeVaiantResult[strike_name][strike_variant] = {'time' : strike_time, 'result' : strike_result}
                     if strike_result == 'Allowed':
                         strikeVaiantResult[strike_name]['Allowed'] = True

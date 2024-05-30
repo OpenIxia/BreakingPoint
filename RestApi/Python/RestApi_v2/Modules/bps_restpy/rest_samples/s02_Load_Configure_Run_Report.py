@@ -41,8 +41,7 @@ bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
 
-
-slot_number = 2
+slot_number = 3
 port_list   = [0, 1]
 
 ########################################
@@ -53,7 +52,7 @@ port_list   = [0, 1]
 bps = BPS(bps_system, bpsuser, bpspass)
 bps.login()
 print("Import a test")
-status = bps.testmodel.importModel(importAsTestName, bpt_filename_to_import, True)
+status = bps.testmodel.importModel(importAsTestName, os.path.join(os.path.dirname(__file__), bpt_filename_to_import), True)
 print("  %s " % status)
 
 print("Search for the imported test")
@@ -68,7 +67,7 @@ print("Test Name: %s"%name)
 
 ########################################
 print("Import a Network Config")
-status = bps.network.importNetwork(importAsNetworkName, networkfile_to_import, True)
+status = bps.network.importNetwork(importAsNetworkName, os.path.join(os.path.dirname(__file__),networkfile_to_import), True)
 print("  %s " % status)
 
 print("Search for the imported network config.")

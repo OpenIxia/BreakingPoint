@@ -28,7 +28,7 @@ bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
 
-slot_number = 1
+slot_number = 3
 port_list   = [0, 1]
 
 ########################################

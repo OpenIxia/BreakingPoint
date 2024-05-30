@@ -33,8 +33,7 @@ bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
 
-
-slot_number = 2
+slot_number = 1
 port_list   = [0, 1]
 
 ########################################
@@ -54,7 +53,6 @@ bps.testmodel.load(canned_test_name)
 print("Reserve Ports")
 for p in port_list:
     bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 2}])
-
 
 ########################################
 print("Run test and Get Stats:")

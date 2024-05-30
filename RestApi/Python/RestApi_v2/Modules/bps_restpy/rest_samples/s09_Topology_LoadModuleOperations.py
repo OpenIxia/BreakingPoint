@@ -19,14 +19,12 @@ import re
 # Demo script global variables
 
 #bps system info
-# bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-# bpsuser     = 'bps user'
-# bpspass     = 'bps pass'
-bps_system  = '10.36.66.31'
-bpsuser     = 'admin'
-bpspass     = 'admin'
+bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+bpsuser     = 'bps user'
+bpspass     = 'bps pass'
 
-slot_number = 6
+
+slot_number = 3
 port_list   = [0, 1]
 ########################################
 # utility procedure to wait for long operations like card change mode, reboot, speed change
@@ -113,7 +111,7 @@ while retry>0 and not slot['port']:
 
 print ('setCardFanout to BPS mode--')
 # The fan type represented by an integer id. For CloudStorm: 0(100G), 1(40G), 2(25G), 3(10G), 4(50G). For PerfectStorm 40G: 0(40G), 1(10G). For PerfectStorm 100G: 0(100G), 1(40G), 2(10G)
-r = bps.topology.setCardFanout(board=slot_number, fanid=1)
+r = bps.topology.setCardFanout(board=slot_number, fanid=0)
 waitForComplete(bps, r)
 
 bps.logout()

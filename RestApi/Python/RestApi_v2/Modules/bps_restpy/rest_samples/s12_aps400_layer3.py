@@ -5,13 +5,13 @@ Actions:
     2.  Create new test
     3.  Add components
     4.  Set component values
-    5.  Reserve ports
+    5.  Reserve ports and resources
     6.  Run Test
     7.  Get live stats
     8.  Wait for the test to finish
     9.  Get test result
     10. Get and print the Synopsis page from report
-    11. Unreserve ports
+    11. Unreserve ports resources
     12. Logout
 """
 
@@ -42,7 +42,7 @@ BPSPASS = 'bps pass'
 
 SLOT_NUMBER = 1
 GROUP_NUMBER = 2
-PORT_LIST = [0, 1]
+PORT_LIST = ["3.0", "4.0"]
 
 ########################################
 
@@ -109,6 +109,9 @@ for p in PORT_LIST:
     bps.topology.reserve(
         [{'group': GROUP_NUMBER, 'slot': SLOT_NUMBER, 'port': p, 'capture': True}], False)
 
+print("Reserve L23 resources...")
+for r in range(16):
+    bps.topology.reserveResource(group = GROUP_NUMBER, resourceId = r, resourceType = "l23")
 ########################################
 
 
@@ -177,7 +180,9 @@ for row in range(len(list(tabledata[0].values())[0])):
 for p in PORT_LIST:
     bps.topology.unreserve(
         [{'slot': SLOT_NUMBER, 'port': p}])
-
+print("\nReleasing resources...")
+for r in range(16):
+    bps.topology.releaseResource(group = GROUP_NUMBER, resourceId = r, resourceType = "l23")
 ########################################
 
 

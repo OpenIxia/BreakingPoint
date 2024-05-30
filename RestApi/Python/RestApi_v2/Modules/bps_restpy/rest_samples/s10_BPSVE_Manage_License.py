@@ -16,10 +16,11 @@ import sys
 import os
 # Add bps_restpy libpath *required if the library is not installed
 libpath = os.path.abspath(__file__+"/../../..")
+libpath = os.path.abspath(__file__+"/../../")
 sys.path.insert(0, libpath)
 import logging
 
-from restPyWrapper import BPS, pp
+from restPyWrapper3 import BPS, pp
 from bpsVELicense import BPSVELicenseManagement
 ########################################
 
@@ -31,10 +32,13 @@ from bpsVELicense import BPSVELicenseManagement
 bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
-
+bps_system  = '10.36.82.74'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 mainLicenseServer = '<License_Server_IP/HOSTNAME>'
+mainLicenseServer = "10.36.66.31"
 activationCode = '<Activation_Code>'
-
+activationCode = ""
 ########################################
 
 
