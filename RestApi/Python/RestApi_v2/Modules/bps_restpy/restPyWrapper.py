@@ -15,7 +15,7 @@ class TlsAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block):
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block)
 
-### this BPS REST API wrapper is generated for version: 10.00.1.33
+### this BPS REST API wrapper is generated for version: 10.30.134-noarch-bps
 class BPS(object):
 
     def __init__(self, host, user, password, checkVersion=True):
@@ -25,24 +25,24 @@ class BPS(object):
         self.sessionId = None
         self.session = requests.Session()
         self.session.mount('https://', TlsAdapter())
-        self.clientVersion = BPS.__lver('10.00')
+        self.clientVersion = BPS.__lver('10.30')
         self.serverVersions = None
         self.checkVersion = checkVersion
         self.printRequests = False
-        self.topology = DataModelProxy(wrapper=self, name='topology')
-        self.reports = DataModelProxy(wrapper=self, name='reports')
-        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
         self.administration = DataModelProxy(wrapper=self, name='administration')
-        self.evasionProfile = DataModelProxy(wrapper=self, name='evasionProfile')
-        self.capture = DataModelProxy(wrapper=self, name='capture')
-        self.superflow = DataModelProxy(wrapper=self, name='superflow')
         self.network = DataModelProxy(wrapper=self, name='network')
-        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
+        self.superflow = DataModelProxy(wrapper=self, name='superflow')
+        self.capture = DataModelProxy(wrapper=self, name='capture')
         self.results = DataModelProxy(wrapper=self, name='results')
-        self.statistics = DataModelProxy(wrapper=self, name='statistics')
-        self.strikes = DataModelProxy(wrapper=self, name='strikes')
-        self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
+        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
+        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
         self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
+        self.topology = DataModelProxy(wrapper=self, name='topology')
+        self.statistics = DataModelProxy(wrapper=self, name='statistics')
+        self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
+        self.reports = DataModelProxy(wrapper=self, name='reports')
+        self.strikes = DataModelProxy(wrapper=self, name='strikes')
+        self.evasionProfile = DataModelProxy(wrapper=self, name='evasionProfile')
         self.remote = DataModelProxy(wrapper=self, name='remote')
 
     ### connect to the system
@@ -208,6 +208,21 @@ class BPS(object):
         :param name (string): the name of the license file
         """
         return self._wrapper.__import('/administration/atiLicensing/operations/importAtiLicense', **{'filename': filename, 'name': name})
+
+    ### Schedules a time for Result Database purge, and an interval at which this will take place.
+    @staticmethod
+    def _administration_operations_configPurge(self, configPurge):
+        """
+        Schedules a time for Result Database purge, and an interval at which this will take place.
+        :param configPurge (object): 
+               object of object with fields
+                      name (string): 
+                      purgeTime (string): 
+                      interval (string): 
+                      testsPriority (bool): 
+                      purgeEnabled (bool): 
+        """
+        return self._wrapper.__post('/administration/operations/configPurge', **{'configPurge': configPurge})
 
     ### Exports everything including test models, network configurations and others from system.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
@@ -548,6 +563,82 @@ class BPS(object):
         """
         return self._wrapper.__post('/loadProfile/operations/saveAs', **{'name': name})
 
+    ### null
+    @staticmethod
+    def _loadProfile_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        :param searchString (string): Search application profile name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by.
+        :param sortorder (string): The sort order (ascending/descending)
+        :return loadprofile (list): 
+               list of object with fields
+                      name (string): 
+                      label (string): 
+                      createdBy (string): 
+                      createdOn (string): 
+                      revision (number): 
+                      description (string): 
+        """
+        return self._wrapper.__post('/loadProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Search dynamic profiles operation. Used in searching live profiles used by Live Appsim component.
+    @staticmethod
+    def _loadProfile_operations_searchDynamic(self, searchString, limit='25', sort='name', sortorder='ascending', offset='0'):
+        """
+        Search dynamic profiles operation. Used in searching live profiles used by Live Appsim component.
+        :param searchString (string): Live profile string name to search.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by.
+        :param sortorder (string): The sort order (ascending/descending)
+        :param offset (string): The offset to begin from
+        :return loadprofile (list): 
+               list of object with fields
+                      name (string): 
+        """
+        return self._wrapper.__post('/loadProfile/operations/searchDynamic', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder, 'offset': offset})
+
+    ### null
+    @staticmethod
+    def _network_networkModel_path_advanced_operations_deletePathFile(self, file):
+        """
+        :param file (string): The file name to delete.
+        """
+        return self._wrapper.__post('/network/networkModel/path_advanced/operations/deletePathFile', **{'file': file})
+
+    ### Imports a file resource and stores it in the dedicated storage path. Supported file extension: .csvThis operation can not be executed from the RESTApi Browser, and it needs to be executed from a remote system through a REST call
+    @staticmethod
+    def _network_networkModel_path_advanced_operations_importPathFile(self, name, filename, force):
+        """
+        Imports a file resource and stores it in the dedicated storage path. Supported file extension: .csvThis operation can not be executed from the RESTApi Browser, and it needs to be executed from a remote system through a REST call
+        :param name (string): The name of the object being imported
+        :param filename (string): The file path containing the object to be imported. File extension: .csv
+        :param force (bool): Force to import the file and the object having the same name will be replaced.
+        """
+        return self._wrapper.__import('/network/networkModel/path_advanced/operations/importPathFile', **{'name': name, 'filename': filename, 'force': force})
+
+    ### null
+    @staticmethod
+    def _network_networkModel_path_advanced_operations_listPathFile(self, recurse=True, root='/var/ipc/paths'):
+        """
+        :param recurse (bool): 
+        :param root (string): 
+        :return files (object): 
+        """
+        return self._wrapper.__post('/network/networkModel/path_advanced/operations/listPathFile', **{'recurse': recurse, 'root': root})
+
+    ### Adds the given network to the list of most recently opened network configurations.
+    @staticmethod
+    def _network_operations_addOpenRecent(self, testName):
+        """
+        Adds the given network to the list of most recently opened network configurations.
+        :param testName (object): The test model config
+               object of object with fields
+                      objectType (string): For network config use: neighborhood
+                      name (string): 
+        """
+        return self._wrapper.__post('/network/operations/addOpenRecent', **{'testName': testName})
+
     ### Deletes a given Network Neighborhood Config from the database.
     @staticmethod
     def _network_operations_delete(self, name):
@@ -577,6 +668,18 @@ class BPS(object):
         :param filepath (string): The local path where to save the exported object.
         """
         return self._wrapper.__export('/network/operations/exportNetwork', **{'name': name, 'attachments': attachments, 'filepath': filepath})
+
+    ### Get the most recently opened network configurations
+    @staticmethod
+    def _network_operations_getRecent(self):
+        """
+        Get the most recently opened network configurations
+        :return recentlyOpened (list): 
+               list of object with fields
+                      objectType (string): 
+                      name (string): 
+        """
+        return self._wrapper.__post('/network/operations/getRecent', **{})
 
     ### Imports a network neighborhood model, given as a file.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
@@ -616,6 +719,15 @@ class BPS(object):
         :param template (string): The name of the network neighborhood template
         """
         return self._wrapper.__post('/network/operations/load', **{'template': template})
+
+    ### null
+    @staticmethod
+    def _network_operations_networkInfo(self, name):
+        """
+        :param name (string): 
+        :return results (object): 
+        """
+        return self._wrapper.__post('/network/operations/networkInfo', **{'name': name})
 
     ### Creates a new Network Neighborhood configuration with no name. The template value must remain empty.
     @staticmethod
@@ -683,11 +795,11 @@ class BPS(object):
 
     ### Disconnects from a remote chassis in order to release remote resources.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
-    def _remote_operations_disconnectChassis(self, address, port):
+    def _remote_operations_disconnectChassis(self, address, port=None):
         """
         Disconnects from a remote chassis in order to release remote resources.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
         :param address (string): Remote chassis address.
-        :param port (number): Remote connection port.
+        :param port (number): Remote connection port. This port has an internal usage. Can be let unset.
         """
         return self._wrapper.__post('/remote/operations/disconnectChassis', **{'address': address, 'port': port})
 
@@ -929,6 +1041,7 @@ class BPS(object):
     def _superflow_actions_operations_getActionChoices(self, id):
         """
         :param id (number): the flow id
+        :return action (object): 
         """
         return self._wrapper.__post('/superflow/actions/operations/getActionChoices', **{'id': id})
 
@@ -1098,13 +1211,25 @@ class BPS(object):
 
     ### Lists all the component presets names.
     @staticmethod
+    def _testmodel_component_operations_getComponentPreset(self, name='None'):
+        """
+        Lists all the component presets names.
+        :param name (string): The Component type.
+        All the component types are listed under the node testComponentTypesDescription.
+        If this argument is not set, all the presets will be listed.
+        :return component (object): 
+        """
+        return self._wrapper.__post('/testmodel/component/operations/getComponentPreset', **{'name': name})
+
+    ### Lists all the component presets names.
+    @staticmethod
     def _testmodel_component_operations_getComponentPresetNames(self, type='None'):
         """
         Lists all the component presets names.
         :param type (string): The Component type.
         All the component types are listed under the node testComponentTypesDescription.
         If this argument is not set, all the presets will be listed.
-        :return result (list): 
+        :return component (list): 
                list of object with fields
                       id (string): 
                       label (string): 
@@ -1124,6 +1249,19 @@ class BPS(object):
         :param active (bool): Set component enable (by default is active) or disable
         """
         return self._wrapper.__post('/testmodel/operations/add', **{'name': name, 'component': component, 'type': type, 'active': active})
+
+    ### Adds the given test to the list of most recently opened tests.
+    @staticmethod
+    def _testmodel_operations_addOpenRecent(self, testName):
+        """
+        Adds the given test to the list of most recently opened tests.
+        :param testName (object): The test model config
+               object of object with fields
+                      objectType (string): For test use: executable
+                      name (string): 
+                      type (string): TEST / PLAN / MULTIBOX
+        """
+        return self._wrapper.__post('/testmodel/operations/addOpenRecent', **{'testName': testName})
 
     ### Clones a component in the current working Test Model
     @staticmethod
@@ -1157,6 +1295,30 @@ class BPS(object):
         """
         return self._wrapper.__export('/testmodel/operations/exportModel', **{'name': name, 'attachments': attachments, 'filepath': filepath, 'runid': runid})
 
+    ### null
+    @staticmethod
+    def _testmodel_operations_flowExceptions(self, runid, limit, offset):
+        """
+        :param runid (number): Test RUN ID
+        :param limit (number): The limit of rows to return
+        :param offset (number): The start row of the returned list
+        :return flowException (object): 
+        """
+        return self._wrapper.__post('/testmodel/operations/flowExceptions', **{'runid': runid, 'limit': limit, 'offset': offset})
+
+    ### Get the most recently opened tests
+    @staticmethod
+    def _testmodel_operations_getRecent(self):
+        """
+        Get the most recently opened tests
+        :return recentlyOpened (list): 
+               list of object with fields
+                      objectType (string): 
+                      name (string): 
+                      dut (string): 
+        """
+        return self._wrapper.__post('/testmodel/operations/getRecent', **{})
+
     ### Imports a test model, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
     def _testmodel_operations_importModel(self, name, filename, force):
@@ -1170,12 +1332,13 @@ class BPS(object):
 
     ### Load an existing test model template.
     @staticmethod
-    def _testmodel_operations_load(self, template):
+    def _testmodel_operations_load(self, template, validate=False):
         """
         Load an existing test model template.
         :param template (string): The name of the template testmodel
+        :param validate (bool): In order to validate or not the test model, to get proper values for shared component settings
         """
-        return self._wrapper.__post('/testmodel/operations/load', **{'template': template})
+        return self._wrapper.__post('/testmodel/operations/load', **{'template': template, 'validate': validate})
 
     ### Creates a new Test Model
     @staticmethod
@@ -1188,13 +1351,15 @@ class BPS(object):
 
     ### Retrieves the real time statistics for the running test, by giving the run id.
     @staticmethod
-    def _testmodel_operations_realTimeStats(self, runid, rtsgroup, numSeconds, numDataPoints=1):
+    def _testmodel_operations_realTimeStats(self, runid, rtsgroup, numSeconds, numDataPoints=1, aggregate=None, protocol=None):
         """
         Retrieves the real time statistics for the running test, by giving the run id.
         :param runid (number): Test RUN ID
         :param rtsgroup (string): Real Time Stats group name. Values for this can be get from 'statistics' node, inside 'statNames' from each component at 'realtime Group' key/column. Examples: 'l7STats', 'all', 'bpslite', 'summary', 'clientStats' etc.Instead of a group name, it can be used a statistic name and the usage is: `fields:<statname>`Example: 'fields:txFrames' or 'fields:ethTxFrames, appIncomplete, rxFrameRate, etc'. 
         :param numSeconds (number): The number of seconds.  If negative, means counting from the end. Example -1 means the last second from the moment of request.
         :param numDataPoints (number): The number of data points, or set of values, on server side. The default is 1. In case of missing stats,because of requesting to many stats per second in real time,increase the value (grater than 1)
+        :param aggregate (string): The aggregation mode. It can be left empty or set to 'none' and a aggragated valuewill be returned or can be set to retrieve values for each interface of protocol (set to 'protocol'/'interface')
+        :param protocol (list): The superflow protocol/protocols. It is a filter parameter that can be set only if 'aggregate'='protocol'.It can be left empty to get values for all the existing protocols)or set a list of protocols in order to retrieve values exclusively for those.
         :return result (object): 
                object of object with fields
                       testStuck (bool): 
@@ -1202,7 +1367,7 @@ class BPS(object):
                       progress (number): 
                       values (string): 
         """
-        return self._wrapper.__post('/testmodel/operations/realTimeStats', **{'runid': runid, 'rtsgroup': rtsgroup, 'numSeconds': numSeconds, 'numDataPoints': numDataPoints})
+        return self._wrapper.__post('/testmodel/operations/realTimeStats', **{'runid': runid, 'rtsgroup': rtsgroup, 'numSeconds': numSeconds, 'numDataPoints': numDataPoints, 'aggregate': aggregate, 'protocol': protocol})
 
     ### Removes a component from the current working Test Model.
     @staticmethod
@@ -1271,6 +1436,27 @@ class BPS(object):
         :param runid (number): Test RUN ID
         """
         return self._wrapper.__post('/testmodel/operations/stopRun', **{'runid': runid})
+
+    ### Returns main groups of statistics for a single BPS Test Component. These groups can be used then in requesting statistics values from the history of a test run.
+    @staticmethod
+    def _testmodel_operations_testComponentDefinition(self, name, dynamicEnums=True, includeOutputs=True):
+        """
+        Returns main groups of statistics for a single BPS Test Component. These groups can be used then in requesting statistics values from the history of a test run.
+        :param name (string): BPS Component name. This argument is actually the component type which can be get from 'statistics' table
+        :param dynamicEnums (bool): 
+        :param includeOutputs (bool): 
+        :return results (object): 
+        """
+        return self._wrapper.__post('/testmodel/operations/testComponentDefinition', **{'name': name, 'dynamicEnums': dynamicEnums, 'includeOutputs': includeOutputs})
+
+    ### null
+    @staticmethod
+    def _testmodel_operations_validate(self, group):
+        """
+        :param group (string): The reservation group
+        :return check (object): 
+        """
+        return self._wrapper.__post('/testmodel/operations/validate', **{'group': group})
 
     ### Adds a note to given port.
     @staticmethod
@@ -1380,16 +1566,18 @@ class BPS(object):
         """
         return self._wrapper.__post('/topology/operations/releaseResources', **{'count': count, 'resourceType': resourceType, 'slotId': slotId})
 
-    ### null
+    ### Reserves one or more ports.It requires the following: group, port id, slot id ,capture mode and force mode.In case of remote chassis, be aware that the slot's id is changed after attach (ex: from 9 to 109), in order to get the new value a GET request over the topology will retrieve the new updated slot info.
     @staticmethod
     def _topology_operations_reserve(self, reservation, force=False):
         """
-        :param reservation (list): Reserves one or more ports
+        Reserves one or more ports.It requires the following: group, port id, slot id ,capture mode and force mode.In case of remote chassis, be aware that the slot's id is changed after attach (ex: from 9 to 109), in order to get the new value a GET request over the topology will retrieve the new updated slot info.
+        :param reservation (list): List of ports to reserve.
                list of object with fields
                       group (number): 
-                      slot (number): 
+                      slot (number): Slot number. In case of a remote chassis the slot's 'id' value is changed. A new GET requests can retrieve the topology slots new info.
                       port (string): 
                       capture (bool): 
+                      number (number): The index to be reserved with
         :param force (bool): 
         """
         return self._wrapper.__post('/topology/operations/reserve', **{'reservation': reservation, 'force': force})
@@ -1603,6 +1791,8 @@ class DataModelMeta(type):
                 }
             },
             'operations': {
+                'configPurge': [{
+                }],
                 'exportAllTests': [{
                 }],
                 'importAllTests': [{
@@ -1677,6 +1867,14 @@ class DataModelMeta(type):
                 },
                 'lockedBy': {
                 },
+                'meta': {
+                    'info': [{
+                        'name': {
+                        },
+                        'value': {
+                        }
+                    }]
+                },
                 'revision': {
                 },
                 'softwareUpdate': {
@@ -1738,6 +1936,14 @@ class DataModelMeta(type):
             },
             'lockedBy': {
             },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
+            },
             'name': {
             },
             'operations': {
@@ -1788,6 +1994,14 @@ class DataModelMeta(type):
                 'label': {
                 },
                 'lockedBy': {
+                },
+                'meta': {
+                    'info': [{
+                        'name': {
+                        },
+                        'value': {
+                        }
+                    }]
                 },
                 'name': {
                 },
@@ -1843,6 +2057,14 @@ class DataModelMeta(type):
             'label': {
             },
             'lockedBy': {
+            },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
             },
             'name': {
             },
@@ -2384,6 +2606,14 @@ class DataModelMeta(type):
             },
             'lockedBy': {
             },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
+            },
             'name': {
             },
             'operations': {
@@ -2418,6 +2648,14 @@ class DataModelMeta(type):
             },
             'lockedBy': {
             },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
+            },
             'name': {
             },
             'operations': {
@@ -2430,6 +2668,10 @@ class DataModelMeta(type):
                 'save': [{
                 }],
                 'saveAs': [{
+                }],
+                'search': [{
+                }],
+                'searchDynamic': [{
                 }]
             },
             'phase': [{
@@ -2468,6 +2710,14 @@ class DataModelMeta(type):
                 'label': {
                 },
                 'lockedBy': {
+                },
+                'meta': {
+                    'info': [{
+                        'name': {
+                        },
+                        'value': {
+                        }
+                    }]
                 },
                 'name': {
                 },
@@ -2599,6 +2849,14 @@ class DataModelMeta(type):
             'label': {
             },
             'lockedBy': {
+            },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
             },
             'modelDefinition': {
             },
@@ -2912,6 +3170,10 @@ class DataModelMeta(type):
                     },
                     'netmask': {
                     },
+                    'peer_ip_address': {
+                    },
+                    'remote_fixed': {
+                    },
                     'vni_base': {
                     },
                     'vni_count': {
@@ -3116,7 +3378,11 @@ class DataModelMeta(type):
                     },
                     'ip_address': {
                     },
+                    'peer_ip_address': {
+                    },
                     'prefix_length': {
+                    },
+                    'remote_fixed': {
                     },
                     'vni_base': {
                     },
@@ -3132,6 +3398,8 @@ class DataModelMeta(type):
                     },
                     'gateway_ip_address': {
                     },
+                    'gateway_mac_address': {
+                    },
                     'id': {
                     },
                     'ip_address': {
@@ -3145,8 +3413,6 @@ class DataModelMeta(type):
                     'proxy': {
                     },
                     'tags': {
-                    },
-                    'tep_vni_mapping': {
                     }
                 }],
                 'ip6_router': [{
@@ -3314,6 +3580,8 @@ class DataModelMeta(type):
                     },
                     'gateway_ip_address': {
                     },
+                    'gateway_mac_address': {
+                    },
                     'id': {
                     },
                     'ip_address': {
@@ -3327,8 +3595,6 @@ class DataModelMeta(type):
                     'proxy': {
                     },
                     'tags': {
-                    },
-                    'tep_vni_mapping': {
                     }
                 }],
                 'ip_router': [{
@@ -3563,6 +3829,14 @@ class DataModelMeta(type):
                     'file': {
                     },
                     'id': {
+                    },
+                    'operations': {
+                        'deletePathFile': [{
+                        }],
+                        'importPathFile': [{
+                        }],
+                        'listPathFile': [{
+                        }]
                     },
                     'source_container': {
                     },
@@ -3843,17 +4117,1297 @@ class DataModelMeta(type):
                 }]
             },
             'operations': {
+                'addOpenRecent': [{
+                }],
                 'delete': [{
                 }],
                 'exportCSV': [{
                 }],
                 'exportNetwork': [{
                 }],
+                'getRecent': [{
+                }],
                 'importNetwork': [{
                 }],
                 'list': [{
                 }],
                 'load': [{
+                }],
+                'networkInfo': [{
+                    'author': {
+                    },
+                    'clazz': {
+                    },
+                    'createdBy': {
+                    },
+                    'createdOn': {
+                    },
+                    'description': {
+                    },
+                    'interfaceCount': {
+                    },
+                    'label': {
+                    },
+                    'lockedBy': {
+                    },
+                    'meta': {
+                        'info': [{
+                            'name': {
+                            },
+                            'value': {
+                            }
+                        }]
+                    },
+                    'name': {
+                    },
+                    'networkModel': {
+                        'dhcpv6c_cfg': [{
+                            'dhcp6c_duid_type': {
+                            },
+                            'dhcp6c_ia_t1': {
+                            },
+                            'dhcp6c_ia_t2': {
+                            },
+                            'dhcp6c_ia_type': {
+                            },
+                            'dhcp6c_initial_srate': {
+                            },
+                            'dhcp6c_max_outstanding': {
+                            },
+                            'dhcp6c_renew_timer': {
+                            },
+                            'dhcp6c_req_opts_config': {
+                            },
+                            'dhcp6c_tout_and_retr_config': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'dhcpv6c_req_opts_cfg': [{
+                            'dhcpv6v_req_dns_list': {
+                            },
+                            'dhcpv6v_req_dns_resolvers': {
+                            },
+                            'dhcpv6v_req_preference': {
+                            },
+                            'dhcpv6v_req_server_id': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'dhcpv6c_tout_and_retr_cfg': [{
+                            'dhcp6c_inforeq_attempts': {
+                            },
+                            'dhcp6c_initial_inforeq_tout': {
+                            },
+                            'dhcp6c_initial_rebind_tout': {
+                            },
+                            'dhcp6c_initial_release_tout': {
+                            },
+                            'dhcp6c_initial_renew_tout': {
+                            },
+                            'dhcp6c_initial_req_tout': {
+                            },
+                            'dhcp6c_initial_sol_tout': {
+                            },
+                            'dhcp6c_max_inforeq_tout': {
+                            },
+                            'dhcp6c_max_rebind_tout': {
+                            },
+                            'dhcp6c_max_renew_tout': {
+                            },
+                            'dhcp6c_max_req_tout': {
+                            },
+                            'dhcp6c_max_sol_tout': {
+                            },
+                            'dhcp6c_release_attempts': {
+                            },
+                            'dhcp6c_req_attempts': {
+                            },
+                            'dhcp6c_sol_attempts': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ds_lite_aftr': [{
+                            'b4_count': {
+                            },
+                            'b4_ip_address': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'ipv6_addr_alloc_mode': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'ds_lite_b4': [{
+                            'aftr_addr': {
+                            },
+                            'aftr_count': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'host_ip_addr_alloc_mode': {
+                            },
+                            'host_ip_base_addr': {
+                            },
+                            'hosts_ip_increment': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'ipv6_addr_alloc_mode': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'enodeb': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enodebs': [{
+                                'enodebCount': {
+                                },
+                                'ip_address': {
+                                },
+                                'mme_ip_address': {
+                                }
+                            }],
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'netmask': {
+                            },
+                            'plmn': {
+                            },
+                            'psn': {
+                            },
+                            'psn_netmask': {
+                            },
+                            'sctp_over_udp': {
+                            },
+                            'sctp_sport': {
+                            }
+                        }],
+                        'enodeb6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enodebs': [{
+                                'enodebCount': {
+                                },
+                                'ip_address': {
+                                },
+                                'mme_ip_address': {
+                                }
+                            }],
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'sctp_over_udp': {
+                            },
+                            'sctp_sport': {
+                            }
+                        }],
+                        'enodeb_mme': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enodebs': [{
+                                'default_container': {
+                                },
+                                'enodebCount': {
+                                },
+                                'gateway_ip_address': {
+                                },
+                                'ip_address': {
+                                },
+                                'netmask': {
+                                }
+                            }],
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_allocation_mode': {
+                            },
+                            'mme_ip_address': {
+                            },
+                            'netmask': {
+                            },
+                            'pgw_ip_address': {
+                            },
+                            'plmn': {
+                            },
+                            'sgw_ip_address': {
+                            },
+                            'ue_address': {
+                            }
+                        }],
+                        'enodeb_mme6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enodebs': [{
+                                'default_container': {
+                                },
+                                'enodebCount': {
+                                },
+                                'gateway_ip_address': {
+                                },
+                                'ip_address': {
+                                },
+                                'prefix_length': {
+                                }
+                            }],
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_allocation_mode': {
+                            },
+                            'mme_ip_address': {
+                            },
+                            'pgw_ip_address': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'sgw_ip_address': {
+                            },
+                            'ue_address': {
+                            }
+                        }],
+                        'enodeb_mme_sgw': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_allocation_mode': {
+                            },
+                            'mme_ip_address': {
+                            },
+                            'netmask': {
+                            },
+                            'pgw_ip_address': {
+                            },
+                            'plmn': {
+                            },
+                            'ue_address': {
+                            }
+                        }],
+                        'enodeb_mme_sgw6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_allocation_mode': {
+                            },
+                            'mme_ip_address': {
+                            },
+                            'pgw_ip_address': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'ue_address': {
+                            }
+                        }],
+                        'geneve_tep': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'header_options': [{
+                                'geneve_data': {
+                                },
+                                'geneve_option_class': {
+                                },
+                                'geneve_type': {
+                                }
+                            }],
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'netmask': {
+                            },
+                            'peer_ip_address': {
+                            },
+                            'remote_fixed': {
+                            },
+                            'vni_base': {
+                            },
+                            'vni_count': {
+                            }
+                        }],
+                        'ggsn': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ggsn_advertised_control_ip_address': {
+                            },
+                            'ggsn_advertised_data_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'ggsn6': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ggsn_advertised_control_ip_address': {
+                            },
+                            'ggsn_advertised_data_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'global_config': [{
+                            'gtp': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'interface': [{
+                            'description': {
+                            },
+                            'duplicate_mac_address': {
+                            },
+                            'id': {
+                            },
+                            'ignore_pause_frames': {
+                            },
+                            'impairments': {
+                                'corrupt_chksum': {
+                                },
+                                'corrupt_gt256': {
+                                },
+                                'corrupt_lt256': {
+                                },
+                                'corrupt_lt64': {
+                                },
+                                'corrupt_rand': {
+                                },
+                                'drop': {
+                                },
+                                'frack': {
+                                },
+                                'rate': {
+                                }
+                            },
+                            'mac_address': {
+                            },
+                            'mtu': {
+                            },
+                            'number': {
+                            },
+                            'packet_filter': {
+                                'dest_ip': {
+                                },
+                                'dest_port': {
+                                },
+                                'filter': {
+                                },
+                                'not_dest_ip': {
+                                },
+                                'not_dest_port': {
+                                },
+                                'not_src_ip': {
+                                },
+                                'not_src_port': {
+                                },
+                                'not_vlan': {
+                                },
+                                'src_ip': {
+                                },
+                                'src_port': {
+                                },
+                                'vlan': {
+                                }
+                            },
+                            'use_vnic_mac_address': {
+                            },
+                            'vlan_key': {
+                            }
+                        }],
+                        'ip6_dhcp_server': [{
+                            'default_container': {
+                            },
+                            'default_lease_time': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ia_type': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'max_lease_time': {
+                            },
+                            'offer_lifetime': {
+                            },
+                            'pool_base_address': {
+                            },
+                            'pool_dns_address1': {
+                            },
+                            'pool_dns_address2': {
+                            },
+                            'pool_prefix_length': {
+                            },
+                            'pool_size': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'ip6_dns_config': [{
+                            'dns_domain': {
+                            },
+                            'dns_server_address': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ip6_dns_proxy': [{
+                            'dns_proxy_ip_base': {
+                            },
+                            'dns_proxy_ip_count': {
+                            },
+                            'dns_proxy_src_ip_base': {
+                            },
+                            'dns_proxy_src_ip_count': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ip6_external_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip6_geneve_tep': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'header_options': [{
+                                'geneve_data': {
+                                },
+                                'geneve_option_class': {
+                                },
+                                'geneve_type': {
+                                }
+                            }],
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'peer_ip_address': {
+                            },
+                            'prefix_length': {
+                            },
+                            'remote_fixed': {
+                            },
+                            'vni_base': {
+                            },
+                            'vni_count': {
+                            }
+                        }],
+                        'ip6_mac_static_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'gateway_mac_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'mac_address': {
+                            },
+                            'mtu': {
+                            },
+                            'prefix_length': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip6_router': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'hosts_ip_alloc_container': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'ip6_static_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'dns_proxy': {
+                            },
+                            'enable_stats': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'host_ipv6_addr_alloc_mode': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'ip_alloc_container': {
+                            },
+                            'ip_selection_type': {
+                            },
+                            'maxmbps_per_host': {
+                            },
+                            'mpls_list': [{
+                                'id': {
+                                },
+                                'value': {
+                                }
+                            }],
+                            'prefix_length': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip_dhcp_hosts': [{
+                            'accept_local_offers_only': {
+                            },
+                            'allocation_rate': {
+                            },
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns_proxy': {
+                            },
+                            'enable_stats': {
+                            },
+                            'id': {
+                            },
+                            'ldap': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip_dhcp_server': [{
+                            'accept_local_requests_only': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_time': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'ip_dns_config': [{
+                            'dns_domain': {
+                            },
+                            'dns_server_address': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ip_dns_proxy': [{
+                            'dns_proxy_ip_base': {
+                            },
+                            'dns_proxy_ip_count': {
+                            },
+                            'dns_proxy_src_ip_base': {
+                            },
+                            'dns_proxy_src_ip_count': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ip_external_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip_ldap_server': [{
+                            'auth_timeout': {
+                            },
+                            'authentication_rate': {
+                            },
+                            'dn_fixed_val': {
+                            },
+                            'id': {
+                            },
+                            'ldap_password_start_tag': {
+                            },
+                            'ldap_server_address': {
+                            },
+                            'ldap_user_count': {
+                            },
+                            'ldap_user_max': {
+                            },
+                            'ldap_user_min': {
+                            },
+                            'ldap_username_start_tag': {
+                            }
+                        }],
+                        'ip_mac_static_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'gateway_mac_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'mac_address': {
+                            },
+                            'mtu': {
+                            },
+                            'netmask': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip_router': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'ip_static_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'dns_proxy': {
+                            },
+                            'enable_stats': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'ip_selection_type': {
+                            },
+                            'ldap': {
+                            },
+                            'maxmbps_per_host': {
+                            },
+                            'mpls_list': [{
+                                'id': {
+                                },
+                                'value': {
+                                }
+                            }],
+                            'netmask': {
+                            },
+                            'proxy': {
+                            },
+                            'psn': {
+                            },
+                            'psn_netmask': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ipsec_config': [{
+                            'debug_log': {
+                            },
+                            'dpd_delay': {
+                            },
+                            'dpd_enabled': {
+                            },
+                            'dpd_timeout': {
+                            },
+                            'enable_xauth': {
+                            },
+                            'esp_auth_alg': {
+                            },
+                            'esp_encr_alg': {
+                            },
+                            'id': {
+                            },
+                            'ike_1to1': {
+                            },
+                            'ike_auth_alg': {
+                            },
+                            'ike_dh': {
+                            },
+                            'ike_encr_alg': {
+                            },
+                            'ike_lifetime': {
+                            },
+                            'ike_mode': {
+                            },
+                            'ike_pfs': {
+                            },
+                            'ike_prf_alg': {
+                            },
+                            'ike_version': {
+                            },
+                            'init_rate': {
+                            },
+                            'initial_contact': {
+                            },
+                            'ipsec_lifetime': {
+                            },
+                            'left_id': {
+                            },
+                            'max_outstanding': {
+                            },
+                            'nat_traversal': {
+                            },
+                            'psk': {
+                            },
+                            'rekey_margin': {
+                            },
+                            'retrans_interval': {
+                            },
+                            'right_id': {
+                            },
+                            'setup_timeout': {
+                            },
+                            'wildcard_tsr': {
+                            },
+                            'xauth_password': {
+                            },
+                            'xauth_username': {
+                            }
+                        }],
+                        'ipsec_router': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ike_peer_ip_address': {
+                            },
+                            'ip_address': {
+                            },
+                            'ipsec': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'mme_sgw_pgw': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'netmask': {
+                            },
+                            'plmn': {
+                            },
+                            'sgw_advertised_pgw': {
+                            },
+                            'sgw_advertised_sgw': {
+                            },
+                            'ue_info': {
+                            }
+                        }],
+                        'mme_sgw_pgw6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'sgw_advertised_pgw': {
+                            },
+                            'sgw_advertised_sgw': {
+                            },
+                            'ue_info': {
+                            }
+                        }],
+                        'mobility_session_info': [{
+                            'access_point_name': {
+                            },
+                            'bearers': [{
+                                'qci_label': {
+                                }
+                            }],
+                            'id': {
+                            },
+                            'initiated_dedicated_bearers': {
+                            },
+                            'password': {
+                            },
+                            'username': {
+                            }
+                        }],
+                        'mpls_settings': [{
+                            'id': {
+                            },
+                            'mpls_tags': [{
+                                'mpls_exp': {
+                                },
+                                'mpls_label': {
+                                },
+                                'mpls_ttl': {
+                                }
+                            }]
+                        }],
+                        'path_advanced': [{
+                            'destination_container': {
+                            },
+                            'destination_port_algorithm': {
+                            },
+                            'destination_port_base': {
+                            },
+                            'destination_port_count': {
+                            },
+                            'enable_external_file': {
+                            },
+                            'file': {
+                            },
+                            'id': {
+                            },
+                            'source_container': {
+                            },
+                            'source_port_algorithm': {
+                            },
+                            'source_port_base': {
+                            },
+                            'source_port_count': {
+                            },
+                            'stream_group': {
+                            },
+                            'tags': {
+                            },
+                            'tuple_limit': {
+                            },
+                            'xor_bits': {
+                            }
+                        }],
+                        'path_basic': [{
+                            'destination_container': {
+                            },
+                            'id': {
+                            },
+                            'source_container': {
+                            }
+                        }],
+                        'pgw': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'netmask': {
+                            },
+                            'plmn': {
+                            }
+                        }],
+                        'pgw6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'plmn': [{
+                            'description': {
+                            },
+                            'id': {
+                            },
+                            'mcc': {
+                            },
+                            'mnc': {
+                            }
+                        }],
+                        'sgsn': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ggsn_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'sgsn6': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ggsn_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'sgw_pgw': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'netmask': {
+                            },
+                            'plmn': {
+                            },
+                            'sgw_advertised_pgw': {
+                            },
+                            'sgw_advertised_sgw': {
+                            }
+                        }],
+                        'sgw_pgw6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'sgw_advertised_pgw': {
+                            },
+                            'sgw_advertised_sgw': {
+                            }
+                        }],
+                        'sixrd_ce': [{
+                            'br_ip_address': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enable_stats': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'hosts_per_ce': {
+                            },
+                            'id': {
+                            },
+                            'ip4_mask_length': {
+                            },
+                            'ip_address': {
+                            },
+                            'netmask': {
+                            },
+                            'sixrd_prefix': {
+                            },
+                            'sixrd_prefix_length': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'slaac_cfg': [{
+                            'enable_dad': {
+                            },
+                            'fallback_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'stateless_dhcpv6c_cfg': {
+                            },
+                            'use_rand_addr': {
+                            }
+                        }],
+                        'ue': [{
+                            'allocation_rate': {
+                            },
+                            'behind_snapt': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enable_stats': {
+                            },
+                            'id': {
+                            },
+                            'mobility_action': {
+                            },
+                            'mobility_interval_ms': {
+                            },
+                            'mobility_with_traffic': {
+                            },
+                            'proxy': {
+                            },
+                            'request_ipv6': {
+                            },
+                            'tags': {
+                            },
+                            'ue_info': {
+                            }
+                        }],
+                        'ue_info': [{
+                            'count': {
+                            },
+                            'id': {
+                            },
+                            'imei_base': {
+                            },
+                            'imsi_base': {
+                            },
+                            'maxmbps_per_ue': {
+                            },
+                            'mobility_session_infos': [{
+                                'id': {
+                                },
+                                'value': {
+                                }
+                            }],
+                            'msisdn_base': {
+                            },
+                            'operator_variant': {
+                            },
+                            'secret_key': {
+                            },
+                            'secret_key_step': {
+                            }
+                        }],
+                        'vlan': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'description': {
+                            },
+                            'duplicate_mac_address': {
+                            },
+                            'id': {
+                            },
+                            'inner_vlan': {
+                            },
+                            'mac_address': {
+                            },
+                            'mtu': {
+                            },
+                            'outer_vlan': {
+                            },
+                            'tpid': {
+                            }
+                        }]
+                    },
+                    'revision': {
+                    }
                 }],
                 'new': [{
                 }],
@@ -3944,6 +5498,14 @@ class DataModelMeta(type):
                     },
                     'lockedBy': {
                     },
+                    'meta': {
+                        'info': [{
+                            'name': {
+                            },
+                            'value': {
+                            }
+                        }]
+                    },
                     'revision': {
                     }
                 }],
@@ -3989,6 +5551,14 @@ class DataModelMeta(type):
             'label': {
             },
             'lockedBy': {
+            },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
             },
             'name': {
             },
@@ -4051,10 +5621,6 @@ class DataModelMeta(type):
                 }],
                 'severity': {
                 },
-                'strike': {
-                },
-                'strikeset': {
-                },
                 'variants': {
                 },
                 'year': {
@@ -4103,18 +5669,20 @@ class DataModelMeta(type):
         },
         'superflow': {
             'actions': [{
-                'actionInfo': [{
-                    'description': {
-                    },
-                    'label': {
-                    },
-                    'name': {
-                    },
-                    'realtimeGroup': {
-                    },
-                    'units': {
-                    }
-                }],
+                'actionInfo': {
+                    'settings': [{
+                        'description': {
+                        },
+                        'label': {
+                        },
+                        'name': {
+                        },
+                        'realtimeGroup': {
+                        },
+                        'units': {
+                        }
+                    }]
+                },
                 'exflows': {
                 },
                 'flowid': {
@@ -4131,18 +5699,32 @@ class DataModelMeta(type):
                 },
                 'operations': {
                     'getActionChoices': [{
+                        'settings': [{
+                            'description': {
+                            },
+                            'label': {
+                            },
+                            'name': {
+                            },
+                            'realtimeGroup': {
+                            },
+                            'units': {
+                            }
+                        }]
                     }],
                     'getActionInfo': [{
-                        'description': {
-                        },
-                        'label': {
-                        },
-                        'name': {
-                        },
-                        'realtimeGroup': {
-                        },
-                        'units': {
-                        }
+                        'settings': [{
+                            'description': {
+                            },
+                            'label': {
+                            },
+                            'name': {
+                            },
+                            'realtimeGroup': {
+                            },
+                            'units': {
+                            }
+                        }]
                     }]
                 },
                 'params': {
@@ -4197,6 +5779,14 @@ class DataModelMeta(type):
                         },
                         'lockedBy': {
                         },
+                        'meta': {
+                            'info': [{
+                                'name': {
+                                },
+                                'value': {
+                                }
+                            }]
+                        },
                         'revision': {
                         }
                     }]
@@ -4225,6 +5815,14 @@ class DataModelMeta(type):
             'label': {
             },
             'lockedBy': {
+            },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
             },
             'name': {
             },
@@ -4379,6 +5977,10 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
+                        'enableIgnoreAdaptiveRampupSettings': {
+                        },
+                        'enableSuperflowTimeout': {
+                        },
                         'engine': {
                         },
                         'max': {
@@ -4396,6 +5998,8 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
+                        },
+                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -4557,6 +6161,10 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
+                        'enableIgnoreAdaptiveRampupSettings': {
+                        },
+                        'enableSuperflowTimeout': {
+                        },
                         'engine': {
                         },
                         'max': {
@@ -4574,6 +6182,8 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
+                        },
+                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -5207,6 +6817,10 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
+                        'enableIgnoreAdaptiveRampupSettings': {
+                        },
+                        'enableSuperflowTimeout': {
+                        },
                         'engine': {
                         },
                         'max': {
@@ -5224,6 +6838,8 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
+                        },
+                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -5377,6 +6993,10 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
+                        'enableIgnoreAdaptiveRampupSettings': {
+                        },
+                        'enableSuperflowTimeout': {
+                        },
                         'engine': {
                         },
                         'max': {
@@ -5394,6 +7014,8 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
+                        },
+                        'valueSuperflowTimeout': {
                         }
                     },
                     'sfratescalefactor': {
@@ -5557,6 +7179,10 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
+                        'enableIgnoreAdaptiveRampupSettings': {
+                        },
+                        'enableSuperflowTimeout': {
+                        },
                         'engine': {
                         },
                         'max': {
@@ -5574,6 +7200,8 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
+                        },
+                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -5861,6 +7489,10 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
+                        'enableIgnoreAdaptiveRampupSettings': {
+                        },
+                        'enableSuperflowTimeout': {
+                        },
                         'engine': {
                         },
                         'max': {
@@ -5878,6 +7510,8 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
+                        },
+                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -5957,7 +7591,1767 @@ class DataModelMeta(type):
                 },
                 'lockedBy': {
                 },
+                'meta': {
+                    'info': [{
+                        'name': {
+                        },
+                        'value': {
+                        }
+                    }]
+                },
                 'operations': {
+                    'getComponentPreset': [{
+                        '@type:appsim': {
+                            'app': {
+                                'fidelity': {
+                                },
+                                'removedns': {
+                                },
+                                'replace_streams': {
+                                },
+                                'streamsPerSuperflow': {
+                                }
+                            },
+                            'delayStart': {
+                            },
+                            'experimental': {
+                                'tcpSegmentsBurst': {
+                                },
+                                'unify_l4_bufs': {
+                                }
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'profile': {
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'expand': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'ssl': {
+                                'client_record_len': {
+                                },
+                                'server_record_len': {
+                                },
+                                'sslReuseType': {
+                                },
+                                'ssl_client_keylog': {
+                                },
+                                'ssl_keylog_max_entries': {
+                                },
+                                'upgrade': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        '@type:clientsim': {
+                            'app': {
+                                'fidelity': {
+                                },
+                                'removedns': {
+                                },
+                                'replace_streams': {
+                                },
+                                'streamsPerSuperflow': {
+                                }
+                            },
+                            'delayStart': {
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'expand': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'ssl': {
+                                'client_record_len': {
+                                },
+                                'server_record_len': {
+                                },
+                                'sslReuseType': {
+                                },
+                                'ssl_client_keylog': {
+                                },
+                                'ssl_keylog_max_entries': {
+                                },
+                                'upgrade': {
+                                }
+                            },
+                            'superflow': {
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        '@type:layer2': {
+                            'advanced': {
+                                'ethTypeField': {
+                                },
+                                'ethTypeVal': {
+                                }
+                            },
+                            'bidirectional': {
+                            },
+                            'delayStart': {
+                            },
+                            'duration': {
+                                'disable_nd_probes': {
+                                },
+                                'durationFrames': {
+                                },
+                                'durationTime': {
+                                }
+                            },
+                            'maxStreams': {
+                            },
+                            'payload': {
+                                'data': {
+                                },
+                                'dataWidth': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadAdvanced': {
+                                'udfDataWidth': {
+                                },
+                                'udfLength': {
+                                },
+                                'udfMode': {
+                                },
+                                'udfOffset': {
+                                }
+                            },
+                            'rateDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'ramptype': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'sizeDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'mixlen1': {
+                                },
+                                'mixlen10': {
+                                },
+                                'mixlen2': {
+                                },
+                                'mixlen3': {
+                                },
+                                'mixlen4': {
+                                },
+                                'mixlen5': {
+                                },
+                                'mixlen6': {
+                                },
+                                'mixlen7': {
+                                },
+                                'mixlen8': {
+                                },
+                                'mixlen9': {
+                                },
+                                'mixweight1': {
+                                },
+                                'mixweight10': {
+                                },
+                                'mixweight2': {
+                                },
+                                'mixweight3': {
+                                },
+                                'mixweight4': {
+                                },
+                                'mixweight5': {
+                                },
+                                'mixweight6': {
+                                },
+                                'mixweight7': {
+                                },
+                                'mixweight8': {
+                                },
+                                'mixweight9': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'slowStart': {
+                            },
+                            'slowStartFps': {
+                            }
+                        },
+                        '@type:layer3': {
+                            'Templates': {
+                                'TemplateType': {
+                                }
+                            },
+                            'addrGenMode': {
+                            },
+                            'advancedIPv4': {
+                                'checksumField': {
+                                },
+                                'checksumVal': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                },
+                                'optionHeaderData': {
+                                },
+                                'optionHeaderField': {
+                                },
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'advancedIPv6': {
+                                'extensionHeaderData': {
+                                },
+                                'extensionHeaderField': {
+                                },
+                                'flowLabel': {
+                                },
+                                'hopLimit': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                },
+                                'nextHeader': {
+                                },
+                                'trafficClass': {
+                                }
+                            },
+                            'advancedUDP': {
+                                'checksumField': {
+                                },
+                                'checksumVal': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                }
+                            },
+                            'bidirectional': {
+                            },
+                            'delayStart': {
+                            },
+                            'dstPort': {
+                            },
+                            'dstPortMask': {
+                            },
+                            'duration': {
+                                'disable_nd_probes': {
+                                },
+                                'durationFrames': {
+                                },
+                                'durationTime': {
+                                }
+                            },
+                            'enableTCP': {
+                            },
+                            'maxStreams': {
+                            },
+                            'payload': {
+                                'data': {
+                                },
+                                'dataWidth': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadAdvanced': {
+                                'udfDataWidth': {
+                                },
+                                'udfLength': {
+                                },
+                                'udfMode': {
+                                },
+                                'udfOffset': {
+                                }
+                            },
+                            'randomizeIP': {
+                            },
+                            'rateDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'ramptype': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'sizeDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'mixlen1': {
+                                },
+                                'mixlen10': {
+                                },
+                                'mixlen2': {
+                                },
+                                'mixlen3': {
+                                },
+                                'mixlen4': {
+                                },
+                                'mixlen5': {
+                                },
+                                'mixlen6': {
+                                },
+                                'mixlen7': {
+                                },
+                                'mixlen8': {
+                                },
+                                'mixlen9': {
+                                },
+                                'mixweight1': {
+                                },
+                                'mixweight10': {
+                                },
+                                'mixweight2': {
+                                },
+                                'mixweight3': {
+                                },
+                                'mixweight4': {
+                                },
+                                'mixweight5': {
+                                },
+                                'mixweight6': {
+                                },
+                                'mixweight7': {
+                                },
+                                'mixweight8': {
+                                },
+                                'mixweight9': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'slowStart': {
+                            },
+                            'slowStartFps': {
+                            },
+                            'srcPort': {
+                            },
+                            'srcPortMask': {
+                            },
+                            'syncIP': {
+                            },
+                            'udpDstPortMode': {
+                            },
+                            'udpSrcPortMode': {
+                            }
+                        },
+                        '@type:layer3advanced': {
+                            'Templates': {
+                                'TemplateType': {
+                                }
+                            },
+                            'advancedIPv4': {
+                                'checksumField': {
+                                },
+                                'checksumVal': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                },
+                                'optionHeaderData': {
+                                },
+                                'optionHeaderField': {
+                                },
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'advancedIPv6': {
+                                'extensionHeaderData': {
+                                },
+                                'extensionHeaderField': {
+                                },
+                                'flowLabel': {
+                                },
+                                'hopLimit': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                },
+                                'nextHeader': {
+                                },
+                                'trafficClass': {
+                                }
+                            },
+                            'advancedUDP': {
+                                'checksumField': {
+                                },
+                                'checksumVal': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                }
+                            },
+                            'bidirectional': {
+                            },
+                            'delayStart': {
+                            },
+                            'duration': {
+                                'disable_nd_probes': {
+                                },
+                                'durationFrames': {
+                                },
+                                'durationTime': {
+                                }
+                            },
+                            'enablePerStreamStats': {
+                            },
+                            'enableTCP': {
+                            },
+                            'payload': {
+                                'data': {
+                                },
+                                'dataWidth': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadAdvanced': {
+                                'udfDataWidth': {
+                                },
+                                'udfLength': {
+                                },
+                                'udfMode': {
+                                },
+                                'udfOffset': {
+                                }
+                            },
+                            'rateDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'ramptype': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'sizeDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'mixlen1': {
+                                },
+                                'mixlen10': {
+                                },
+                                'mixlen2': {
+                                },
+                                'mixlen3': {
+                                },
+                                'mixlen4': {
+                                },
+                                'mixlen5': {
+                                },
+                                'mixlen6': {
+                                },
+                                'mixlen7': {
+                                },
+                                'mixlen8': {
+                                },
+                                'mixlen9': {
+                                },
+                                'mixweight1': {
+                                },
+                                'mixweight10': {
+                                },
+                                'mixweight2': {
+                                },
+                                'mixweight3': {
+                                },
+                                'mixweight4': {
+                                },
+                                'mixweight5': {
+                                },
+                                'mixweight6': {
+                                },
+                                'mixweight7': {
+                                },
+                                'mixweight8': {
+                                },
+                                'mixweight9': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'slowStart': {
+                            },
+                            'slowStartFps': {
+                            },
+                            'tuple_gen_seed': {
+                            }
+                        },
+                        '@type:layer4': {
+                            'delayStart': {
+                            },
+                            'dstPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'packetsPerSession': {
+                            },
+                            'payload': {
+                                'add_timestamp': {
+                                },
+                                'data': {
+                                },
+                                'http_type': {
+                                },
+                                'transport': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadSizeDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        '@type:liveappsim': {
+                            'app': {
+                                'fidelity': {
+                                },
+                                'removeUnknownSSL': {
+                                },
+                                'removeUnknownTcpUdp': {
+                                },
+                                'removedns': {
+                                },
+                                'replace_streams': {
+                                },
+                                'streamsPerSuperflow': {
+                                }
+                            },
+                            'concurrencyscalefactor': {
+                            },
+                            'delayStart': {
+                            },
+                            'inflateDeflate': {
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'liveProfile': {
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'sfratescalefactor': {
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            },
+                            'tputscalefactor': {
+                            }
+                        },
+                        '@type:playback': {
+                            'behavior': {
+                            },
+                            'delayStart': {
+                            },
+                            'file': {
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'modification': {
+                                'bpfstring': {
+                                },
+                                'endpacket': {
+                                },
+                                'independentflows': {
+                                },
+                                'loopcount': {
+                                },
+                                'newport': {
+                                },
+                                'originalport': {
+                                },
+                                'replay': {
+                                },
+                                'serveripinjection': {
+                                },
+                                'single': {
+                                },
+                                'startpacket': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        '@type:security_all': {
+                            'attackPlan': {
+                            },
+                            'attackPlanIterationDelay': {
+                            },
+                            'attackPlanIterations': {
+                            },
+                            'attackProfile': {
+                            },
+                            'attackRetries': {
+                            },
+                            'delayStart': {
+                            },
+                            'maxAttacksPerSecond': {
+                            },
+                            'maxConcurrAttacks': {
+                            },
+                            'maxPacketsPerSecond': {
+                            },
+                            'randomSeed': {
+                            }
+                        },
+                        '@type:security_np': {
+                            'attackPlan': {
+                            },
+                            'attackPlanIterationDelay': {
+                            },
+                            'attackPlanIterations': {
+                            },
+                            'attackProfile': {
+                            },
+                            'attackRetries': {
+                            },
+                            'delayStart': {
+                            },
+                            'randomSeed': {
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'sessions': {
+                                'max': {
+                                },
+                                'maxPerSecond': {
+                                }
+                            }
+                        },
+                        '@type:stackscrambler': {
+                            'delayStart': {
+                            },
+                            'dstPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'payload': {
+                                'data': {
+                                },
+                                'transport': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadSizeDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'prng': {
+                                'offset': {
+                                },
+                                'seed': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'scrambleOptions': {
+                                'badEthType': {
+                                },
+                                'badGTPFlags': {
+                                },
+                                'badGTPLen': {
+                                },
+                                'badGTPNext': {
+                                },
+                                'badGTPNpdu': {
+                                },
+                                'badGTPSeqno': {
+                                },
+                                'badGTPType': {
+                                },
+                                'badICMPCode': {
+                                },
+                                'badICMPType': {
+                                },
+                                'badIPChecksum': {
+                                },
+                                'badIPFlags': {
+                                },
+                                'badIPFlowLabel': {
+                                },
+                                'badIPFragOffset': {
+                                },
+                                'badIPLength': {
+                                },
+                                'badIPOptions': {
+                                },
+                                'badIPProtocol': {
+                                },
+                                'badIPTOS': {
+                                },
+                                'badIPTTL': {
+                                },
+                                'badIPTotalLength': {
+                                },
+                                'badIPVersion': {
+                                },
+                                'badL4Checksum': {
+                                },
+                                'badL4HeaderLength': {
+                                },
+                                'badSCTPChecksum': {
+                                },
+                                'badSCTPFlags': {
+                                },
+                                'badSCTPLength': {
+                                },
+                                'badSCTPType': {
+                                },
+                                'badSCTPVerificationTag': {
+                                },
+                                'badTCPFlags': {
+                                },
+                                'badTCPOptions': {
+                                },
+                                'badUrgentPointer': {
+                                },
+                                'handshakeTCP': {
+                                },
+                                'maxCorruptions': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        'active': {
+                        },
+                        'author': {
+                        },
+                        'clazz': {
+                        },
+                        'createdBy': {
+                        },
+                        'createdOn': {
+                        },
+                        'description': {
+                        },
+                        'id': {
+                        },
+                        'label': {
+                        },
+                        'lockedBy': {
+                        },
+                        'meta': {
+                            'info': [{
+                                'name': {
+                                },
+                                'value': {
+                                }
+                            }]
+                        },
+                        'originalPreset': {
+                        },
+                        'originalPresetLabel': {
+                        },
+                        'reportResults': {
+                        },
+                        'revision': {
+                        },
+                        'tags': [{
+                            'domainId': {
+                                'external': {
+                                },
+                                'iface': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'id': {
+                            },
+                            'type': {
+                            }
+                        }],
+                        'timeline': {
+                            'timesegment': [{
+                                'label': {
+                                },
+                                'size': {
+                                },
+                                'type': {
+                                }
+                            }]
+                        },
+                        'type': {
+                        }
+                    }],
                     'getComponentPresetNames': [{
                     }]
                 },
@@ -6004,6 +9398,8 @@ class DataModelMeta(type):
             },
             'duration': {
             },
+            'dut': {
+            },
             'label': {
             },
             'lastrun': {
@@ -6012,6 +9408,14 @@ class DataModelMeta(type):
             },
             'lockedBy': {
             },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
+            },
             'name': {
             },
             'network': {
@@ -6019,11 +9423,39 @@ class DataModelMeta(type):
             'operations': {
                 'add': [{
                 }],
+                'addOpenRecent': [{
+                }],
                 'clone': [{
                 }],
                 'delete': [{
                 }],
                 'exportModel': [{
+                }],
+                'flowExceptions': [{
+                    'component': {
+                    },
+                    'componentLabel': {
+                    },
+                    'componentType': {
+                        'label': {
+                        }
+                    },
+                    'dataIndex': {
+                    },
+                    'group': {
+                    },
+                    'iface': {
+                    },
+                    'params': {
+                    },
+                    'protocol': {
+                    },
+                    'slot': {
+                    },
+                    'vlan': {
+                    }
+                }],
+                'getRecent': [{
                 }],
                 'importModel': [{
                 }],
@@ -6044,6 +9476,26 @@ class DataModelMeta(type):
                 'search': [{
                 }],
                 'stopRun': [{
+                }],
+                'testComponentDefinition': [{
+                }],
+                'validate': [{
+                    'fixAction': {
+                        'content': {
+                        },
+                        'key': {
+                        }
+                    },
+                    'fixable': {
+                    },
+                    'message': {
+                        'content': {
+                        },
+                        'key': {
+                        }
+                    },
+                    'result': {
+                    }
                 }]
             },
             'result': {
@@ -6056,6 +9508,8 @@ class DataModelMeta(type):
                     },
                     'current': {
                     },
+                    'enabled': {
+                    },
                     'original': {
                     }
                 },
@@ -6063,6 +9517,8 @@ class DataModelMeta(type):
                     'content': {
                     },
                     'current': {
+                    },
+                    'enabled': {
                     },
                     'original': {
                     }
@@ -6072,6 +9528,8 @@ class DataModelMeta(type):
                     },
                     'current': {
                     },
+                    'enabled': {
+                    },
                     'original': {
                     }
                 },
@@ -6079,6 +9537,8 @@ class DataModelMeta(type):
                     'content': {
                     },
                     'current': {
+                    },
+                    'enabled': {
                     },
                     'original': {
                     }
@@ -6088,6 +9548,8 @@ class DataModelMeta(type):
                     },
                     'current': {
                     },
+                    'enabled': {
+                    },
                     'original': {
                     }
                 },
@@ -6095,6 +9557,8 @@ class DataModelMeta(type):
                     'content': {
                     },
                     'current': {
+                    },
+                    'enabled': {
                     },
                     'original': {
                     }
@@ -6129,8 +9593,12 @@ class DataModelMeta(type):
             'chain': {
                 'name': {
                 },
-                'remotes': {
-                }
+                'remotes': [{
+                    'host': {
+                    },
+                    'state': {
+                    }
+                }]
             },
             'cnState': [{
                 'cnId': {
@@ -6141,13 +9609,41 @@ class DataModelMeta(type):
                 },
                 'cnSlotNo': {
                 },
+                'conditions': [{
+                    'message': {
+                    },
+                    'status': {
+                    },
+                    'type': {
+                    }
+                }],
                 'firmwareUpgrade': {
                 },
                 'licensed': {
                 },
                 'marketingName': {
                 },
+                'opModes': [{
+                    'active': {
+                    },
+                    'id': {
+                    },
+                    'label': {
+                    },
+                    'name': {
+                    }
+                }],
+                'remoteInfo': {
+                    'host': {
+                    },
+                    'slotId': {
+                    },
+                    'state': {
+                    }
+                },
                 'state': {
+                },
+                'stateDescription': {
                 }
             }],
             'ixos': {
@@ -6164,20 +9660,28 @@ class DataModelMeta(type):
                 'exportCapture': [{
                 }],
                 'getFanoutModes': [{
-                    'cardModel': {
-                    },
-                    'fanout': [{
-                        'fanoutId': {
+                    'fanouts': [{
+                        'active': {
+                        },
+                        'id': {
                         },
                         'name': {
+                        },
+                        'speedMode': {
                         }
-                    }]
+                    }],
+                    'model': {
+                    }
                 }],
                 'getPortAvailableModes': [{
                     'modes': [{
-                        'fanoutId': {
+                        'active': {
+                        },
+                        'id': {
                         },
                         'name': {
+                        },
+                        'speedMode': {
                         }
                     }],
                     'port': {
@@ -6277,6 +9781,14 @@ class DataModelMeta(type):
             'serialNumber': {
             },
             'slot': [{
+                'conditions': [{
+                    'message': {
+                    },
+                    'status': {
+                    },
+                    'type': {
+                    }
+                }],
                 'firmwareUpgrade': {
                 },
                 'fpga': [{
@@ -6298,6 +9810,8 @@ class DataModelMeta(type):
                 'id': {
                 },
                 'interfaceCount': {
+                },
+                'ipAddress': {
                 },
                 'mode': {
                 },
@@ -6321,12 +9835,24 @@ class DataModelMeta(type):
                     'state': {
                     }
                 }],
+                'opModes': [{
+                    'active': {
+                    },
+                    'id': {
+                    },
+                    'label': {
+                    },
+                    'name': {
+                    }
+                }],
                 'port': [{
                     'active': {
                     },
                     'auto': {
                     },
                     'capture': {
+                    },
+                    'capture_group': {
                     },
                     'capturing': {
                     },
@@ -6365,9 +9891,17 @@ class DataModelMeta(type):
                         },
                         'rxframes': {
                         },
+                        'rxreason': {
+                        },
+                        'rxstate': {
+                        },
                         'txbytes': {
                         },
                         'txframes': {
+                        },
+                        'txreason': {
+                        },
+                        'txstate': {
                         }
                     }],
                     'portGroup': {
@@ -6378,9 +9912,43 @@ class DataModelMeta(type):
                     },
                     'reservedBy': {
                     },
+                    'reservedLinkSettings': {
+                        'auto': {
+                        },
+                        'capture': {
+                        },
+                        'fullduplex': {
+                        },
+                        'ignorepause': {
+                        },
+                        'media': {
+                        },
+                        'mtu': {
+                        },
+                        'precoder': {
+                        },
+                        'speed': {
+                        }
+                    },
+                    'software_capture': {
+                    },
                     'speed': {
                     },
                     'state': {
+                    },
+                    'transceiver': {
+                        '_id': {
+                        },
+                        'cableLength': {
+                        },
+                        'identifier': {
+                        },
+                        'mediaType': {
+                        },
+                        'vendor': {
+                        },
+                        'vendorPartNumber': {
+                        }
                     }
                 }],
                 'remoteInfo': {
@@ -6394,6 +9962,10 @@ class DataModelMeta(type):
                 'serialNumber': {
                 },
                 'state': {
+                },
+                'stateDescription': {
+                },
+                'supportsL23': {
                 }
             }]
         }
