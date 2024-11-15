@@ -1,2 +1,2 @@
 
-[https://github.com/OpenIxia/azure-bps](https://github.com/OpenIxia/azure-bps) 
+[https://github.com/Keysight/bpsve/tree/main/microsoft-azure](https://github.com/Keysight/bpsve/tree/main/microsoft-azure) 
