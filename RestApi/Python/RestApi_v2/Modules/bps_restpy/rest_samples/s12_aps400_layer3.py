@@ -23,9 +23,8 @@ import os
 # Add bps_restpy libpath *required if the library is not installed
 libpath = os.path.abspath(__file__+"/../../..")
 sys.path.insert(0, libpath)
-# pylint: disable=wrong-import-position
-# pylint: disable=import-error
-from bps_restpy.bps import BPS, pp  # noqa: E402
+
+from bps_restpy.bps import BPS, pp  
 
 ########################################
 
