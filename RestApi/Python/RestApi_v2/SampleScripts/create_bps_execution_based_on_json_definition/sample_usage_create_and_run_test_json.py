@@ -25,9 +25,6 @@ canned_test_name = 'AppSim'
 # bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 # bpsuser     = 'bps user'
 # bpspass     = 'bps pass'
-bps_system  = '10.36.83.188'
-bpsuser     = 'admin'
-bpspass     = 'admin'
 
 file = os.path.join(os.path.dirname(__file__), 'http_https.json')
 slot_number = 5

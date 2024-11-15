@@ -15,7 +15,7 @@ class TlsAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block):
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block)
 
-### this BPS REST API wrapper is generated for version: 10.30.134-noarch-bps
+### this BPS REST API wrapper is generated for version: 10.30
 class BPS(object):
 
     def __init__(self, host, user, password, checkVersion=True):
@@ -29,20 +29,20 @@ class BPS(object):
         self.serverVersions = None
         self.checkVersion = checkVersion
         self.printRequests = False
-        self.administration = DataModelProxy(wrapper=self, name='administration')
-        self.network = DataModelProxy(wrapper=self, name='network')
-        self.superflow = DataModelProxy(wrapper=self, name='superflow')
-        self.capture = DataModelProxy(wrapper=self, name='capture')
-        self.results = DataModelProxy(wrapper=self, name='results')
-        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
-        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
-        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
-        self.topology = DataModelProxy(wrapper=self, name='topology')
-        self.statistics = DataModelProxy(wrapper=self, name='statistics')
-        self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
         self.reports = DataModelProxy(wrapper=self, name='reports')
-        self.strikes = DataModelProxy(wrapper=self, name='strikes')
+        self.statistics = DataModelProxy(wrapper=self, name='statistics')
+        self.administration = DataModelProxy(wrapper=self, name='administration')
+        self.superflow = DataModelProxy(wrapper=self, name='superflow')
+        self.network = DataModelProxy(wrapper=self, name='network')
+        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
+        self.capture = DataModelProxy(wrapper=self, name='capture')
+        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
+        self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
         self.evasionProfile = DataModelProxy(wrapper=self, name='evasionProfile')
+        self.topology = DataModelProxy(wrapper=self, name='topology')
+        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
+        self.strikes = DataModelProxy(wrapper=self, name='strikes')
+        self.results = DataModelProxy(wrapper=self, name='results')
         self.remote = DataModelProxy(wrapper=self, name='remote')
 
     ### connect to the system
@@ -66,7 +66,7 @@ class BPS(object):
         r = self.session.delete(url=requestUrl, headers=headers, verify=False)
         if(r.status_code == 400):
             methodCall = '%s'%path.replace('/', '.').replace('.operations', '')
-            content_message = r.content + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
+            content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
             raise Exception({'status_code': r.status_code, 'content': content_message})
         if(r.status_code in [200, 204]):
             return self.__json_load(r)
@@ -93,11 +93,12 @@ class BPS(object):
         r = self.session.post(url=requestUrl, headers={'content-type': 'application/json'}, data=json.dumps(kwargs), verify=False)
         if(r.status_code == 400):
             methodCall = '%s'%path.replace('/', '.').replace('.operations', '')
-            content_message = r.content + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
+            content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
             raise Exception({'status_code': r.status_code, 'content': content_message})
         if(r.status_code == 200) or r.status_code == 204:
-            get_url = 'https://' + self.host + r.content
-            get_req = self.session.get(url = get_url, verify = False)
+            get_url = 'https://' + self.host + r.content.decode()
+            get_head = {'content-type': 'application/json'}
+            get_req = self.session.get(url = get_url, verify = False, headers = get_head)
             with open(kwargs['filepath'], 'wb') as fd:
                 for chunk in get_req.iter_content(chunk_size=1024):
                     fd.write(chunk)
@@ -132,7 +133,7 @@ class BPS(object):
         r = self.session.post(url=requestUrl, files=files, data=data, verify=False)
         if(r.status_code == 400):
             methodCall = '%s'%path.replace('/', '.').replace('.operations', '')
-            content_message = r.content + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
+            content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
             raise Exception({'status_code': r.status_code, 'content': content_message})
         if(r.status_code in [200, 204]):
             return self.__json_load(r)
@@ -160,7 +161,7 @@ class BPS(object):
         r = self.session.options('https://' + self.host + '/bps/api/v2/core/'+ path)
         if(r.status_code == 400):
             methodCall = '%s'%path.replace('/', '.').replace('.operations', '')
-            content_message = r.content + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
+            content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
             raise Exception({'status_code': r.status_code, 'content': content_message})
         if(r.status_code in [200]):
             return self.__json_load(r)
@@ -184,7 +185,7 @@ class BPS(object):
         r = self.session.post(url=requestUrl, headers=headers, data=json.dumps(kwargs), verify=False)
         if(r.status_code == 400):
             methodCall = '%s'%path.replace('/', '.').replace('.operations', '')
-            content_message = r.content + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
+            content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
             raise Exception({'status_code': r.status_code, 'content': content_message})
         if(r.status_code in [200, 204, 202]):
             return self.__json_load(r)
@@ -208,21 +209,6 @@ class BPS(object):
         :param name (string): the name of the license file
         """
         return self._wrapper.__import('/administration/atiLicensing/operations/importAtiLicense', **{'filename': filename, 'name': name})
-
-    ### Schedules a time for Result Database purge, and an interval at which this will take place.
-    @staticmethod
-    def _administration_operations_configPurge(self, configPurge):
-        """
-        Schedules a time for Result Database purge, and an interval at which this will take place.
-        :param configPurge (object): 
-               object of object with fields
-                      name (string): 
-                      purgeTime (string): 
-                      interval (string): 
-                      testsPriority (bool): 
-                      purgeEnabled (bool): 
-        """
-        return self._wrapper.__post('/administration/operations/configPurge', **{'configPurge': configPurge})
 
     ### Exports everything including test models, network configurations and others from system.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
@@ -248,13 +234,13 @@ class BPS(object):
     @staticmethod
     def _administration_operations_logs(self, error=False, messages=False, web=False, all=False, audit=False, info=False, system=False, lines=20, drop=0):
         """
-        :param error (bool): 
-        :param messages (bool): 
-        :param web (bool): 
-        :param all (bool): 
-        :param audit (bool): 
-        :param info (bool): 
-        :param system (bool): 
+        :param error (bool):
+        :param messages (bool):
+        :param web (bool):
+        :param all (bool):
+        :param audit (bool):
+        :param info (bool):
+        :param system (bool):
         :param lines (number): number lines to return
         :param drop (number): number lines to drop
         """
@@ -265,7 +251,7 @@ class BPS(object):
     def _administration_sessions_operations_close(self, session):
         """
         close active session
-        :param session (string): 
+        :param session (string):
         """
         return self._wrapper.__post('/administration/sessions/operations/close', **{'session': session})
 
@@ -274,7 +260,7 @@ class BPS(object):
     def _administration_sessions_operations_list(self):
         """
         list active sessions
-        :return result (list): 
+        :return result (list):
         """
         return self._wrapper.__post('/administration/sessions/operations/list', **{})
 
@@ -293,7 +279,7 @@ class BPS(object):
     def _administration_userSettings_operations_setAutoReserve(self, resourceType, units):
         """
         :param resourceType (string): Valid values: >l47< or >l23<
-        :param units (number): 
+        :param units (number):
         """
         return self._wrapper.__post('/administration/userSettings/operations/setAutoReserve', **{'resourceType': resourceType, 'units': units})
 
@@ -302,7 +288,7 @@ class BPS(object):
     def _appProfile_operations_add(self, add):
         """
         Adds a list of SuperFlow to the current working Application Profile. ([{'superflow':'adadad', 'weight':'20'},{..}])
-        :param add (list): 
+        :param add (list):
                list of object with fields
                       superflow (string): The name of the super flow
                       weight (string): The weight of the super flow
@@ -366,11 +352,11 @@ class BPS(object):
         """
         return self._wrapper.__post('/appProfile/operations/recompute', **{})
 
-    ### Removes a SuperFlow from the current working Application Profile. 
+    ### Removes a SuperFlow from the current working Application Profile.
     @staticmethod
     def _appProfile_operations_remove(self, superflow):
         """
-        Removes a SuperFlow from the current working Application Profile. 
+        Removes a SuperFlow from the current working Application Profile.
         :param superflow (string): The name of the super flow.
         """
         return self._wrapper.__post('/appProfile/operations/remove', **{'superflow': superflow})
@@ -403,14 +389,14 @@ class BPS(object):
         :param limit (string): The limit of rows to return
         :param sort (string): Parameter to sort by.
         :param sortorder (string): The sort order (ascending/descending)
-        :return appprofile (list): 
+        :return appprofile (list):
                list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      createdOn (string): 
-                      revision (number): 
-                      description (string): 
+                      name (string):
+                      label (string):
+                      createdBy (string):
+                      createdOn (string):
+                      revision (number):
+                      description (string):
         """
         return self._wrapper.__post('/appProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
@@ -433,19 +419,19 @@ class BPS(object):
         :param limit (string): The limit of rows to return
         :param sort (string): Parameter to sort by.
         :param sortorder (string): The sort order (ascending/descending)
-        :return item (list): 
+        :return item (list):
                list of object with fields
-                      name (string): 
-                      totalPackets (string): 
-                      duration (string): 
-                      ipv4Packets (string): 
-                      ipv6Packets (string): 
-                      avgPacketSize (string): 
-                      udpPackets (string): 
-                      contentType (string): 
-                      pcapFilesize (string): 
-                      tcpPackets (string): 
-                      avgFlowLength (string): 
+                      name (string):
+                      totalPackets (string):
+                      duration (string):
+                      ipv4Packets (string):
+                      ipv6Packets (string):
+                      avgPacketSize (string):
+                      udpPackets (string):
+                      contentType (string):
+                      pcapFilesize (string):
+                      tcpPackets (string):
+                      avgFlowLength (string):
         """
         return self._wrapper.__post('/capture/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
@@ -454,7 +440,7 @@ class BPS(object):
     def _evasionProfile_StrikeOptions_operations_getStrikeOptions(self):
         """
         Retrieves all the security options
-        :return result (list): 
+        :return result (list):
         """
         return self._wrapper.__post('/evasionProfile/StrikeOptions/operations/getStrikeOptions', **{})
 
@@ -513,13 +499,13 @@ class BPS(object):
         :param limit (string): The limit of rows to return
         :param sort (string): Parameter to sort by. (name/createdBy ...)
         :param sortorder (string): The sort order (ascending/descending)
-        :return attackprofile (list): 
+        :return attackprofile (list):
                list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      revision (number): 
-                      description (string): 
+                      name (string):
+                      label (string):
+                      createdBy (string):
+                      revision (number):
+                      description (string):
         """
         return self._wrapper.__post('/evasionProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
@@ -545,7 +531,7 @@ class BPS(object):
     @staticmethod
     def _loadProfile_operations_load(self, template):
         """
-        :param template (string): 
+        :param template (string):
         """
         return self._wrapper.__post('/loadProfile/operations/load', **{'template': template})
 
@@ -559,7 +545,7 @@ class BPS(object):
     def _loadProfile_operations_saveAs(self, name):
         """
         Save the active editing LoadProfile under specified name
-        :param name (string): 
+        :param name (string):
         """
         return self._wrapper.__post('/loadProfile/operations/saveAs', **{'name': name})
 
@@ -571,61 +557,16 @@ class BPS(object):
         :param limit (string): The limit of rows to return
         :param sort (string): Parameter to sort by.
         :param sortorder (string): The sort order (ascending/descending)
-        :return loadprofile (list): 
+        :return loadprofile (list):
                list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      createdOn (string): 
-                      revision (number): 
-                      description (string): 
+                      name (string):
+                      label (string):
+                      createdBy (string):
+                      createdOn (string):
+                      revision (number):
+                      description (string):
         """
         return self._wrapper.__post('/loadProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
-
-    ### Search dynamic profiles operation. Used in searching live profiles used by Live Appsim component.
-    @staticmethod
-    def _loadProfile_operations_searchDynamic(self, searchString, limit='25', sort='name', sortorder='ascending', offset='0'):
-        """
-        Search dynamic profiles operation. Used in searching live profiles used by Live Appsim component.
-        :param searchString (string): Live profile string name to search.
-        :param limit (string): The limit of rows to return
-        :param sort (string): Parameter to sort by.
-        :param sortorder (string): The sort order (ascending/descending)
-        :param offset (string): The offset to begin from
-        :return loadprofile (list): 
-               list of object with fields
-                      name (string): 
-        """
-        return self._wrapper.__post('/loadProfile/operations/searchDynamic', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder, 'offset': offset})
-
-    ### null
-    @staticmethod
-    def _network_networkModel_path_advanced_operations_deletePathFile(self, file):
-        """
-        :param file (string): The file name to delete.
-        """
-        return self._wrapper.__post('/network/networkModel/path_advanced/operations/deletePathFile', **{'file': file})
-
-    ### Imports a file resource and stores it in the dedicated storage path. Supported file extension: .csvThis operation can not be executed from the RESTApi Browser, and it needs to be executed from a remote system through a REST call
-    @staticmethod
-    def _network_networkModel_path_advanced_operations_importPathFile(self, name, filename, force):
-        """
-        Imports a file resource and stores it in the dedicated storage path. Supported file extension: .csvThis operation can not be executed from the RESTApi Browser, and it needs to be executed from a remote system through a REST call
-        :param name (string): The name of the object being imported
-        :param filename (string): The file path containing the object to be imported. File extension: .csv
-        :param force (bool): Force to import the file and the object having the same name will be replaced.
-        """
-        return self._wrapper.__import('/network/networkModel/path_advanced/operations/importPathFile', **{'name': name, 'filename': filename, 'force': force})
-
-    ### null
-    @staticmethod
-    def _network_networkModel_path_advanced_operations_listPathFile(self, recurse=True, root='/var/ipc/paths'):
-        """
-        :param recurse (bool): 
-        :param root (string): 
-        :return files (object): 
-        """
-        return self._wrapper.__post('/network/networkModel/path_advanced/operations/listPathFile', **{'recurse': recurse, 'root': root})
 
     ### Adds the given network to the list of most recently opened network configurations.
     @staticmethod
@@ -635,7 +576,7 @@ class BPS(object):
         :param testName (object): The test model config
                object of object with fields
                       objectType (string): For network config use: neighborhood
-                      name (string): 
+                      name (string):
         """
         return self._wrapper.__post('/network/operations/addOpenRecent', **{'testName': testName})
 
@@ -674,10 +615,10 @@ class BPS(object):
     def _network_operations_getRecent(self):
         """
         Get the most recently opened network configurations
-        :return recentlyOpened (list): 
+        :return recentlyOpened (list):
                list of object with fields
-                      objectType (string): 
-                      name (string): 
+                      objectType (string):
+                      name (string):
         """
         return self._wrapper.__post('/network/operations/getRecent', **{})
 
@@ -696,18 +637,18 @@ class BPS(object):
     @staticmethod
     def _network_operations_list(self, userid, clazz, sortorder, sort, limit, offset):
         """
-        :param userid (string): 
-        :param clazz (string): 
-        :param sortorder (string): 
-        :param sort (string): 
-        :param limit (number): 
-        :param offset (number): 
-        :return returnArg (list): 
+        :param userid (string):
+        :param clazz (string):
+        :param sortorder (string):
+        :param sort (string):
+        :param limit (number):
+        :param offset (number):
+        :return returnArg (list):
                list of object with fields
-                      name (string): 
-                      type (string): 
-                      author (string): 
-                      createdOn (string): 
+                      name (string):
+                      type (string):
+                      author (string):
+                      createdOn (string):
         """
         return self._wrapper.__post('/network/operations/list', **{'userid': userid, 'clazz': clazz, 'sortorder': sortorder, 'sort': sort, 'limit': limit, 'offset': offset})
 
@@ -724,8 +665,8 @@ class BPS(object):
     @staticmethod
     def _network_operations_networkInfo(self, name):
         """
-        :param name (string): 
-        :return results (object): 
+        :param name (string):
+        :return results (object):
         """
         return self._wrapper.__post('/network/operations/networkInfo', **{'name': name})
 
@@ -772,14 +713,14 @@ class BPS(object):
         :param sort (string): Parameter to sort by: 'name'/'class'/'createdBy'/'interfaces'/'timestamp'
         :param limit (number): The limit of network elements to return
         :param offset (number): The offset to begin from.
-        :return network (list): 
+        :return network (list):
                list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      revision (number): 
-                      description (string): 
-                      type (enum): 
+                      name (string):
+                      label (string):
+                      createdBy (string):
+                      revision (number):
+                      description (string):
+                      type (enum):
         """
         return self._wrapper.__post('/network/operations/search', **{'searchString': searchString, 'userid': userid, 'clazz': clazz, 'sortorder': sortorder, 'sort': sort, 'limit': limit, 'offset': offset})
 
@@ -795,11 +736,11 @@ class BPS(object):
 
     ### Disconnects from a remote chassis in order to release remote resources.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
-    def _remote_operations_disconnectChassis(self, address, port=None):
+    def _remote_operations_disconnectChassis(self, address, port):
         """
         Disconnects from a remote chassis in order to release remote resources.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
         :param address (string): Remote chassis address.
-        :param port (number): Remote connection port. This port has an internal usage. Can be let unset.
+        :param port (number): Remote connection port.
         """
         return self._wrapper.__post('/remote/operations/disconnectChassis', **{'address': address, 'port': port})
 
@@ -832,10 +773,10 @@ class BPS(object):
         Returns the report Table of Contents using the test run id.
         :param runid (number): The test run id.
         :param getTableOfContents (bool): Boolean value having the default value set on 'True'. To obtain the Table Contents this value should remain on 'True'.
-        :return results (list): 
+        :return results (list):
                list of object with fields
-                      Section Name (string): 
-                      Section ID (string): 
+                      Section Name (string):
+                      Section ID (string):
         """
         return self._wrapper.__post('/reports/operations/getReportContents', **{'runid': runid, 'getTableOfContents': getTableOfContents})
 
@@ -846,7 +787,7 @@ class BPS(object):
         Returns the section of a report
         :param runid (number): The test run id.
         :param sectionId (string): The section id of the table desired to extract.
-        :return results (object): 
+        :return results (object):
         """
         return self._wrapper.__post('/reports/operations/getReportTable', **{'runid': runid, 'sectionId': sectionId})
 
@@ -857,7 +798,7 @@ class BPS(object):
         :param searchString (string): Search test name matching the string given.
         :param limit (string): The limit of rows to return
         :param sort (string): Parameter to sort by: 'name'/'endTime'/'duration'/'result'/'startTime'/'iteration'/'network'/'dut'/'user'/'size'
-        :param sortorder (string): The sort order: ascending/descending 
+        :param sortorder (string): The sort order: ascending/descending
         """
         return self._wrapper.__post('/reports/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
@@ -867,13 +808,13 @@ class BPS(object):
         """
         Returns main groups of statistics for a single BPS Test Component. These groups can be used then in requesting statistics values from the history of a test run.
         :param name (string): BPS Component name. This argument is actually the component type which can be get from 'statistics' table
-        :param dynamicEnums (bool): 
-        :param includeOutputs (bool): 
-        :return results (object): 
+        :param dynamicEnums (bool):
+        :param includeOutputs (bool):
+        :return results (object):
                object of object with fields
-                      name (string): 
-                      label (string): 
-                      groups (list): 
+                      name (string):
+                      label (string):
+                      groups (list):
         """
         return self._wrapper.__post('/results/operations/getGroups', **{'name': name, 'dynamicEnums': dynamicEnums, 'includeOutputs': includeOutputs})
 
@@ -884,7 +825,7 @@ class BPS(object):
         :param runid (number): The test run id
         :param componentid (string): The component identifier
         :param group (string): The data group or one of the BPS component main groups. The group name can be get by executing the operation 'getGroups' from results node
-        :return result (string): 
+        :return result (string):
         """
         return self._wrapper.__post('/results/operations/getHistoricalResultSize', **{'runid': runid, 'componentid': componentid, 'group': group})
 
@@ -897,11 +838,11 @@ class BPS(object):
         :param componentid (string): The component identifier. Each component has an id and can be get loading the testand checking it's components info
         :param dataindex (number): The table index, equivalent with timestamp.
         :param group (string): The data group or one of the BPS component main groups. The group name can be get by executing the operation 'getGroups' from results node.
-        :return param (list): 
+        :return param (list):
                list of object with fields
-                      name (string): 
-                      content (string): 
-                      datasetvals (string): 
+                      name (string):
+                      content (string):
+                      datasetvals (string):
         """
         return self._wrapper.__post('/results/operations/getHistoricalSeries', **{'runid': runid, 'componentid': componentid, 'dataindex': dataindex, 'group': group})
 
@@ -973,7 +914,7 @@ class BPS(object):
         Removes a strike from the current working  Strike List.([{id: 'bb/c/d'}, {id: 'aa/f/g'}])
         :param strike (list): The list of strike ids to remove. The strike id is in fact the it's path.
                list of object with fields
-                      id (string): 
+                      id (string):
         """
         return self._wrapper.__post('/strikeList/operations/remove', **{'strike': strike})
 
@@ -1018,21 +959,21 @@ class BPS(object):
         :param sort (string): Parameter to sort by.
         :param sortorder (string): The sort order (ascending/descending)
         :param offset (number): The offset to begin from. Default is 0.
-        :return strike (list): 
+        :return strike (list):
                list of object with fields
-                      id (string): 
-                      protocol (string): 
-                      category (string): 
-                      direction (string): 
-                      keyword (string): 
-                      name (string): 
-                      path (string): 
-                      variants (number): 
-                      severity (string): 
-                      reference (string): 
-                      fileSize (string): 
-                      fileExtension (string): 
-                      year (string): 
+                      id (string):
+                      protocol (string):
+                      category (string):
+                      direction (string):
+                      keyword (string):
+                      name (string):
+                      path (string):
+                      variants (number):
+                      severity (string):
+                      reference (string):
+                      fileSize (string):
+                      fileExtension (string):
+                      year (string):
         """
         return self._wrapper.__post('/strikes/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder, 'offset': offset})
 
@@ -1041,7 +982,6 @@ class BPS(object):
     def _superflow_actions_operations_getActionChoices(self, id):
         """
         :param id (number): the flow id
-        :return action (object): 
         """
         return self._wrapper.__post('/superflow/actions/operations/getActionChoices', **{'id': id})
 
@@ -1051,12 +991,12 @@ class BPS(object):
         """
         Get information about an action in the current working Superflow, retrieving also the choices for each action setting.
         :param id (number): The action id
-        :return result (list): 
+        :return result (list):
                list of object with fields
-                      label (string): 
-                      name (string): 
-                      description (string): 
-                      choice (object): 
+                      label (string):
+                      name (string):
+                      description (string):
+                      choice (object):
         """
         return self._wrapper.__post('/superflow/actions/operations/getActionInfo', **{'id': id})
 
@@ -1065,10 +1005,10 @@ class BPS(object):
     def _superflow_flows_operations_getCannedFlows(self):
         """
         Gives abbreviated information about all Canned Flow Names.
-        :return flow (list): 
+        :return flow (list):
                list of object with fields
-                      name (string): 
-                      label (string): 
+                      name (string):
+                      label (string):
         """
         return self._wrapper.__post('/superflow/flows/operations/getCannedFlows', **{})
 
@@ -1078,7 +1018,7 @@ class BPS(object):
         """
         :param id (number): The flow id.
         :param name (string): The flow type/name.
-        :return result (list): 
+        :return result (list):
         """
         return self._wrapper.__post('/superflow/flows/operations/getFlowChoices', **{'id': id, 'name': name})
 
@@ -1112,7 +1052,7 @@ class BPS(object):
     def _superflow_operations_addHost(self, hostParams, force):
         """
         Add a host to the current working Superflow
-        :param hostParams (object): 
+        :param hostParams (object):
                object of object with fields
                       name (string): The host name.
                       hostname (string): The NickName of the host.
@@ -1217,7 +1157,7 @@ class BPS(object):
         :param name (string): The Component type.
         All the component types are listed under the node testComponentTypesDescription.
         If this argument is not set, all the presets will be listed.
-        :return component (object): 
+        :return component (object):
         """
         return self._wrapper.__post('/testmodel/component/operations/getComponentPreset', **{'name': name})
 
@@ -1229,12 +1169,12 @@ class BPS(object):
         :param type (string): The Component type.
         All the component types are listed under the node testComponentTypesDescription.
         If this argument is not set, all the presets will be listed.
-        :return component (list): 
+        :return component (list):
                list of object with fields
-                      id (string): 
-                      label (string): 
-                      type (string): 
-                      description (string): 
+                      id (string):
+                      label (string):
+                      type (string):
+                      description (string):
         """
         return self._wrapper.__post('/testmodel/component/operations/getComponentPresetNames', **{'type': type})
 
@@ -1258,7 +1198,7 @@ class BPS(object):
         :param testName (object): The test model config
                object of object with fields
                       objectType (string): For test use: executable
-                      name (string): 
+                      name (string):
                       type (string): TEST / PLAN / MULTIBOX
         """
         return self._wrapper.__post('/testmodel/operations/addOpenRecent', **{'testName': testName})
@@ -1302,7 +1242,7 @@ class BPS(object):
         :param runid (number): Test RUN ID
         :param limit (number): The limit of rows to return
         :param offset (number): The start row of the returned list
-        :return flowException (object): 
+        :return flowException (object):
         """
         return self._wrapper.__post('/testmodel/operations/flowExceptions', **{'runid': runid, 'limit': limit, 'offset': offset})
 
@@ -1311,11 +1251,11 @@ class BPS(object):
     def _testmodel_operations_getRecent(self):
         """
         Get the most recently opened tests
-        :return recentlyOpened (list): 
+        :return recentlyOpened (list):
                list of object with fields
-                      objectType (string): 
-                      name (string): 
-                      dut (string): 
+                      objectType (string):
+                      name (string):
+                      dut (string):
         """
         return self._wrapper.__post('/testmodel/operations/getRecent', **{})
 
@@ -1332,13 +1272,12 @@ class BPS(object):
 
     ### Load an existing test model template.
     @staticmethod
-    def _testmodel_operations_load(self, template, validate=False):
+    def _testmodel_operations_load(self, template):
         """
         Load an existing test model template.
         :param template (string): The name of the template testmodel
-        :param validate (bool): In order to validate or not the test model, to get proper values for shared component settings
         """
-        return self._wrapper.__post('/testmodel/operations/load', **{'template': template, 'validate': validate})
+        return self._wrapper.__post('/testmodel/operations/load', **{'template': template})
 
     ### Creates a new Test Model
     @staticmethod
@@ -1351,23 +1290,21 @@ class BPS(object):
 
     ### Retrieves the real time statistics for the running test, by giving the run id.
     @staticmethod
-    def _testmodel_operations_realTimeStats(self, runid, rtsgroup, numSeconds, numDataPoints=1, aggregate=None, protocol=None):
+    def _testmodel_operations_realTimeStats(self, runid, rtsgroup, numSeconds, numDataPoints=1):
         """
         Retrieves the real time statistics for the running test, by giving the run id.
         :param runid (number): Test RUN ID
-        :param rtsgroup (string): Real Time Stats group name. Values for this can be get from 'statistics' node, inside 'statNames' from each component at 'realtime Group' key/column. Examples: 'l7STats', 'all', 'bpslite', 'summary', 'clientStats' etc.Instead of a group name, it can be used a statistic name and the usage is: `fields:<statname>`Example: 'fields:txFrames' or 'fields:ethTxFrames, appIncomplete, rxFrameRate, etc'. 
+        :param rtsgroup (string): Real Time Stats group name. Values for this can be get from 'statistics' node, inside 'statNames' from each component at 'realtime Group' key/column. Examples: 'l7STats', 'all', 'bpslite', 'summary', 'clientStats' etc.Instead of a group name, it can be used a statistic name and the usage is: `fields:<statname>`Example: 'fields:txFrames' or 'fields:ethTxFrames, appIncomplete, rxFrameRate, etc'.
         :param numSeconds (number): The number of seconds.  If negative, means counting from the end. Example -1 means the last second from the moment of request.
         :param numDataPoints (number): The number of data points, or set of values, on server side. The default is 1. In case of missing stats,because of requesting to many stats per second in real time,increase the value (grater than 1)
-        :param aggregate (string): The aggregation mode. It can be left empty or set to 'none' and a aggragated valuewill be returned or can be set to retrieve values for each interface of protocol (set to 'protocol'/'interface')
-        :param protocol (list): The superflow protocol/protocols. It is a filter parameter that can be set only if 'aggregate'='protocol'.It can be left empty to get values for all the existing protocols)or set a list of protocols in order to retrieve values exclusively for those.
-        :return result (object): 
+        :return result (object):
                object of object with fields
-                      testStuck (bool): 
-                      time (number): 
-                      progress (number): 
-                      values (string): 
+                      testStuck (bool):
+                      time (number):
+                      progress (number):
+                      values (string):
         """
-        return self._wrapper.__post('/testmodel/operations/realTimeStats', **{'runid': runid, 'rtsgroup': rtsgroup, 'numSeconds': numSeconds, 'numDataPoints': numDataPoints, 'aggregate': aggregate, 'protocol': protocol})
+        return self._wrapper.__post('/testmodel/operations/realTimeStats', **{'runid': runid, 'rtsgroup': rtsgroup, 'numSeconds': numSeconds, 'numDataPoints': numDataPoints})
 
     ### Removes a component from the current working Test Model.
     @staticmethod
@@ -1416,15 +1353,15 @@ class BPS(object):
         :param searchString (string): Search test name matching the string given.
         :param limit (string): The limit of rows to return
         :param sort (string): Parameter to sort by: 'createdOn'/'timestamp'/'bandwidth'/'result'/'lastrunby'/'createdBy'/'interfaces'/'testLabType'
-        :param sortorder (string): The sort order: ascending/descending 
-        :return testmodel (list): 
+        :param sortorder (string): The sort order: ascending/descending
+        :return testmodel (list):
                list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      network (string): 
-                      duration (number): 
-                      description (string): 
+                      name (string):
+                      label (string):
+                      createdBy (string):
+                      network (string):
+                      duration (number):
+                      description (string):
         """
         return self._wrapper.__post('/testmodel/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
@@ -1443,9 +1380,9 @@ class BPS(object):
         """
         Returns main groups of statistics for a single BPS Test Component. These groups can be used then in requesting statistics values from the history of a test run.
         :param name (string): BPS Component name. This argument is actually the component type which can be get from 'statistics' table
-        :param dynamicEnums (bool): 
-        :param includeOutputs (bool): 
-        :return results (object): 
+        :param dynamicEnums (bool):
+        :param includeOutputs (bool):
+        :return results (object):
         """
         return self._wrapper.__post('/testmodel/operations/testComponentDefinition', **{'name': name, 'dynamicEnums': dynamicEnums, 'includeOutputs': includeOutputs})
 
@@ -1454,7 +1391,7 @@ class BPS(object):
     def _testmodel_operations_validate(self, group):
         """
         :param group (string): The reservation group
-        :return check (object): 
+        :return check (object):
         """
         return self._wrapper.__post('/testmodel/operations/validate', **{'group': group})
 
@@ -1465,8 +1402,8 @@ class BPS(object):
         Adds a note to given port.
         :param interface (object): Slot and Port ID.
                object of object with fields
-                      slot (number): 
-                      port (string): 
+                      slot (number):
+                      port (string):
         :param note (string): Note info.
         """
         return self._wrapper.__post('/topology/operations/addPortNote', **{'interface': interface, 'note': note})
@@ -1525,7 +1462,7 @@ class BPS(object):
     def _topology_operations_reboot(self, board):
         """
         Reboots the slot with slotId.
-        :param board (number): 
+        :param board (number):
         """
         return self._wrapper.__post('/topology/operations/reboot', **{'board': board})
 
@@ -1542,7 +1479,7 @@ class BPS(object):
     @staticmethod
     def _topology_operations_releaseAllCnResources(self, cnId):
         """
-        :param cnId (string): 
+        :param cnId (string):
         """
         return self._wrapper.__post('/topology/operations/releaseAllCnResources', **{'cnId': cnId})
 
@@ -1550,9 +1487,9 @@ class BPS(object):
     @staticmethod
     def _topology_operations_releaseResource(self, group, resourceId, resourceType):
         """
-        :param group (number): 
-        :param resourceId (number): 
-        :param resourceType (string): 
+        :param group (number):
+        :param resourceId (number):
+        :param resourceType (string):
         """
         return self._wrapper.__post('/topology/operations/releaseResource', **{'group': group, 'resourceId': resourceId, 'resourceType': resourceType})
 
@@ -1560,25 +1497,23 @@ class BPS(object):
     @staticmethod
     def _topology_operations_releaseResources(self, count, resourceType, slotId):
         """
-        :param count (number): 
-        :param resourceType (string): 
-        :param slotId (number): 
+        :param count (number):
+        :param resourceType (string):
+        :param slotId (number):
         """
         return self._wrapper.__post('/topology/operations/releaseResources', **{'count': count, 'resourceType': resourceType, 'slotId': slotId})
 
-    ### Reserves one or more ports.It requires the following: group, port id, slot id ,capture mode and force mode.In case of remote chassis, be aware that the slot's id is changed after attach (ex: from 9 to 109), in order to get the new value a GET request over the topology will retrieve the new updated slot info.
+    ### null
     @staticmethod
     def _topology_operations_reserve(self, reservation, force=False):
         """
-        Reserves one or more ports.It requires the following: group, port id, slot id ,capture mode and force mode.In case of remote chassis, be aware that the slot's id is changed after attach (ex: from 9 to 109), in order to get the new value a GET request over the topology will retrieve the new updated slot info.
-        :param reservation (list): List of ports to reserve.
+        :param reservation (list): Reserves one or more ports
                list of object with fields
-                      group (number): 
-                      slot (number): Slot number. In case of a remote chassis the slot's 'id' value is changed. A new GET requests can retrieve the topology slots new info.
-                      port (string): 
-                      capture (bool): 
-                      number (number): The index to be reserved with
-        :param force (bool): 
+                      group (number):
+                      slot (number):
+                      port (string):
+                      capture (bool):
+        :param force (bool):
         """
         return self._wrapper.__post('/topology/operations/reserve', **{'reservation': reservation, 'force': force})
 
@@ -1587,8 +1522,8 @@ class BPS(object):
     def _topology_operations_reserveAllCnResources(self, group, cnId):
         """
         Reserves all l47 resources of given compute node id.
-        :param group (number): 
-        :param cnId (string): 
+        :param group (number):
+        :param cnId (string):
         """
         return self._wrapper.__post('/topology/operations/reserveAllCnResources', **{'group': group, 'cnId': cnId})
 
@@ -1597,9 +1532,9 @@ class BPS(object):
     def _topology_operations_reserveResource(self, group, resourceId, resourceType):
         """
         Reserves the specified resource of the given type.
-        :param group (number): 
-        :param resourceId (number): 
-        :param resourceType (string): 
+        :param group (number):
+        :param resourceId (number):
+        :param resourceType (string):
         """
         return self._wrapper.__post('/topology/operations/reserveResource', **{'group': group, 'resourceId': resourceId, 'resourceType': resourceType})
 
@@ -1608,10 +1543,10 @@ class BPS(object):
     def _topology_operations_reserveResources(self, group, count, resourceType, slotId):
         """
         Reserves the specified number of resources of given type.
-        :param group (number): 
-        :param count (number): 
-        :param resourceType (string): 
-        :param slotId (number): 
+        :param group (number):
+        :param count (number):
+        :param resourceType (string):
+        :param slotId (number):
         """
         return self._wrapper.__post('/topology/operations/reserveResources', **{'group': group, 'count': count, 'resourceType': resourceType, 'slotId': slotId})
 
@@ -1633,8 +1568,8 @@ class BPS(object):
         Sets the card fanout of a board
         :param board (number): Slot ID.
         :param fanid (number): The fan type represented by an integer id.
-        		Get card specific fanout modes by calling 'topology.getFanoutModes(<card_id>)'. 
-        		For CloudStorm: 0(100G), 1(40G), 2(25G), 3(10G), 4(50G). 
+        		Get card specific fanout modes by calling 'topology.getFanoutModes(<card_id>)'.
+        		For CloudStorm: 0(100G), 1(40G), 2(25G), 3(10G), 4(50G).
         		For PerfectStorm 40G: 0(40G), 1(10G).
         		For PerfectStorm 100G: 0(100G), 1(40G), 2(10G)
         """
@@ -1646,8 +1581,8 @@ class BPS(object):
         """
         Sets the card mode of a board.
         :param board (number): Slot ID.
-        :param mode (number): The new mode: 10(BPS-L23), 7(BPS L4-7), 3(IxLoad), 
-        		11(BPS QT L2-3), 12(BPS QT L4-7) 
+        :param mode (number): The new mode: 10(BPS-L23), 7(BPS L4-7), 3(IxLoad),
+        		11(BPS QT L2-3), 12(BPS QT L4-7)
         """
         return self._wrapper.__post('/topology/operations/setCardMode', **{'board': board, 'mode': mode})
 
@@ -1667,7 +1602,7 @@ class BPS(object):
         """
         Enables/Disables the performance acceleration for a BPS VE blade.
         :param board (number): Slot ID.
-        :param perfacc (bool): Boolean value: 'True' to enable the performance Acceleration and 'False' otherwise. 
+        :param perfacc (bool): Boolean value: 'True' to enable the performance Acceleration and 'False' otherwise.
         """
         return self._wrapper.__post('/topology/operations/setPerfAcc', **{'board': board, 'perfacc': perfacc})
 
@@ -1676,9 +1611,9 @@ class BPS(object):
     def _topology_operations_setPortFanoutMode(self, board, port, mode):
         """
         Switch port fan-out mode.
-        :param board (number): 
-        :param port (string): 
-        :param mode (string): 
+        :param board (number):
+        :param port (string):
+        :param mode (string):
         """
         return self._wrapper.__post('/topology/operations/setPortFanoutMode', **{'board': board, 'port': port, 'mode': mode})
 
@@ -1686,11 +1621,11 @@ class BPS(object):
     @staticmethod
     def _topology_operations_setPortSettings(self, linkState, autoNegotiation, precoder, slotId, portId):
         """
-        :param linkState (string): 
-        :param autoNegotiation (bool): 
-        :param precoder (bool): 
-        :param slotId (number): 
-        :param portId (string): 
+        :param linkState (string):
+        :param autoNegotiation (bool):
+        :param precoder (bool):
+        :param slotId (number):
+        :param portId (string):
         """
         return self._wrapper.__post('/topology/operations/setPortSettings', **{'linkState': linkState, 'autoNegotiation': autoNegotiation, 'precoder': precoder, 'slotId': slotId, 'portId': portId})
 
@@ -1699,8 +1634,8 @@ class BPS(object):
     def _topology_operations_softReboot(self, board, cnId):
         """
         Reboots the metwork processors on the given card card. Only available for APS cards.
-        :param board (number): 
-        :param cnId (string): 
+        :param board (number):
+        :param cnId (string):
         """
         return self._wrapper.__post('/topology/operations/softReboot', **{'board': board, 'cnId': cnId})
 
@@ -1717,10 +1652,10 @@ class BPS(object):
     @staticmethod
     def _topology_operations_unreserve(self, unreservation):
         """
-        :param unreservation (list): 
+        :param unreservation (list):
                list of object with fields
-                      slot (number): 
-                      port (number): 
+                      slot (number):
+                      port (number):
         """
         return self._wrapper.__post('/topology/operations/unreserve', **{'unreservation': unreservation})
 
@@ -1791,8 +1726,6 @@ class DataModelMeta(type):
                 }
             },
             'operations': {
-                'configPurge': [{
-                }],
                 'exportAllTests': [{
                 }],
                 'importAllTests': [{
@@ -1867,14 +1800,6 @@ class DataModelMeta(type):
                 },
                 'lockedBy': {
                 },
-                'meta': {
-                    'info': [{
-                        'name': {
-                        },
-                        'value': {
-                        }
-                    }]
-                },
                 'revision': {
                 },
                 'softwareUpdate': {
@@ -1936,14 +1861,6 @@ class DataModelMeta(type):
             },
             'lockedBy': {
             },
-            'meta': {
-                'info': [{
-                    'name': {
-                    },
-                    'value': {
-                    }
-                }]
-            },
             'name': {
             },
             'operations': {
@@ -1994,14 +1911,6 @@ class DataModelMeta(type):
                 'label': {
                 },
                 'lockedBy': {
-                },
-                'meta': {
-                    'info': [{
-                        'name': {
-                        },
-                        'value': {
-                        }
-                    }]
                 },
                 'name': {
                 },
@@ -2057,14 +1966,6 @@ class DataModelMeta(type):
             'label': {
             },
             'lockedBy': {
-            },
-            'meta': {
-                'info': [{
-                    'name': {
-                    },
-                    'value': {
-                    }
-                }]
             },
             'name': {
             },
@@ -2606,14 +2507,6 @@ class DataModelMeta(type):
             },
             'lockedBy': {
             },
-            'meta': {
-                'info': [{
-                    'name': {
-                    },
-                    'value': {
-                    }
-                }]
-            },
             'name': {
             },
             'operations': {
@@ -2648,14 +2541,6 @@ class DataModelMeta(type):
             },
             'lockedBy': {
             },
-            'meta': {
-                'info': [{
-                    'name': {
-                    },
-                    'value': {
-                    }
-                }]
-            },
             'name': {
             },
             'operations': {
@@ -2670,8 +2555,6 @@ class DataModelMeta(type):
                 'saveAs': [{
                 }],
                 'search': [{
-                }],
-                'searchDynamic': [{
                 }]
             },
             'phase': [{
@@ -2710,14 +2593,6 @@ class DataModelMeta(type):
                 'label': {
                 },
                 'lockedBy': {
-                },
-                'meta': {
-                    'info': [{
-                        'name': {
-                        },
-                        'value': {
-                        }
-                    }]
                 },
                 'name': {
                 },
@@ -2849,14 +2724,6 @@ class DataModelMeta(type):
             'label': {
             },
             'lockedBy': {
-            },
-            'meta': {
-                'info': [{
-                    'name': {
-                    },
-                    'value': {
-                    }
-                }]
             },
             'modelDefinition': {
             },
@@ -3170,10 +3037,6 @@ class DataModelMeta(type):
                     },
                     'netmask': {
                     },
-                    'peer_ip_address': {
-                    },
-                    'remote_fixed': {
-                    },
                     'vni_base': {
                     },
                     'vni_count': {
@@ -3378,11 +3241,7 @@ class DataModelMeta(type):
                     },
                     'ip_address': {
                     },
-                    'peer_ip_address': {
-                    },
                     'prefix_length': {
-                    },
-                    'remote_fixed': {
                     },
                     'vni_base': {
                     },
@@ -3398,8 +3257,6 @@ class DataModelMeta(type):
                     },
                     'gateway_ip_address': {
                     },
-                    'gateway_mac_address': {
-                    },
                     'id': {
                     },
                     'ip_address': {
@@ -3413,6 +3270,8 @@ class DataModelMeta(type):
                     'proxy': {
                     },
                     'tags': {
+                    },
+                    'tep_vni_mapping': {
                     }
                 }],
                 'ip6_router': [{
@@ -3580,8 +3439,6 @@ class DataModelMeta(type):
                     },
                     'gateway_ip_address': {
                     },
-                    'gateway_mac_address': {
-                    },
                     'id': {
                     },
                     'ip_address': {
@@ -3595,6 +3452,8 @@ class DataModelMeta(type):
                     'proxy': {
                     },
                     'tags': {
+                    },
+                    'tep_vni_mapping': {
                     }
                 }],
                 'ip_router': [{
@@ -3829,14 +3688,6 @@ class DataModelMeta(type):
                     'file': {
                     },
                     'id': {
-                    },
-                    'operations': {
-                        'deletePathFile': [{
-                        }],
-                        'importPathFile': [{
-                        }],
-                        'listPathFile': [{
-                        }]
                     },
                     'source_container': {
                     },
@@ -4150,14 +4001,6 @@ class DataModelMeta(type):
                     },
                     'lockedBy': {
                     },
-                    'meta': {
-                        'info': [{
-                            'name': {
-                            },
-                            'value': {
-                            }
-                        }]
-                    },
                     'name': {
                     },
                     'networkModel': {
@@ -4468,10 +4311,6 @@ class DataModelMeta(type):
                             },
                             'netmask': {
                             },
-                            'peer_ip_address': {
-                            },
-                            'remote_fixed': {
-                            },
                             'vni_base': {
                             },
                             'vni_count': {
@@ -4676,11 +4515,7 @@ class DataModelMeta(type):
                             },
                             'ip_address': {
                             },
-                            'peer_ip_address': {
-                            },
                             'prefix_length': {
-                            },
-                            'remote_fixed': {
                             },
                             'vni_base': {
                             },
@@ -4696,8 +4531,6 @@ class DataModelMeta(type):
                             },
                             'gateway_ip_address': {
                             },
-                            'gateway_mac_address': {
-                            },
                             'id': {
                             },
                             'ip_address': {
@@ -4711,6 +4544,8 @@ class DataModelMeta(type):
                             'proxy': {
                             },
                             'tags': {
+                            },
+                            'tep_vni_mapping': {
                             }
                         }],
                         'ip6_router': [{
@@ -4878,8 +4713,6 @@ class DataModelMeta(type):
                             },
                             'gateway_ip_address': {
                             },
-                            'gateway_mac_address': {
-                            },
                             'id': {
                             },
                             'ip_address': {
@@ -4893,6 +4726,8 @@ class DataModelMeta(type):
                             'proxy': {
                             },
                             'tags': {
+                            },
+                            'tep_vni_mapping': {
                             }
                         }],
                         'ip_router': [{
@@ -5498,14 +5333,6 @@ class DataModelMeta(type):
                     },
                     'lockedBy': {
                     },
-                    'meta': {
-                        'info': [{
-                            'name': {
-                            },
-                            'value': {
-                            }
-                        }]
-                    },
                     'revision': {
                     }
                 }],
@@ -5551,14 +5378,6 @@ class DataModelMeta(type):
             'label': {
             },
             'lockedBy': {
-            },
-            'meta': {
-                'info': [{
-                    'name': {
-                    },
-                    'value': {
-                    }
-                }]
             },
             'name': {
             },
@@ -5621,6 +5440,10 @@ class DataModelMeta(type):
                 }],
                 'severity': {
                 },
+                'strike': {
+                },
+                'strikeset': {
+                },
                 'variants': {
                 },
                 'year': {
@@ -5669,20 +5492,18 @@ class DataModelMeta(type):
         },
         'superflow': {
             'actions': [{
-                'actionInfo': {
-                    'settings': [{
-                        'description': {
-                        },
-                        'label': {
-                        },
-                        'name': {
-                        },
-                        'realtimeGroup': {
-                        },
-                        'units': {
-                        }
-                    }]
-                },
+                'actionInfo': [{
+                    'description': {
+                    },
+                    'label': {
+                    },
+                    'name': {
+                    },
+                    'realtimeGroup': {
+                    },
+                    'units': {
+                    }
+                }],
                 'exflows': {
                 },
                 'flowid': {
@@ -5699,32 +5520,18 @@ class DataModelMeta(type):
                 },
                 'operations': {
                     'getActionChoices': [{
-                        'settings': [{
-                            'description': {
-                            },
-                            'label': {
-                            },
-                            'name': {
-                            },
-                            'realtimeGroup': {
-                            },
-                            'units': {
-                            }
-                        }]
                     }],
                     'getActionInfo': [{
-                        'settings': [{
-                            'description': {
-                            },
-                            'label': {
-                            },
-                            'name': {
-                            },
-                            'realtimeGroup': {
-                            },
-                            'units': {
-                            }
-                        }]
+                        'description': {
+                        },
+                        'label': {
+                        },
+                        'name': {
+                        },
+                        'realtimeGroup': {
+                        },
+                        'units': {
+                        }
                     }]
                 },
                 'params': {
@@ -5779,14 +5586,6 @@ class DataModelMeta(type):
                         },
                         'lockedBy': {
                         },
-                        'meta': {
-                            'info': [{
-                                'name': {
-                                },
-                                'value': {
-                                }
-                            }]
-                        },
                         'revision': {
                         }
                     }]
@@ -5815,14 +5614,6 @@ class DataModelMeta(type):
             'label': {
             },
             'lockedBy': {
-            },
-            'meta': {
-                'info': [{
-                    'name': {
-                    },
-                    'value': {
-                    }
-                }]
             },
             'name': {
             },
@@ -5977,10 +5768,6 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
-                        'enableIgnoreAdaptiveRampupSettings': {
-                        },
-                        'enableSuperflowTimeout': {
-                        },
                         'engine': {
                         },
                         'max': {
@@ -5998,8 +5785,6 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
-                        },
-                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -6161,10 +5946,6 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
-                        'enableIgnoreAdaptiveRampupSettings': {
-                        },
-                        'enableSuperflowTimeout': {
-                        },
                         'engine': {
                         },
                         'max': {
@@ -6182,8 +5963,6 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
-                        },
-                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -6817,10 +6596,6 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
-                        'enableIgnoreAdaptiveRampupSettings': {
-                        },
-                        'enableSuperflowTimeout': {
-                        },
                         'engine': {
                         },
                         'max': {
@@ -6838,8 +6613,6 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
-                        },
-                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -6993,10 +6766,6 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
-                        'enableIgnoreAdaptiveRampupSettings': {
-                        },
-                        'enableSuperflowTimeout': {
-                        },
                         'engine': {
                         },
                         'max': {
@@ -7014,8 +6783,6 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
-                        },
-                        'valueSuperflowTimeout': {
                         }
                     },
                     'sfratescalefactor': {
@@ -7179,10 +6946,6 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
-                        'enableIgnoreAdaptiveRampupSettings': {
-                        },
-                        'enableSuperflowTimeout': {
-                        },
                         'engine': {
                         },
                         'max': {
@@ -7200,8 +6963,6 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
-                        },
-                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -7489,10 +7250,6 @@ class DataModelMeta(type):
                         },
                         'emphasis': {
                         },
-                        'enableIgnoreAdaptiveRampupSettings': {
-                        },
-                        'enableSuperflowTimeout': {
-                        },
                         'engine': {
                         },
                         'max': {
@@ -7510,8 +7267,6 @@ class DataModelMeta(type):
                         'targetMatches': {
                         },
                         'targetPerSecond': {
-                        },
-                        'valueSuperflowTimeout': {
                         }
                     },
                     'srcPortDist': {
@@ -7590,14 +7345,6 @@ class DataModelMeta(type):
                 'label': {
                 },
                 'lockedBy': {
-                },
-                'meta': {
-                    'info': [{
-                        'name': {
-                        },
-                        'value': {
-                        }
-                    }]
                 },
                 'operations': {
                     'getComponentPreset': [{
@@ -7695,10 +7442,6 @@ class DataModelMeta(type):
                                 },
                                 'emphasis': {
                                 },
-                                'enableIgnoreAdaptiveRampupSettings': {
-                                },
-                                'enableSuperflowTimeout': {
-                                },
                                 'engine': {
                                 },
                                 'max': {
@@ -7716,8 +7459,6 @@ class DataModelMeta(type):
                                 'targetMatches': {
                                 },
                                 'targetPerSecond': {
-                                },
-                                'valueSuperflowTimeout': {
                                 }
                             },
                             'srcPortDist': {
@@ -7879,10 +7620,6 @@ class DataModelMeta(type):
                                 },
                                 'emphasis': {
                                 },
-                                'enableIgnoreAdaptiveRampupSettings': {
-                                },
-                                'enableSuperflowTimeout': {
-                                },
                                 'engine': {
                                 },
                                 'max': {
@@ -7900,8 +7637,6 @@ class DataModelMeta(type):
                                 'targetMatches': {
                                 },
                                 'targetPerSecond': {
-                                },
-                                'valueSuperflowTimeout': {
                                 }
                             },
                             'srcPortDist': {
@@ -8535,10 +8270,6 @@ class DataModelMeta(type):
                                 },
                                 'emphasis': {
                                 },
-                                'enableIgnoreAdaptiveRampupSettings': {
-                                },
-                                'enableSuperflowTimeout': {
-                                },
                                 'engine': {
                                 },
                                 'max': {
@@ -8556,8 +8287,6 @@ class DataModelMeta(type):
                                 'targetMatches': {
                                 },
                                 'targetPerSecond': {
-                                },
-                                'valueSuperflowTimeout': {
                                 }
                             },
                             'srcPortDist': {
@@ -8711,10 +8440,6 @@ class DataModelMeta(type):
                                 },
                                 'emphasis': {
                                 },
-                                'enableIgnoreAdaptiveRampupSettings': {
-                                },
-                                'enableSuperflowTimeout': {
-                                },
                                 'engine': {
                                 },
                                 'max': {
@@ -8732,8 +8457,6 @@ class DataModelMeta(type):
                                 'targetMatches': {
                                 },
                                 'targetPerSecond': {
-                                },
-                                'valueSuperflowTimeout': {
                                 }
                             },
                             'sfratescalefactor': {
@@ -8897,10 +8620,6 @@ class DataModelMeta(type):
                                 },
                                 'emphasis': {
                                 },
-                                'enableIgnoreAdaptiveRampupSettings': {
-                                },
-                                'enableSuperflowTimeout': {
-                                },
                                 'engine': {
                                 },
                                 'max': {
@@ -8918,8 +8637,6 @@ class DataModelMeta(type):
                                 'targetMatches': {
                                 },
                                 'targetPerSecond': {
-                                },
-                                'valueSuperflowTimeout': {
                                 }
                             },
                             'srcPortDist': {
@@ -9207,10 +8924,6 @@ class DataModelMeta(type):
                                 },
                                 'emphasis': {
                                 },
-                                'enableIgnoreAdaptiveRampupSettings': {
-                                },
-                                'enableSuperflowTimeout': {
-                                },
                                 'engine': {
                                 },
                                 'max': {
@@ -9228,8 +8941,6 @@ class DataModelMeta(type):
                                 'targetMatches': {
                                 },
                                 'targetPerSecond': {
-                                },
-                                'valueSuperflowTimeout': {
                                 }
                             },
                             'srcPortDist': {
@@ -9308,14 +9019,6 @@ class DataModelMeta(type):
                         'label': {
                         },
                         'lockedBy': {
-                        },
-                        'meta': {
-                            'info': [{
-                                'name': {
-                                },
-                                'value': {
-                                }
-                            }]
                         },
                         'originalPreset': {
                         },
@@ -9407,14 +9110,6 @@ class DataModelMeta(type):
             'lastrunby': {
             },
             'lockedBy': {
-            },
-            'meta': {
-                'info': [{
-                    'name': {
-                    },
-                    'value': {
-                    }
-                }]
             },
             'name': {
             },
@@ -9508,8 +9203,6 @@ class DataModelMeta(type):
                     },
                     'current': {
                     },
-                    'enabled': {
-                    },
                     'original': {
                     }
                 },
@@ -9517,8 +9210,6 @@ class DataModelMeta(type):
                     'content': {
                     },
                     'current': {
-                    },
-                    'enabled': {
                     },
                     'original': {
                     }
@@ -9528,8 +9219,6 @@ class DataModelMeta(type):
                     },
                     'current': {
                     },
-                    'enabled': {
-                    },
                     'original': {
                     }
                 },
@@ -9537,8 +9226,6 @@ class DataModelMeta(type):
                     'content': {
                     },
                     'current': {
-                    },
-                    'enabled': {
                     },
                     'original': {
                     }
@@ -9548,8 +9235,6 @@ class DataModelMeta(type):
                     },
                     'current': {
                     },
-                    'enabled': {
-                    },
                     'original': {
                     }
                 },
@@ -9557,8 +9242,6 @@ class DataModelMeta(type):
                     'content': {
                     },
                     'current': {
-                    },
-                    'enabled': {
                     },
                     'original': {
                     }
@@ -9609,14 +9292,6 @@ class DataModelMeta(type):
                 },
                 'cnSlotNo': {
                 },
-                'conditions': [{
-                    'message': {
-                    },
-                    'status': {
-                    },
-                    'type': {
-                    }
-                }],
                 'firmwareUpgrade': {
                 },
                 'licensed': {
@@ -9633,17 +9308,7 @@ class DataModelMeta(type):
                     'name': {
                     }
                 }],
-                'remoteInfo': {
-                    'host': {
-                    },
-                    'slotId': {
-                    },
-                    'state': {
-                    }
-                },
                 'state': {
-                },
-                'stateDescription': {
                 }
             }],
             'ixos': {
@@ -9660,28 +9325,20 @@ class DataModelMeta(type):
                 'exportCapture': [{
                 }],
                 'getFanoutModes': [{
-                    'fanouts': [{
-                        'active': {
-                        },
-                        'id': {
+                    'cardModel': {
+                    },
+                    'fanout': [{
+                        'fanoutId': {
                         },
                         'name': {
-                        },
-                        'speedMode': {
                         }
-                    }],
-                    'model': {
-                    }
+                    }]
                 }],
                 'getPortAvailableModes': [{
                     'modes': [{
-                        'active': {
-                        },
-                        'id': {
+                        'fanoutId': {
                         },
                         'name': {
-                        },
-                        'speedMode': {
                         }
                     }],
                     'port': {
@@ -9781,14 +9438,6 @@ class DataModelMeta(type):
             'serialNumber': {
             },
             'slot': [{
-                'conditions': [{
-                    'message': {
-                    },
-                    'status': {
-                    },
-                    'type': {
-                    }
-                }],
                 'firmwareUpgrade': {
                 },
                 'fpga': [{
@@ -9810,8 +9459,6 @@ class DataModelMeta(type):
                 'id': {
                 },
                 'interfaceCount': {
-                },
-                'ipAddress': {
                 },
                 'mode': {
                 },
@@ -9852,8 +9499,6 @@ class DataModelMeta(type):
                     },
                     'capture': {
                     },
-                    'capture_group': {
-                    },
                     'capturing': {
                     },
                     'currentMode': {
@@ -9891,17 +9536,9 @@ class DataModelMeta(type):
                         },
                         'rxframes': {
                         },
-                        'rxreason': {
-                        },
-                        'rxstate': {
-                        },
                         'txbytes': {
                         },
                         'txframes': {
-                        },
-                        'txreason': {
-                        },
-                        'txstate': {
                         }
                     }],
                     'portGroup': {
@@ -9912,43 +9549,9 @@ class DataModelMeta(type):
                     },
                     'reservedBy': {
                     },
-                    'reservedLinkSettings': {
-                        'auto': {
-                        },
-                        'capture': {
-                        },
-                        'fullduplex': {
-                        },
-                        'ignorepause': {
-                        },
-                        'media': {
-                        },
-                        'mtu': {
-                        },
-                        'precoder': {
-                        },
-                        'speed': {
-                        }
-                    },
-                    'software_capture': {
-                    },
                     'speed': {
                     },
                     'state': {
-                    },
-                    'transceiver': {
-                        '_id': {
-                        },
-                        'cableLength': {
-                        },
-                        'identifier': {
-                        },
-                        'mediaType': {
-                        },
-                        'vendor': {
-                        },
-                        'vendorPartNumber': {
-                        }
                     }
                 }],
                 'remoteInfo': {
@@ -9962,10 +9565,6 @@ class DataModelMeta(type):
                 'serialNumber': {
                 },
                 'state': {
-                },
-                'stateDescription': {
-                },
-                'supportsL23': {
                 }
             }]
         }
@@ -10012,13 +9611,13 @@ class DataModelMeta(type):
     @staticmethod
     def _decorate_model_object_operations(data_model, data_model_path, obj):
         if 'operations' not in data_model:
-           return
+            return
         for operation in data_model['operations']:
-           if obj.__full_path__().replace("/", "") == '':
-               continue
-           method_name = data_model_path.replace("/", "_") + '_operations_' + operation
-           setattr(obj, operation, obj._wrapper.__getattribute__(method_name).__get__(obj))
-           setattr(getattr(obj, operation).__func__, '__name__', operation)
+            if obj.__full_path__().replace("/", "") == '':
+                continue
+            method_name = data_model_path.replace("/", "_") + '_operations_' + operation
+            setattr(obj, operation, obj._wrapper.__getattribute__(method_name).__get__(obj))
+            setattr(getattr(obj, operation).__func__, '__name__', operation)
 
     @staticmethod
     def _get_from_model(path):
@@ -10034,8 +9633,7 @@ class DataModelMeta(type):
             model_path = model_path + "/" + path_part
         return (model_path, model_data)
 
-class DataModelProxy(object):
-    __metaclass__ = DataModelMeta
+class DataModelProxy(object, metaclass = DataModelMeta):
 
     def __init__(self, wrapper, name,  path='', model_path=None):
         self.__cache = {}
