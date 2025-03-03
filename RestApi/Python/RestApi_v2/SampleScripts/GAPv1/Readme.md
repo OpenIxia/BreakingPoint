@@ -4,23 +4,28 @@ This tool implements the Gap Theorem for network traffic calibration, allowing p
 Gap Theorem Explained
 The Gap Theorem provides a mathematical model for achieving a specific Average Packet Size (APS) by mixing traffic from two components with different packet sizes:
 Principle: By combining traffic from a "low APS" component and a "high APS" component in the right proportions, any target APS between them can be achieved.
-Formula:
+
+#Formula:
+
 Tput_high = (APS_high * (APS_desired - APS_low)) / (APS_desired * (APS_high - APS_low)) * Tput_total
 Tput_low = (APS_low * (APS_high - APS_desired)) / (APS_desired * (APS_high - APS_low)) * Tput_total
-Variables:
+
+#Variables:
 APS_low: Average packet size of the low component
 APS_high: Average packet size of the high component
 APS_desired: Target average packet size
 Tput_total: Total throughput (sum of both components)
 Tput_low: Calculated throughput for low component
 Tput_high: Calculated throughput for high component
-Features
+
+#Features
 Automated Calibration: Automatically calibrates low and high components
 Validation Testing: Validates the calibration with a combined test
 Detailed Reporting: Generates comprehensive reports with all test metrics
 Log File Generation: Saves all test results to reports/calibration_validation.log
 Error Handling: Robust error handling for test failures
-Usage
+
+#Usage
 Prerequisites
 Python 3.6+
 BreakingPoint API access
