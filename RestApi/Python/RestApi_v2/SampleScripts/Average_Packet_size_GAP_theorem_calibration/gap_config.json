@@ -1,0 +1,62 @@
+[
+    {
+        "application_profile": "adaptive-gap-ent-datacenter",
+        "aps_desired": 450,
+        "slot_numbers": [7],
+        "port_list": [0, 1],
+        "test_name": "adaptive-GAP-fixed-rampup",
+        "bps_host": "10.36.66.31",
+        "bps_user": "admin",
+        "bps_pass": "admin",
+        "bpt_filename": "adaptive-GAP-fixed-rampup.bpt",
+        "island": "GAP",
+        "island_path": ".",
+        "tolerance_percentage": 3,
+        "group": 30,
+        "components": {
+            "low": {
+                "id": "1",
+                "name": "component1_1"
+            },
+            "high": {
+                "id": "2",
+                "name": "component1_2"
+            }
+        },
+        "poll_interval": 5,
+        "cpu_threshold": 95.0,
+        "use_previous_reports": false,
+        "low_test_id": "TEST-171",
+        "high_test_id" : "TEST-172"  
+    },
+    {
+        "application_profile": "adaptive-gap-ent-datacenter",
+        "aps_desired": 300,
+        "slot_numbers": [8],
+        "port_list": [0, 1],
+        "test_name": "adaptive-GAP-fixed-rampup",
+        "bps_host": "10.36.66.31",
+        "bps_user": "admin",
+        "bps_pass": "admin",
+        "island": "GAP",
+        "island_path": "D:\\work\\REST_API_v2\\GAP",
+        "bpt_filename": "adaptive-GAP-fixed-rampup.bpt",
+        "tolerance_percentage": 3,
+        "group": 30,
+        "components": {
+            "low": {
+                "id": "1",
+                "name": "component1_1"
+            },
+            "high": {
+                "id": "2",
+                "name": "component1_2"
+            }
+        },
+        "poll_interval": 5,
+        "cpu_threshold": 95.0,
+        "use_previous_reports": true,
+        "low_test_id": "TEST-171",
+        "high_test_id" : "TEST-172"  
+    }
+]
