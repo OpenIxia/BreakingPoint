@@ -16,7 +16,9 @@ The **Gap Theorem** provides a systematic method for achieving a target **Averag
 ✔️ **Logging** – Saves all test results in `reports/calibration_validation.log`.  
 ✔️ **Error Handling** – Detects and manages test failures seamlessly.  
 
-## 🛠️ Usage
+## 🛠️ Usage and Assumption
+* Total throughput for calibration is considered to be lower value of both high and low component. 
+
 
 ### 📌 Prerequisites
 - Python **3.6+**
