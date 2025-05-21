@@ -11,7 +11,7 @@ Actions:
     8.  Wait for the test to finish
     9.  Get test result
     10. Get and print the Synopsis page from report
-    11. Unreserve ports resources
+    11. Unreserve ports and resources
     12. Logout
 """
 
@@ -23,8 +23,9 @@ import os
 # Add bps_restpy libpath *required if the library is not installed
 libpath = os.path.abspath(__file__+"/../../..")
 sys.path.insert(0, libpath)
-
-from bps_restpy.bps import BPS, pp  
+# pylint: disable=wrong-import-position
+# pylint: disable=import-error
+from bps_restpy.bps import BPS, pp  # noqa: E402
 
 ########################################
 

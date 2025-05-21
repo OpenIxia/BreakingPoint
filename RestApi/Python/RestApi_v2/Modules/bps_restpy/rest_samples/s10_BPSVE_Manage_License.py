@@ -7,8 +7,6 @@
 #   5. Activate deactivate licenses
 #   6. Check floating license feature statistics (check how many are available and taken)
 
-
-
 #================
 
 ########################################
@@ -16,11 +14,11 @@ import sys
 import os
 # Add bps_restpy libpath *required if the library is not installed
 libpath = os.path.abspath(__file__+"/../../..")
-sys.path.insert(0,libpath)
-
+libpath = os.path.abspath(__file__+"/../../")
+sys.path.insert(0, libpath)
 import logging
 
-from bps_restpy.bps import BPS, pp 
+from restPyWrapper3 import BPS, pp
 from bpsVELicense import BPSVELicenseManagement
 ########################################
 
@@ -32,9 +30,9 @@ from bpsVELicense import BPSVELicenseManagement
 bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
-
 mainLicenseServer = '<License_Server_IP/HOSTNAME>'
 activationCode = '<Activation_Code>'
+
 ########################################
 
 

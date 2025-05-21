@@ -2,8 +2,11 @@ import requests
 import json
 import pprint
 import base64
+import time
+from functools import wraps
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.poolmanager import PoolManager
+#from requests.packages.urllib3.poolmanager import PoolManager
+from urllib3.poolmanager import PoolManager #changed
 import ssl
 
 requests.packages.urllib3.disable_warnings()
@@ -15,7 +18,7 @@ class TlsAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block):
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block)
 
-### this BPS REST API wrapper is generated for version: 10.30.134-noarch-bps
+### this BPS REST API wrapper is generated for version: 11.0.309-noarch-bps
 class BPS(object):
 
     def __init__(self, host, user, password, checkVersion=True):
@@ -25,25 +28,40 @@ class BPS(object):
         self.sessionId = None
         self.session = requests.Session()
         self.session.mount('https://', TlsAdapter())
-        self.clientVersion = BPS.__lver('10.30')
+        self.clientVersion = BPS.__lver('11.0')
         self.serverVersions = None
         self.checkVersion = checkVersion
         self.printRequests = False
-        self.administration = DataModelProxy(wrapper=self, name='administration')
-        self.network = DataModelProxy(wrapper=self, name='network')
-        self.superflow = DataModelProxy(wrapper=self, name='superflow')
-        self.capture = DataModelProxy(wrapper=self, name='capture')
+        self.profiling_enabled = False
+        self.profiling_data = {}
         self.results = DataModelProxy(wrapper=self, name='results')
-        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
-        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
-        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
-        self.topology = DataModelProxy(wrapper=self, name='topology')
-        self.statistics = DataModelProxy(wrapper=self, name='statistics')
         self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
         self.reports = DataModelProxy(wrapper=self, name='reports')
+        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
+        self.superflow = DataModelProxy(wrapper=self, name='superflow')
+        self.statistics = DataModelProxy(wrapper=self, name='statistics')
+        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
+        self.capture = DataModelProxy(wrapper=self, name='capture')
+        self.administration = DataModelProxy(wrapper=self, name='administration')
+        self.topology = DataModelProxy(wrapper=self, name='topology')
+        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
         self.strikes = DataModelProxy(wrapper=self, name='strikes')
+        self.network = DataModelProxy(wrapper=self, name='network')
         self.evasionProfile = DataModelProxy(wrapper=self, name='evasionProfile')
         self.remote = DataModelProxy(wrapper=self, name='remote')
+
+    def ___timed(func):
+        @wraps(func)
+        def timed_wrapper(self, *args, **kwargs):
+            if not self.profiling_enabled: return func(self, *args, **kwargs)
+            start = time.perf_counter(); res = func(self, *args, **kwargs); end = time.perf_counter() - start
+            d = {}; pd = self.profiling_data
+            if func.__name__ not in pd: pd[func.__name__] = d
+            d = pd[func.__name__]; fname = str(args) + str(kwargs)
+            if fname not in d: d[fname] = []
+            d[fname].append(end)
+            return res
+        return timed_wrapper
 
     ### connect to the system
     def __connect(self):
@@ -108,11 +126,12 @@ class BPS(object):
             raise Exception({'status_code': r.status_code, 'content': self.__json_load(r)})
 
     ### Get from data model
-    def __get(self, path, responseDepth=None, **kwargs):
+    @___timed
+    def __get(self, path, responseDepth=None, headers=None, **kwargs):
         requestUrl = 'https://%s/bps/api/v2/core%s%s' % (self.host, path, '?responseDepth=%s' % responseDepth if responseDepth else '')
         for key, value in kwargs.items():
             requestUrl = requestUrl + "&%s=%s" % (key, value)
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json'} if headers is None else headers
         if self.printRequests:
             import re
             print("GET, %s, %s" %(re.sub(".*/bps/api/v2/core/", "", requestUrl), json.dumps(headers)))
@@ -156,6 +175,7 @@ class BPS(object):
         return x
 
     ### OPTIONS request
+    @___timed
     def __options(self, path):
         r = self.session.options('https://' + self.host + '/bps/api/v2/core/'+ path)
         if(r.status_code == 400):
@@ -167,6 +187,7 @@ class BPS(object):
         raise Exception({'status_code': r.status_code, 'content': self.__json_load(r)})
 
     ### Get from data model
+    @___timed
     def __patch(self, path, value):
         headers = {'content-type': 'application/json'}
         if self.printRequests:
@@ -176,6 +197,7 @@ class BPS(object):
             raise Exception({'status_code': r.status_code, 'content': self.__json_load(r)})
 
     ### generic post operation
+    @___timed
     def __post(self, path, **kwargs):
         requestUrl = 'https://' + self.host + '/bps/api/v2/core/' + path
         headers = {'content-type': 'application/json'}
@@ -191,6 +213,7 @@ class BPS(object):
         raise Exception({'status_code': r.status_code, 'content': self.__json_load(r)})
 
     ### Get from data model
+    @___timed
     def __put(self, path, value):
         headers = {'content-type': 'application/json'}
         if self.printRequests:
@@ -1265,14 +1288,15 @@ class BPS(object):
 
     ### Clones a component in the current working Test Model
     @staticmethod
-    def _testmodel_operations_clone(self, template, type, active):
+    def _testmodel_operations_clone(self, template, type, active, label=None):
         """
         Clones a component in the current working Test Model
         :param template (string): The ID of the test component to clone.
         :param type (string): Component Type: appsim, sesionsender ..
         :param active (bool): Set component enable (by default is active) or disable
+        :param label (string): Set the new name for the cloned component. Default value is empty string
         """
-        return self._wrapper.__post('/testmodel/operations/clone', **{'template': template, 'type': type, 'active': active})
+        return self._wrapper.__post('/testmodel/operations/clone', **{'template': template, 'type': type, 'active': active, 'label': label})
 
     ### Deletes a given Test Model from the database.
     @staticmethod
@@ -1480,6 +1504,21 @@ class BPS(object):
         :param resourceType (string): Resource type.
         """
         return self._wrapper.__post('/topology/operations/addResourceNote', **{'resourceId': resourceId, 'resourceType': resourceType})
+
+    ### Changes aspects (reservation parameters values) of existing reservation.Example: it can be changed the port capture flag. (enable / disable capture on a reserved port)
+    @staticmethod
+    def _topology_operations_changeReservation(self, reservation):
+        """
+        Changes aspects (reservation parameters values) of existing reservation.Example: it can be changed the port capture flag. (enable / disable capture on a reserved port)
+        :param reservation (list): List of reserved ports proposed to change aspects on.
+               list of object with fields
+                      group (number): 
+                      slot (number): Slot number. In case of a remote chassis the slot's 'id' value is changed. A new GET requests can retrieve the topology slots new info.
+                      port (string): 
+                      capture (bool): 
+                      number (number): The index to be reserved with
+        """
+        return self._wrapper.__post('/topology/operations/changeReservation', **{'reservation': reservation})
 
     ### Exports a port capture from a test run.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
@@ -1761,6 +1800,16 @@ class BPS(object):
             apiServerVersion = self.serverVersions['apiServer']
         print('Client version: %s \nServer version: %s' % (self.clientVersion, apiServerVersion))
 
+    def profiling_data_print(self):
+        for name, calls in self.profiling_data.items():
+            for args, dur in calls.items():
+                count = len(dur); avgVal = sum(dur) / count; minVal = min(dur); maxVal = max(dur)
+                print('{} {} sample size: {}, duration: avg={}, max={}, min={}'.format(name, args, count, avgVal, maxVal, minVal))
+
+    def profiling_enable(self, enabled):
+        if enabled and not self.profiling_enabled: self.profiling_data = {}
+        self.profiling_enabled = enabled
+
 class DataModelMeta(type):
     _dataModel = {
         'administration': {
@@ -2016,7 +2065,17 @@ class DataModelMeta(type):
                 'seed': {
                 },
                 'settings': [{
+                    'choice': [{
+                        'description': {
+                        },
+                        'label': {
+                        },
+                        'name': {
+                        }
+                    }],
                     'description': {
+                    },
+                    'groupName': {
                     },
                     'label': {
                     },
@@ -2579,7 +2638,17 @@ class DataModelMeta(type):
                 },
                 'operations': {
                     'getStrikeOptions': [{
+                        'choice': [{
+                            'description': {
+                            },
+                            'label': {
+                            },
+                            'name': {
+                            }
+                        }],
                         'description': {
+                        },
+                        'groupName': {
                         },
                         'label': {
                         },
@@ -5520,7 +5589,17 @@ class DataModelMeta(type):
                 'label': {
                 },
                 'statNames': [{
+                    'choice': [{
+                        'description': {
+                        },
+                        'label': {
+                        },
+                        'name': {
+                        }
+                    }],
                     'description': {
+                    },
+                    'groupName': {
                     },
                     'label': {
                     },
@@ -5530,7 +5609,9 @@ class DataModelMeta(type):
                     },
                     'units': {
                     }
-                }]
+                }],
+                'type': {
+                }
             }]
         },
         'strikeList': {
@@ -5671,7 +5752,17 @@ class DataModelMeta(type):
             'actions': [{
                 'actionInfo': {
                     'settings': [{
+                        'choice': [{
+                            'description': {
+                            },
+                            'label': {
+                            },
+                            'name': {
+                            }
+                        }],
                         'description': {
+                        },
+                        'groupName': {
                         },
                         'label': {
                         },
@@ -5700,7 +5791,17 @@ class DataModelMeta(type):
                 'operations': {
                     'getActionChoices': [{
                         'settings': [{
+                            'choice': [{
+                                'description': {
+                                },
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            }],
                             'description': {
+                            },
+                            'groupName': {
                             },
                             'label': {
                             },
@@ -5714,7 +5815,17 @@ class DataModelMeta(type):
                     }],
                     'getActionInfo': [{
                         'settings': [{
+                            'choice': [{
+                                'description': {
+                                },
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            }],
                             'description': {
+                            },
+                            'groupName': {
                             },
                             'label': {
                             },
@@ -5863,7 +5974,17 @@ class DataModelMeta(type):
             'seed': {
             },
             'settings': [{
+                'choice': [{
+                    'description': {
+                    },
+                    'label': {
+                    },
+                    'name': {
+                    }
+                }],
                 'description': {
+                },
+                'groupName': {
                 },
                 'label': {
                 },
@@ -9438,6 +9559,8 @@ class DataModelMeta(type):
                     },
                     'componentType': {
                         'label': {
+                        },
+                        'type': {
                         }
                     },
                     'dataIndex': {
@@ -9656,6 +9779,8 @@ class DataModelMeta(type):
                 'addPortNote': [{
                 }],
                 'addResourceNote': [{
+                }],
+                'changeReservation': [{
                 }],
                 'exportCapture': [{
                 }],

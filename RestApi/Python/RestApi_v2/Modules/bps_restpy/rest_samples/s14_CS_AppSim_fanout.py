@@ -1,13 +1,14 @@
 # Title:  Python Script Sample To Run a Canned Test.
 # Actions:
 #   1. Login to BPS box
-#   2. Reserve ports
-#   3. Load a test from the box and start the run
-#   4. Wait for the test to finish
-#   5. Get test result
-#   6. Get and print the Synopsis page from report
-#   7. Unreserve ports
-#   8. Logout
+#   2. Configure fanout settings from available options
+#   3. Reserve the configured ports for testing
+#   4. Load and execute a test from the box
+#   5. Wait for the test to finish
+#   6. Get and display test results and statistics
+#   7. Generate a test report with Synopsis of results
+#   8. Unreserve ports
+#   9. Logout
 
 
 #================
@@ -33,7 +34,7 @@ bpsuser     = 'bps user'
 bpspass     = 'bps pass'
 
 slot_number = 3
-port_list   = [0, 1]
+port_list   = [0, 4]
 
 ########################################
 
