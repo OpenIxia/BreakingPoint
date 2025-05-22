@@ -102,7 +102,7 @@ class BPS(object):
             raise Exception('Failed disconnecting from %s: (%s, %s)' % (self.host, r.status_code, r.content))
 
     ### generic post operation
-    def __export(self, path, f**kwargs):
+    def __export(self, path, **kwargs):
         requestUrl = 'https://' + self.host + '/bps/api/v2/core/' + path
         if self.printRequests:
             import re
