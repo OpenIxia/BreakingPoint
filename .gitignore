@@ -3,3 +3,14 @@
 .venv
 launch.json
 settings.json
+
+venv/
+env/
+.DS_Store
+DS_Store/
+.DS_Store?
+**/.DS_Store
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store

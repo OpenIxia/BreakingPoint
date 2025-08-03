@@ -6,6 +6,7 @@
 #   4. Add elements and properties
 #   5. Asign the network to a test model
 #   6. Saving the test model
+#   7. Logout
 
 
 #================

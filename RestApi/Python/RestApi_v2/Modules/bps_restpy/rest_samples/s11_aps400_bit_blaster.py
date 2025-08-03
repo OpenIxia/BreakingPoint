@@ -12,7 +12,7 @@ Actions:
     9.  Wait for the test to finish
     10. Get test result
     11. Get and print the Synopsis page from report
-    12. Unreserve ports resources
+    12. Unreserve ports and resources
     13. Logout
 """
 
