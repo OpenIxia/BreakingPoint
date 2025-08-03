@@ -1,4 +1,4 @@
-# REST-API BreakingPoint - Ixia a Keysight Business (Recommended BreakingPoint Framework Version 9.10)
+# REST-API BreakingPoint - Ixia a Keysight Business (Recommended BreakingPoint Framework Version 11.0+)
 
 Welcome to the BreakingPoint Official Community Github. 
 This location has the purpose of aggregatng various scripts that can get you started on cloud or on prem virtualization deployment, administration, execution and results analysis.
