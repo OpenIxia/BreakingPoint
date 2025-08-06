@@ -1,0 +1,50 @@
+#Starting with BPS 10.0 we can user bps_restpy to manage the sessions 
+# The restapi browser can be use by admin users to check and manage session as well
+from bps_restpy.bps import BPS, pp
+
+
+# Initialize connection
+bps_system  = '<BPS_BOX_IP/HOSTNAME>'
+bpsuser     = 'bps user'
+bpspass     = 'bps pass'
+
+# Create BPS instance
+bps = BPS(bps_system, bpsuser, bpspass)
+
+# Login to establish connection
+#Optionaly customize the session inactivity timeout to 60 seconds otherwise defaults to 1 hour
+bps.login(inactivityTimeout = 60)
+print("Successfully logged in")
+    
+# Check current session status
+try:
+    # Get sessions information 
+    sessions_info = bps.administration.sessions.get()
+    print("Sessions is active:")
+    pp(sessions_info) 
+
+except Exception as session_error:
+    print(f"Error checking session status: {session_error}")
+
+#Check each session inactivity timeout. Close sessions that are inactive for more than 3500 seconds
+for session in sessions_info:
+    if session['inactivity'] > 3500:
+        print(
+            f"!!! Killing {session['type']} session prematurely "
+            f"user: {session['user']} "
+            f"session ID: {session['session']}."
+            f"Open for: {session['age']} seconds and "
+            f"inactive for: {session['inactivity']} seconds (threshold: 3500 seconds)"
+        )
+        bps.administration.sessions.close(session.id)
+    else:
+        print(
+            f"{session['type']} session for user {session['user']}, "
+            f"Session ID: {session['session']}, "
+            f"open for: {session['age']} seconds."
+            f"Will timeout in: {session['inactivityTimeout'] - session['inactivity']} seconds if kept inactive."
+        )
+
+# Logout to end the session
+bps.logout()
+print("Logged out successfully")
