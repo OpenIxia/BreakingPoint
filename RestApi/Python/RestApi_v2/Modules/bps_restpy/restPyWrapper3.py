@@ -5,7 +5,7 @@ import base64
 import time
 from functools import wraps
 from requests.adapters import HTTPAdapter
-from urllib3.poolmanager import PoolManager
+from requests.packages.urllib3.poolmanager import PoolManager
 import ssl
 
 requests.packages.urllib3.disable_warnings()
@@ -17,7 +17,7 @@ class TlsAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block):
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block)
 
-### this BPS REST API wrapper is generated for version: 11.0.309-noarch-bps
+### this BPS REST API wrapper is generated for version: 26.0.5-noarch-bps
 class BPS(object):
 
     def __init__(self, host, user, password, checkVersion=True):
@@ -27,27 +27,29 @@ class BPS(object):
         self.sessionId = None
         self.session = requests.Session()
         self.session.mount('https://', TlsAdapter())
-        self.clientVersion = BPS.__lver('11.0')
+        self.clientVersion = BPS.__lver('26.0')
         self.serverVersions = None
         self.checkVersion = checkVersion
         self.printRequests = False
         self.profiling_enabled = False
         self.profiling_data = {}
-        self.results = DataModelProxy(wrapper=self, name='results')
-        self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
-        self.reports = DataModelProxy(wrapper=self, name='reports')
-        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
-        self.superflow = DataModelProxy(wrapper=self, name='superflow')
-        self.statistics = DataModelProxy(wrapper=self, name='statistics')
-        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
-        self.capture = DataModelProxy(wrapper=self, name='capture')
-        self.administration = DataModelProxy(wrapper=self, name='administration')
-        self.topology = DataModelProxy(wrapper=self, name='topology')
-        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
-        self.strikes = DataModelProxy(wrapper=self, name='strikes')
         self.network = DataModelProxy(wrapper=self, name='network')
+        self.administration = DataModelProxy(wrapper=self, name='administration')
+        self.strikes = DataModelProxy(wrapper=self, name='strikes')
+        self.testlab = DataModelProxy(wrapper=self, name='testlab')
         self.evasionProfile = DataModelProxy(wrapper=self, name='evasionProfile')
+        self.superflow = DataModelProxy(wrapper=self, name='superflow')
+        self.capture = DataModelProxy(wrapper=self, name='capture')
+        self.testmodel = DataModelProxy(wrapper=self, name='testmodel')
+        self.results = DataModelProxy(wrapper=self, name='results')
+        self.statistics = DataModelProxy(wrapper=self, name='statistics')
+        self.strikeList = DataModelProxy(wrapper=self, name='strikeList')
+        self.topology = DataModelProxy(wrapper=self, name='topology')
+        self.reports = DataModelProxy(wrapper=self, name='reports')
+        self.loadProfile = DataModelProxy(wrapper=self, name='loadProfile')
+        self.appProfile = DataModelProxy(wrapper=self, name='appProfile')
         self.remote = DataModelProxy(wrapper=self, name='remote')
+        self.dut = DataModelProxy(wrapper=self, name='dut')
 
     def ___timed(func):
         @wraps(func)
@@ -113,7 +115,7 @@ class BPS(object):
             content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
             raise Exception({'status_code': r.status_code, 'content': content_message})
         if(r.status_code == 200) or r.status_code == 204:
-            get_url = 'https://' + self.host + r.content.decode()
+            get_url = 'https://' + self.host + self.__json_load(r)['url']
             get_head = {'content-type': 'application/json'}
             get_req = self.session.get(url = get_url, verify = False, headers = get_head)
             with open(kwargs['filepath'], 'wb') as fd:
@@ -154,7 +156,7 @@ class BPS(object):
             content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
             raise Exception({'status_code': r.status_code, 'content': content_message})
         if(r.status_code in [200, 204]):
-            return self.__json_load(r)
+            return (lambda status: status['result'] if 'result' in status else status)(self.__json_load(r))
         raise Exception({'status_code': r.status_code, 'content': self.__json_load(r)})
 
     def __json_load(self, r):
@@ -177,7 +179,7 @@ class BPS(object):
     ### OPTIONS request
     @___timed
     def __options(self, path):
-        r = self.session.options('https://' + self.host + '/bps/api/v2/core/'+ path)
+        r = self.session.options('https://' + self.host + '/bps/api/v2/core/'+ path, verify=False)
         if(r.status_code == 400):
             methodCall = '%s'%path.replace('/', '.').replace('.operations', '')
             content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
@@ -247,6 +249,18 @@ class BPS(object):
         """
         return self._wrapper.__post('/administration/operations/configPurge', **{'configPurge': configPurge})
 
+    ### Executes a script
+    @staticmethod
+    def _administration_operations_executeScript(self, name, args):
+        """
+        Executes a script
+        :param name (string): 
+        :param args (list): 
+               list of object with fields
+                      arg (string): 
+        """
+        return self._wrapper.__post('/administration/operations/executeScript', **{'name': name, 'args': args})
+
     ### Exports everything including test models, network configurations and others from system.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
     def _administration_operations_exportAllTests(self, filepath):
@@ -255,6 +269,22 @@ class BPS(object):
         :param filepath (string): The local path where to save the compressed file with all the models. The path must contain the file name and extension (.tar.gz): '/d/c/f/AllTests.tar.gz'
         """
         return self._wrapper.__export('/administration/operations/exportAllTests', **{'filepath': filepath})
+
+    ### Sets the guardrail settings for the application.
+    @staticmethod
+    def _administration_operations_guardrailSettings(self, guardrailSettings):
+        """
+        Sets the guardrail settings for the application.
+        :param guardrailSettings (object): 
+               object of object with fields
+                      enableOversubscriptionExceptions (bool): 
+                      enableStrictMode (bool): 
+                      stopOnLinkdown (bool): 
+                      testStartPrevention (number): 
+                      testStatusWarning (number): 
+                      testStop (number): 
+        """
+        return self._wrapper.__post('/administration/operations/guardrailSettings', **{'guardrailSettings': guardrailSettings})
 
     ### Imports all test models, actually imports everything from 'exportAllTests'. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
@@ -269,7 +299,7 @@ class BPS(object):
 
     ### null
     @staticmethod
-    def _administration_operations_logs(self, error=False, messages=False, web=False, all=False, audit=False, info=False, system=False, lines=20, drop=0):
+    def _administration_operations_logs(self, error=False, messages=False, web=False, all=False, audit=False, info=False, system=False, lines=20, drop=0, searchRegex='', invertMatch=False):
         """
         :param error (bool): 
         :param messages (bool): 
@@ -280,8 +310,19 @@ class BPS(object):
         :param system (bool): 
         :param lines (number): number lines to return
         :param drop (number): number lines to drop
+        :param searchRegex (string): regex to search after
+        :param invertMatch (bool): true if regex invert match desired 
         """
-        return self._wrapper.__post('/administration/operations/logs', **{'error': error, 'messages': messages, 'web': web, 'all': all, 'audit': audit, 'info': info, 'system': system, 'lines': lines, 'drop': drop})
+        return self._wrapper.__post('/administration/operations/logs', **{'error': error, 'messages': messages, 'web': web, 'all': all, 'audit': audit, 'info': info, 'system': system, 'lines': lines, 'drop': drop, 'searchRegex': searchRegex, 'invertMatch': invertMatch})
+
+    ### Removes a license
+    @staticmethod
+    def _administration_operations_removeLicense(self, filename):
+        """
+        Removes a license
+        :param filename (string): 
+        """
+        return self._wrapper.__post('/administration/operations/removeLicense', **{'filename': filename})
 
     ### close active session
     @staticmethod
@@ -315,7 +356,7 @@ class BPS(object):
     @staticmethod
     def _administration_userSettings_operations_setAutoReserve(self, resourceType, units):
         """
-        :param resourceType (string): Valid values: >l47< or >l23<
+        :param resourceType (string): Resource type, choose from one of the options ("l47", "l23"). Supported types can be retrieved via '/topology/getResourceTypes'
         :param units (number): 
         """
         return self._wrapper.__post('/administration/userSettings/operations/setAutoReserve', **{'resourceType': resourceType, 'units': units})
@@ -341,16 +382,18 @@ class BPS(object):
         """
         return self._wrapper.__post('/appProfile/operations/delete', **{'name': name})
 
-    ### Exports an Application profile and all of its dependencies.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    ### Exports an Application profile and all of its dependencies. When executed from the RESTApi Browser, this operation will return a download URL. When executed from a remote system, through a REST call, the download will start automatically to the specified filepath.
     @staticmethod
-    def _appProfile_operations_exportAppProfile(self, name, attachments, filepath):
+    def _appProfile_operations_exportAppProfile(self, name, attachments, password, requiredLicense, filepath):
         """
-        Exports an Application profile and all of its dependencies.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
-        :param name (string): The name of the test model to be exported.
+        Exports an Application profile and all of its dependencies. When executed from the RESTApi Browser, this operation will return a download URL. When executed from a remote system, through a REST call, the download will start automatically to the specified filepath.
+        :param name (string): The name of the application profile to be exported.
         :param attachments (bool): True if object attachments are needed.
+        :param password (string): The password to encrypt.
+        :param requiredLicense (string): The license to encrypt with.
         :param filepath (string): The local path where to save the exported object.
         """
-        return self._wrapper.__export('/appProfile/operations/exportAppProfile', **{'name': name, 'attachments': attachments, 'filepath': filepath})
+        return self._wrapper.__export('/appProfile/operations/exportAppProfile', **{'name': name, 'attachments': attachments, 'password': password, 'requiredLicense': requiredLicense, 'filepath': filepath})
 
     ### Imports an application profile, given as a file. This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
@@ -403,8 +446,8 @@ class BPS(object):
     def _appProfile_operations_save(self, name=None, force=True):
         """
         Saves the current working application profile using the current name. No need to use any parameter.
-        :param name (string): The name of the template. No need to configure. The current name is used.
-        :param force (bool): Force to save the working Application Profile with the same name. No need to configure. The default is used.
+        :param name (string): The name of the template. No need to configure. Leave empty to save the Application Profile without changing its name.
+        :param force (bool): Force to save the working Application Profile with the same name.
         """
         return self._wrapper.__post('/appProfile/operations/save', **{'name': name, 'force': force})
 
@@ -413,7 +456,7 @@ class BPS(object):
     def _appProfile_operations_saveAs(self, name, force):
         """
         Saves the current working Application Profiles and gives it a new name.
-        :param name (string): The new name given for the current working Application Profile
+        :param name (string): The new name given for the current working Application Profile. Leave empty to save the Application Profile without changing its name.
         :param force (bool): Force to save the working Application Profile using the given name.
         """
         return self._wrapper.__post('/appProfile/operations/saveAs', **{'name': name, 'force': force})
@@ -472,6 +515,22 @@ class BPS(object):
         """
         return self._wrapper.__post('/capture/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
+    ### Search Device Under Test (DUT).
+    @staticmethod
+    def _dut_operations_search(self, searchString, userid, clazz, sortorder, sort, limit, offset):
+        """
+        Search Device Under Test (DUT).
+        :param searchString (string): Search DUTs matching the search criteria.
+        :param userid (string): The owner to search for.
+        :param clazz (string): The 'class' of the object (usually 'canned' or 'custom')
+        :param sortorder (string): The order in which to sort: ascending/descending
+        :param sort (string): Parameter to sort by: 'name'/'class'/'createdBy'/'interfaces'/'timestamp'
+        :param limit (number): The limit of DUT elements to return
+        :param offset (number): The offset to begin from.
+        :return dut (list): 
+        """
+        return self._wrapper.__post('/dut/operations/search', **{'searchString': searchString, 'userid': userid, 'clazz': clazz, 'sortorder': sortorder, 'sort': sort, 'limit': limit, 'offset': offset})
+
     ### Retrieves all the security options
     @staticmethod
     def _evasionProfile_StrikeOptions_operations_getStrikeOptions(self):
@@ -513,8 +572,8 @@ class BPS(object):
     def _evasionProfile_operations_save(self, name=None, force=True):
         """
         Saves the working Test Model using the current name. No need to configure. The current name is used.
-        :param name (string): This argument should be empty for saving the profile using it's actual name.
-        :param force (bool): Force to save the working profile with the same name.
+        :param name (string): This argument should be empty for saving the Evasion Profile using it's actual name.
+        :param force (bool): Force to save the working Evasion Profile if one with the same name already exists.
         """
         return self._wrapper.__post('/evasionProfile/operations/save', **{'name': name, 'force': force})
 
@@ -523,8 +582,8 @@ class BPS(object):
     def _evasionProfile_operations_saveAs(self, name, force):
         """
         Saves the current working Test Model under specified name.
-        :param name (string): The new name given for the current working Evasion Profile
-        :param force (bool): Force to save the working Evasion Profile using a new name.
+        :param name (string): The new name given for the current working Evasion Profile. Leave empty to save the Evasion Profile without changing its name.
+        :param force (bool): Force to save the working Evasion Profile if one with the same name already exists.
         """
         return self._wrapper.__post('/evasionProfile/operations/saveAs', **{'name': name, 'force': force})
 
@@ -548,12 +607,13 @@ class BPS(object):
 
     ### Create a new custom Load Profile.
     @staticmethod
-    def _loadProfile_operations_createNewCustom(self, loadProfile):
+    def _loadProfile_operations_createNewCustom(self, loadProfile, force):
         """
         Create a new custom Load Profile.
         :param loadProfile (string): The Name of The load profile object to create.
+        :param force (bool): 
         """
-        return self._wrapper.__post('/loadProfile/operations/createNewCustom', **{'loadProfile': loadProfile})
+        return self._wrapper.__post('/loadProfile/operations/createNewCustom', **{'loadProfile': loadProfile, 'force': force})
 
     ### Deletes a specified load profile from the database.
     @staticmethod
@@ -572,19 +632,23 @@ class BPS(object):
         """
         return self._wrapper.__post('/loadProfile/operations/load', **{'template': template})
 
-    ### null
+    ### Save the current Load Profile.
     @staticmethod
     def _loadProfile_operations_save(self):
+        """
+        Save the current Load Profile.
+        """
         return self._wrapper.__post('/loadProfile/operations/save', **{})
 
     ### Save the active editing LoadProfile under specified name
     @staticmethod
-    def _loadProfile_operations_saveAs(self, name):
+    def _loadProfile_operations_saveAs(self, name, force):
         """
         Save the active editing LoadProfile under specified name
-        :param name (string): 
+        :param name (string): Give a new name given for the Load Profile. Leave empty to save the Load Profile without changing its name.
+        :param force (bool): Force to save the working Load Profile with the same name.
         """
-        return self._wrapper.__post('/loadProfile/operations/saveAs', **{'name': name})
+        return self._wrapper.__post('/loadProfile/operations/saveAs', **{'name': name, 'force': force})
 
     ### null
     @staticmethod
@@ -602,6 +666,7 @@ class BPS(object):
                       createdOn (string): 
                       revision (number): 
                       description (string): 
+                      clazz (string): 
         """
         return self._wrapper.__post('/loadProfile/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
@@ -766,7 +831,7 @@ class BPS(object):
     def _network_operations_save(self, name=None, regenerateOldStyle=True, force=True):
         """
         Save the current working network config.
-        :param name (string): The new name given for the current working network config. No need to configure. The current name is used.
+        :param name (string): The new name given for the current working network config. No need to configure. Leave empty to save the network config without changing its name.
         :param regenerateOldStyle (bool): No need to configure. The default is used.
         :param force (bool): No need to configure. The default is used.
         """
@@ -777,7 +842,7 @@ class BPS(object):
     def _network_operations_saveAs(self, name, regenerateOldStyle=True, force=False):
         """
         Saves the working network config and gives it a new name.
-        :param name (string): The new name given for the current working network config
+        :param name (string): The new name given for the current working network config. Leave empty to save the network config without changing its name.
         :param regenerateOldStyle (bool): Force to apply the changes made on the loaded network configuration. Force to generate a network from the old one.
         :param force (bool): Force to save the network config. It replaces a pre-existing config having the same name.
         """
@@ -796,13 +861,6 @@ class BPS(object):
         :param limit (number): The limit of network elements to return
         :param offset (number): The offset to begin from.
         :return network (list): 
-               list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      revision (number): 
-                      description (string): 
-                      type (enum): 
         """
         return self._wrapper.__post('/network/operations/search', **{'searchString': searchString, 'userid': userid, 'clazz': clazz, 'sortorder': sortorder, 'sort': sort, 'limit': limit, 'offset': offset})
 
@@ -837,7 +895,7 @@ class BPS(object):
 
     ### Exports the result report of a test, identified by its run id and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
-    def _reports_operations_exportReport(self, filepath, runid, reportType, sectionIds='', dataType='ALL'):
+    def _reports_operations_exportReport(self, filepath, runid, reportType, sectionIds='', dataType='ALL', includeSubsections=False):
         """
         Exports the result report of a test, identified by its run id and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
         :param filepath (string): The local path where to export the report, including the report name and proper file extension.
@@ -845,8 +903,9 @@ class BPS(object):
         :param reportType (string): Report file format to be exported in.Supported types: gwt, csv, pdf, xls, rtf, html, zip, score_img, user_img, xml, stats. For exporting 'extended stats' use 'stats'and use '.zip' as file extension in 'filepath'.
         :param sectionIds (string): Chapter Ids. Can be extracted a chapter or many, a sub-chapter or many or the entire report: (sectionIds='6' / sectionIds='5,6,7' / sectionIds='7.4,8.5.2,8.6.3.1' / sectionIds=''(to export the entire report))
         :param dataType (string): Report content data type to export. Default value is 'all data'. For tabular only use 'TABLE' and for graphs only use 'CHARTS'.
+        :param includeSubsections (bool): Include/exclude subsections from the sections specified in 'sectionIds' parameter.
         """
-        return self._wrapper.__export('/reports/operations/exportReport', **{'filepath': filepath, 'runid': runid, 'reportType': reportType, 'sectionIds': sectionIds, 'dataType': dataType})
+        return self._wrapper.__export('/reports/operations/exportReport', **{'filepath': filepath, 'runid': runid, 'reportType': reportType, 'sectionIds': sectionIds, 'dataType': dataType, 'includeSubsections': includeSubsections})
 
     ### Returns the report Table of Contents using the test run id.
     @staticmethod
@@ -1005,8 +1064,8 @@ class BPS(object):
     def _strikeList_operations_save(self, name=None, force=True):
         """
         Saves the current working Strike List using the current name
-        :param name (string): The name of the template. Default is empty.
-        :param force (bool): Force to save the working Strike List with the same name.
+        :param name (string): The name of the template. Leave empty to save the Strike List without changing its name.
+        :param force (bool): Force to save the working Strike List if one with the same name already exists.
         """
         return self._wrapper.__post('/strikeList/operations/save', **{'name': name, 'force': force})
 
@@ -1015,8 +1074,8 @@ class BPS(object):
     def _strikeList_operations_saveAs(self, name, force):
         """
         Saves the current working Strike List and gives it a new name.
-        :param name (string): The new name given for the current working Strike List
-        :param force (bool): Force to save the working Strike List using the given name.
+        :param name (string): The new name for the current working Strike List. Leave empty to save the Strike List without changing its name.
+        :param force (bool): Force to save the working Strike List if one with the same name already exists.
         """
         return self._wrapper.__post('/strikeList/operations/saveAs', **{'name': name, 'force': force})
 
@@ -1042,20 +1101,6 @@ class BPS(object):
         :param sortorder (string): The sort order (ascending/descending)
         :param offset (number): The offset to begin from. Default is 0.
         :return strike (list): 
-               list of object with fields
-                      id (string): 
-                      protocol (string): 
-                      category (string): 
-                      direction (string): 
-                      keyword (string): 
-                      name (string): 
-                      path (string): 
-                      variants (number): 
-                      severity (string): 
-                      reference (string): 
-                      fileSize (string): 
-                      fileExtension (string): 
-                      year (string): 
         """
         return self._wrapper.__post('/strikes/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder, 'offset': offset})
 
@@ -1067,6 +1112,23 @@ class BPS(object):
         :return action (object): 
         """
         return self._wrapper.__post('/superflow/actions/operations/getActionChoices', **{'id': id})
+
+    ### Get information about an action within a flow in the current working Superflow, retrieving also the choices for each action setting.
+    @staticmethod
+    def _superflow_actions_operations_getActionInFlowInfo(self, flowid, actionType, source):
+        """
+        Get information about an action within a flow in the current working Superflow, retrieving also the choices for each action setting.
+        :param flowid (number): The flow id in the current superflow.
+        :param actionType (string): The type of action to look for.
+        :param source (string): The action source (client, server, both or all).
+        :return result (list): 
+               list of object with fields
+                      label (string): 
+                      name (string): 
+                      description (string): 
+                      choice (object): 
+        """
+        return self._wrapper.__post('/superflow/actions/operations/getActionInFlowInfo', **{'flowid': flowid, 'actionType': actionType, 'source': source})
 
     ### Get information about an action in the current working Superflow, retrieving also the choices for each action setting.
     @staticmethod
@@ -1083,17 +1145,38 @@ class BPS(object):
         """
         return self._wrapper.__post('/superflow/actions/operations/getActionInfo', **{'id': id})
 
+    ### Change action params, match and goto blocks.
+    @staticmethod
+    def _superflow_actions_operations_modify(self, id, actionParams):
+        """
+        Change action params, match and goto blocks.
+        :param id (number): The action id.
+        :param actionParams (object): The action params, match, no-match and goto blocks.
+        """
+        return self._wrapper.__post('/superflow/actions/operations/modify', **{'id': id, 'actionParams': actionParams})
+
+    ### Change action position in actions list of the current working SuperFlow
+    @staticmethod
+    def _superflow_actions_operations_move(self, id, newid):
+        """
+        Change action position in actions list of the current working SuperFlow
+        :param id (number): The action id.
+        :param newid (number): The new id.
+        """
+        return self._wrapper.__post('/superflow/actions/operations/move', **{'id': id, 'newid': newid})
+
     ### Gives abbreviated information about all Canned Flow Names.
     @staticmethod
-    def _superflow_flows_operations_getCannedFlows(self):
+    def _superflow_flows_operations_getCannedFlows(self, nodep=True):
         """
         Gives abbreviated information about all Canned Flow Names.
+        :param nodep (bool): Ignore deprecated flows.
         :return flow (list): 
                list of object with fields
                       name (string): 
                       label (string): 
         """
-        return self._wrapper.__post('/superflow/flows/operations/getCannedFlows', **{})
+        return self._wrapper.__post('/superflow/flows/operations/getCannedFlows', **{'nodep': nodep})
 
     ### null
     @staticmethod
@@ -1153,6 +1236,38 @@ class BPS(object):
         """
         return self._wrapper.__post('/superflow/operations/delete', **{'name': name})
 
+    ### Exports a resource and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _superflow_operations_exportResource(self, name, path):
+        """
+        Exports a resource and all of its dependenciesThis operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the resource to be exported.
+        :param path (string): The local path where to save the exported object.
+        """
+        return self._wrapper.__export('/superflow/operations/exportResource', **{'name': name, 'path': path})
+
+    ### Exports a Superflow and all of its dependencies. When executed from the RESTApi Browser, this operation will return a download URL. When executed from a remote system, through a REST call, the download will start automatically to the specified filepath.
+    @staticmethod
+    def _superflow_operations_exportSuperflow(self, name, attachments, password, requiredLicense, filepath):
+        """
+        Exports a Superflow and all of its dependencies. When executed from the RESTApi Browser, this operation will return a download URL. When executed from a remote system, through a REST call, the download will start automatically to the specified filepath.
+        :param name (string): The name of the superflow to be exported.
+        :param attachments (bool): True if superflow attachments are needed.
+        :param password (string): The password to encrypt.
+        :param requiredLicense (string): The license to encrypt with.
+        :param filepath (string): The local path where to save the exported superflow.
+        """
+        return self._wrapper.__export('/superflow/operations/exportSuperflow', **{'name': name, 'attachments': attachments, 'password': password, 'requiredLicense': requiredLicense, 'filepath': filepath})
+
+    ### Gets all application type categories.
+    @staticmethod
+    def _superflow_operations_getCategories(self):
+        """
+        Gets all application type categories.
+        :return categories (object): Categories all available application type categories.
+        """
+        return self._wrapper.__post('/superflow/operations/getCategories', **{})
+
     ### Imports a resource model to be used in flow traffic as .txt files, certificates, keys etc, given as a file. File will be uploaded to '/chroot/resources' by default if 'type' is not specifed otherwise the destination will be '/chroot/resources/'+ (clientcerts / clientkeys / cacerts ...). This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
     @staticmethod
     def _superflow_operations_importResource(self, name, filename, force, type='resource'):
@@ -1164,6 +1279,17 @@ class BPS(object):
         :param type (string): File type to import. Accepted types: clientcert, clientkey, resource, cacert, dhparams. Default value is 'resource'.
         """
         return self._wrapper.__import('/superflow/operations/importResource', **{'name': name, 'filename': filename, 'force': force, 'type': type})
+
+    ### Imports a superflow model, given as a file.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+    @staticmethod
+    def _superflow_operations_importSuperflow(self, name, filename, force):
+        """
+        Imports a superflow model, given as a file.This operation can not be executed from the RESTApi Browser, it needs to be executed from a remote system through a REST call.
+        :param name (string): The name of the superflow being imported
+        :param filename (string): The file containing the superflow
+        :param force (bool): Force to import the file and replace the superflow having the same name.
+        """
+        return self._wrapper.__import('/superflow/operations/importSuperflow', **{'name': name, 'filename': filename, 'force': force})
 
     ### Load an existing Super Flow and sets it as the current one.
     @staticmethod
@@ -1201,22 +1327,22 @@ class BPS(object):
         """
         return self._wrapper.__post('/superflow/operations/removeFlow', **{'id': id})
 
-    ### Saves the working Super Flow using the current name
+    ### Saves the working Super Flow using the current name, or specify a new name.
     @staticmethod
     def _superflow_operations_save(self, name=None, force=True):
         """
-        Saves the working Super Flow using the current name
-        :param name (string): The name of the template that should be empty.
+        Saves the working Super Flow using the current name, or specify a new name.
+        :param name (string): Leave empty to save the Super Flow without changing its name.
         :param force (bool): Force to save the working Super Flow with the same name.
         """
         return self._wrapper.__post('/superflow/operations/save', **{'name': name, 'force': force})
 
-    ### Saves the current working Application Profiles and gives it a new name.
+    ### Saves the working Super Flow using the current name, or specify a new name.
     @staticmethod
     def _superflow_operations_saveAs(self, name, force):
         """
-        Saves the current working Application Profiles and gives it a new name.
-        :param name (string): The new name given for the current working Super Flow
+        Saves the working Super Flow using the current name, or specify a new name.
+        :param name (string): Give a new name given for the working Super Flow. Leave empty to save the Super Flow without changing its name.
         :param force (bool): Force to save the working Super Flow using the given name.
         """
         return self._wrapper.__post('/superflow/operations/saveAs', **{'name': name, 'force': force})
@@ -1231,6 +1357,128 @@ class BPS(object):
         :param sortorder (string): The sort order (ascending/descending)
         """
         return self._wrapper.__post('/superflow/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Search Lawful Intercept Labs.
+    @staticmethod
+    def _testlab_lawfulIntercept_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        Search Lawful Intercept Labs.
+        :param searchString (string): Search lab name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by: 'createdOn'/'timestamp'/'bandwidth'/'result'/'lastrunby'/'createdBy'/'interfaces'
+        :param sortorder (string): The sort order: ascending/descending 
+        :return testlab (list): 
+        """
+        return self._wrapper.__post('/testlab/lawfulIntercept/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### null
+    @staticmethod
+    def _testlab_lawfulIntercept_target_operations_listResources(self, recurse=True, root='/chroot/resources'):
+        """
+        :param recurse (bool): 
+        :param root (string): 
+        :return files (object): 
+        """
+        return self._wrapper.__post('/testlab/lawfulIntercept/target/operations/listResources', **{'recurse': recurse, 'root': root})
+
+    ### Search networks compatible with Multicast Lab.
+    @staticmethod
+    def _testlab_multicast_network_operations_search(self):
+        """
+        Search networks compatible with Multicast Lab.
+        :return entry (list): 
+        """
+        return self._wrapper.__post('/testlab/multicast/network/operations/search', **{})
+
+    ### Search Multicast Labs.
+    @staticmethod
+    def _testlab_multicast_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        Search Multicast Labs.
+        :param searchString (string): Search lab name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by: 'createdOn'/'timestamp'/'bandwidth'/'result'/'lastrunby'/'createdBy'/'interfaces'
+        :param sortorder (string): The sort order: ascending/descending 
+        :return testlab (list): 
+        """
+        return self._wrapper.__post('/testlab/multicast/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Load an existing test lab template.
+    @staticmethod
+    def _testlab_operations_load(self, template, validate=False):
+        """
+        Load an existing test lab template.
+        :param template (string): The name of the template test lab
+        :param validate (bool): In order to validate or not the test lab.
+        """
+        return self._wrapper.__post('/testlab/operations/load', **{'template': template, 'validate': validate})
+
+    ### Runs the Test Lab.
+    @staticmethod
+    def _testlab_operations_run(self, modelname, group, allowMalware=False):
+        """
+        Runs the Test Lab.
+        :param modelname (string): Test Lab to run.
+        :param group (number): Group to run on.
+        :param allowMalware (bool): Enable this option to allow malware in test lab.
+        """
+        return self._wrapper.__post('/testlab/operations/run', **{'modelname': modelname, 'group': group, 'allowMalware': allowMalware})
+
+    ### Saves the working Test Lab using the current name. No need to configure. The current name is used.
+    @staticmethod
+    def _testlab_operations_save(self, name=None, force=True):
+        """
+        Saves the working Test Lab using the current name. No need to configure. The current name is used.
+        :param name (string): The name of the template that should be empty. Leave empty to save the Test Lab without changing its name.
+        :param force (bool): Force to save the working Test Lab with the same name.
+        """
+        return self._wrapper.__post('/testlab/operations/save', **{'name': name, 'force': force})
+
+    ### Saves the current working Test Lab under specified name.
+    @staticmethod
+    def _testlab_operations_saveAs(self, name, force):
+        """
+        Saves the current working Test Lab under specified name.
+        :param name (string): The new name given for the current working Test Lab. Leave empty to save the Test Lab without changing its name.
+        :param force (bool): Force to save the working Test Lab using a new name.
+        """
+        return self._wrapper.__post('/testlab/operations/saveAs', **{'name': name, 'force': force})
+
+    ### Validates the current Test Lab.
+    @staticmethod
+    def _testlab_operations_validate(self, group):
+        """
+        Validates the current Test Lab.
+        :param group (string): The reservation group.
+        :return check (object): 
+        """
+        return self._wrapper.__post('/testlab/operations/validate', **{'group': group})
+
+    ### Search RFC 2544 Labs.
+    @staticmethod
+    def _testlab_rfc2544_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        Search RFC 2544 Labs.
+        :param searchString (string): Search lab name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by: 'createdOn'/'timestamp'/'bandwidth'/'result'/'lastrunby'/'createdBy'/'interfaces'
+        :param sortorder (string): The sort order: ascending/descending 
+        :return testlab (list): 
+        """
+        return self._wrapper.__post('/testlab/rfc2544/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
+
+    ### Search Session Sender Labs.
+    @staticmethod
+    def _testlab_sessionSender_operations_search(self, searchString, limit, sort, sortorder):
+        """
+        Search Session Sender Labs.
+        :param searchString (string): Search lab name matching the string given.
+        :param limit (string): The limit of rows to return
+        :param sort (string): Parameter to sort by: 'createdOn'/'timestamp'/'bandwidth'/'result'/'lastrunby'/'createdBy'/'interfaces'
+        :param sortorder (string): The sort order: ascending/descending 
+        :return testlab (list): 
+        """
+        return self._wrapper.__post('/testlab/sessionSender/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
     ### Lists all the component presets names.
     @staticmethod
@@ -1338,6 +1586,7 @@ class BPS(object):
         :return recentlyOpened (list): 
                list of object with fields
                       objectType (string): 
+                      testLabType (string): 
                       name (string): 
                       dut (string): 
         """
@@ -1407,18 +1656,18 @@ class BPS(object):
     def _testmodel_operations_run(self, modelname, group, allowMalware=False):
         """
         Runs a Test.
-        :param modelname (string): Test Name to run
-        :param group (number): Group to run
+        :param modelname (string): Test Name to run.
+        :param group (number): Group to run on.
         :param allowMalware (bool): Enable this option to allow malware in test.
         """
         return self._wrapper.__post('/testmodel/operations/run', **{'modelname': modelname, 'group': group, 'allowMalware': allowMalware})
 
-    ### Saves the working Test Model using the current name. No need to configure. The current name is used.
+    ### Saves the working Test Model using the current name. Leave empty to save the Test Model without changing its name.
     @staticmethod
     def _testmodel_operations_save(self, name=None, force=True):
         """
-        Saves the working Test Model using the current name. No need to configure. The current name is used.
-        :param name (string): The name of the template that should be empty.
+        Saves the working Test Model using the current name. Leave empty to save the Test Model without changing its name.
+        :param name (string): Leave empty to save the Test Model without changing its name.
         :param force (bool): Force to save the working Test Model with the same name.
         """
         return self._wrapper.__post('/testmodel/operations/save', **{'name': name, 'force': force})
@@ -1428,7 +1677,7 @@ class BPS(object):
     def _testmodel_operations_saveAs(self, name, force):
         """
         Saves the current working Test Model under specified name.
-        :param name (string): The new name given for the current working Test Model
+        :param name (string): The new name given for the current working Test Model. Leave empty to save the Test Model without changing its name.
         :param force (bool): Force to save the working Test Model using a new name.
         """
         return self._wrapper.__post('/testmodel/operations/saveAs', **{'name': name, 'force': force})
@@ -1442,13 +1691,6 @@ class BPS(object):
         :param sort (string): Parameter to sort by: 'createdOn'/'timestamp'/'bandwidth'/'result'/'lastrunby'/'createdBy'/'interfaces'/'testLabType'
         :param sortorder (string): The sort order: ascending/descending 
         :return testmodel (list): 
-               list of object with fields
-                      name (string): 
-                      label (string): 
-                      createdBy (string): 
-                      network (string): 
-                      duration (number): 
-                      description (string): 
         """
         return self._wrapper.__post('/testmodel/operations/search', **{'searchString': searchString, 'limit': limit, 'sort': sort, 'sortorder': sortorder})
 
@@ -1473,11 +1715,12 @@ class BPS(object):
         """
         return self._wrapper.__post('/testmodel/operations/testComponentDefinition', **{'name': name, 'dynamicEnums': dynamicEnums, 'includeOutputs': includeOutputs})
 
-    ### null
+    ### Validates the current Test Model.
     @staticmethod
     def _testmodel_operations_validate(self, group):
         """
-        :param group (string): The reservation group
+        Validates the current Test Model.
+        :param group (string): The reservation group.
         :return check (object): 
         """
         return self._wrapper.__post('/testmodel/operations/validate', **{'group': group})
@@ -1497,13 +1740,14 @@ class BPS(object):
 
     ### Adds a note to given resource.
     @staticmethod
-    def _topology_operations_addResourceNote(self, resourceId, resourceType):
+    def _topology_operations_addResourceNote(self, resourceId, resourceType, note):
         """
         Adds a note to given resource.
         :param resourceId (string): Resource Id.
-        :param resourceType (string): Resource type.
+        :param resourceType (string): Resource type, choose from one of the options ("l47", "l23").
+        :param note (string): Text note.
         """
-        return self._wrapper.__post('/topology/operations/addResourceNote', **{'resourceId': resourceId, 'resourceType': resourceType})
+        return self._wrapper.__post('/topology/operations/addResourceNote', **{'resourceId': resourceId, 'resourceType': resourceType, 'note': note})
 
     ### Changes aspects (reservation parameters values) of existing reservation.Example: it can be changed the port capture flag. (enable / disable capture on a reserved port)
     @staticmethod
@@ -1559,6 +1803,14 @@ class BPS(object):
         """
         return self._wrapper.__post('/topology/operations/getPortAvailableModes', **{'cardId': cardId, 'port': port})
 
+    ### null
+    @staticmethod
+    def _topology_operations_getResourceTypes(self):
+        """
+        :return resourceTypes (object): 
+        """
+        return self._wrapper.__post('/topology/operations/getResourceTypes', **{})
+
     ### Reboots the slot with slotId.
     @staticmethod
     def _topology_operations_reboot(self, board):
@@ -1579,31 +1831,41 @@ class BPS(object):
 
     ### null
     @staticmethod
-    def _topology_operations_releaseAllCnResources(self, cnId):
+    def _topology_operations_releaseAllCnResources(self, cnId, force=None):
         """
         :param cnId (string): 
+        :param force (bool): Force release of resources that are not owned by the current user and group.
         """
-        return self._wrapper.__post('/topology/operations/releaseAllCnResources', **{'cnId': cnId})
+        return self._wrapper.__post('/topology/operations/releaseAllCnResources', **{'cnId': cnId, 'force': force})
 
     ### null
     @staticmethod
-    def _topology_operations_releaseResource(self, group, resourceId, resourceType):
+    def _topology_operations_releaseResource(self, group, resourceId, resourceType, force=None):
         """
-        :param group (number): 
+        :param group (number): Reservation group.
         :param resourceId (number): 
-        :param resourceType (string): 
+        :param resourceType (string): Resource type, choose from one of the options ("l47", "l23").
+        :param force (bool): Force release of resources that are not owned by the current user and group.
         """
-        return self._wrapper.__post('/topology/operations/releaseResource', **{'group': group, 'resourceId': resourceId, 'resourceType': resourceType})
+        return self._wrapper.__post('/topology/operations/releaseResource', **{'group': group, 'resourceId': resourceId, 'resourceType': resourceType, 'force': force})
 
     ### null
     @staticmethod
-    def _topology_operations_releaseResources(self, count, resourceType, slotId):
+    def _topology_operations_releaseResources(self, count, resourceType, slotId, select, force=None):
         """
-        :param count (number): 
-        :param resourceType (string): 
+        :param count (number): Number of resources to release.
+        :param resourceType (string): Resource type, choose from one of the options ("l47", "l23").
         :param slotId (number): 
+        :param select (object): Advanced filter for resources with specific models and modes. For L47 resources mode can have one of the following values: 
+        		1 for Compatibility Mode (2NP), 
+        		3 for Expanded Mode (4NP), 
+        		None|null for Any mode
+               object of object with fields
+                      model (string): Resource hardware model. None|null for any
+                      mode (number): Resource active mode, can be 1 (for 2NPs), 3 (for 4NPs) or None|null (for any).
+        :param force (bool): Force release of resources that are not owned by the current user and group.
         """
-        return self._wrapper.__post('/topology/operations/releaseResources', **{'count': count, 'resourceType': resourceType, 'slotId': slotId})
+        return self._wrapper.__post('/topology/operations/releaseResources', **{'count': count, 'resourceType': resourceType, 'slotId': slotId, 'select': select, 'force': force})
 
     ### Reserves one or more ports.It requires the following: group, port id, slot id ,capture mode and force mode.In case of remote chassis, be aware that the slot's id is changed after attach (ex: from 9 to 109), in order to get the new value a GET request over the topology will retrieve the new updated slot info.
     @staticmethod
@@ -1636,31 +1898,38 @@ class BPS(object):
     def _topology_operations_reserveResource(self, group, resourceId, resourceType):
         """
         Reserves the specified resource of the given type.
-        :param group (number): 
+        :param group (number): Reservation group.
         :param resourceId (number): 
-        :param resourceType (string): 
+        :param resourceType (string): Resource type, choose from one of the options ("l47", "l23").
         """
         return self._wrapper.__post('/topology/operations/reserveResource', **{'group': group, 'resourceId': resourceId, 'resourceType': resourceType})
 
     ### Reserves the specified number of resources of given type.
     @staticmethod
-    def _topology_operations_reserveResources(self, group, count, resourceType, slotId):
+    def _topology_operations_reserveResources(self, group, count, resourceType, slotId, select):
         """
         Reserves the specified number of resources of given type.
-        :param group (number): 
-        :param count (number): 
-        :param resourceType (string): 
+        :param group (number): Reservation group.
+        :param count (number): Number of resources to reserve.
+        :param resourceType (string): Resource type, choose from one of the options ("l47", "l23").
         :param slotId (number): 
+        :param select (object): Advanced filter for resources with specific models and modes. For L47 resources mode can have one of the following values: 
+        		1 for Compatibility Mode (2NP), 
+        		3 for Expanded Mode (4NP), 
+        		None|null for any mode
+               object of object with fields
+                      model (string): Resource hardware model. None|null for any
+                      mode (number): Resource active mode, can be 1 (for 2NPs), 3 (for 4NPs), None|null (for any).
         """
-        return self._wrapper.__post('/topology/operations/reserveResources', **{'group': group, 'count': count, 'resourceType': resourceType, 'slotId': slotId})
+        return self._wrapper.__post('/topology/operations/reserveResources', **{'group': group, 'count': count, 'resourceType': resourceType, 'slotId': slotId, 'select': select})
 
     ### Runs a Test.
     @staticmethod
     def _topology_operations_run(self, modelname, group, allowMalware=False):
         """
         Runs a Test.
-        :param modelname (string): Test Name to run
-        :param group (number): Group to run
+        :param modelname (string): Test Name to run.
+        :param group (number): Group to run on.
         :param allowMalware (bool): Enable this option to allow malware in test.
         """
         return self._wrapper.__post('/topology/operations/run', **{'modelname': modelname, 'group': group, 'allowMalware': allowMalware})
@@ -1685,8 +1954,9 @@ class BPS(object):
         """
         Sets the card mode of a board.
         :param board (number): Slot ID.
-        :param mode (number): The new mode: 10(BPS-L23), 7(BPS L4-7), 3(IxLoad), 
-        		11(BPS QT L2-3), 12(BPS QT L4-7) 
+        :param mode (number): For non-APS platforms: 10 (BPS-L23), 7 (BPS L4-7), 3 (IxLoad). 
+        For APS platforms BPS Mode: 7. 
+        For APS platforms Non-BPS Modes (ex: IxLoad, CyPerf) check available slot modes in topology/slot/{slotId}/opModes or topology/cnState/{slotId}/opModes.
         """
         return self._wrapper.__post('/topology/operations/setCardMode', **{'board': board, 'mode': mode})
 
@@ -1699,6 +1969,18 @@ class BPS(object):
         :param speed (number): The new speed.(the int value for 1G is 1000, 10G(10000), 40G(40000))
         """
         return self._wrapper.__post('/topology/operations/setCardSpeed', **{'board': board, 'speed': speed})
+
+    ### Changes the np operation mode on an APS compute node.
+    @staticmethod
+    def _topology_operations_setNpMode(self, board, npmode):
+        """
+        Changes the np operation mode on an APS compute node.
+        :param board (number): Slot ID.
+        :param npmode (number): Depending on the board, the NP mode can have one of the following values. 
+        		For Compatibility Mode (2NP): 1. 
+        		For Expanded Mode (4NP): 3.
+        """
+        return self._wrapper.__post('/topology/operations/setNpMode', **{'board': board, 'npmode': npmode})
 
     ### Enables/Disables the performance acceleration for a BPS VE blade.
     @staticmethod
@@ -1732,6 +2014,16 @@ class BPS(object):
         :param portId (string): 
         """
         return self._wrapper.__post('/topology/operations/setPortSettings', **{'linkState': linkState, 'autoNegotiation': autoNegotiation, 'precoder': precoder, 'slotId': slotId, 'portId': portId})
+
+    ### Change compute node link settings.
+    @staticmethod
+    def _topology_operations_setResourceSettings(self, linkState, cnId):
+        """
+        Change compute node link settings.
+        :param linkState (string): Link state: UP or DOWN.
+        :param cnId (string): Compute node id.
+        """
+        return self._wrapper.__post('/topology/operations/setResourceSettings', **{'linkState': linkState, 'cnId': cnId})
 
     ### Reboots the metwork processors on the given card card. Only available for APS cards.
     @staticmethod
@@ -1815,9 +2107,13 @@ class DataModelMeta(type):
         'administration': {
             'atiLicensing': {
                 'license': [{
+                    'activates': {
+                    },
                     'boardserialno': {
                     },
                     'expires': {
+                    },
+                    'fileName': {
                     },
                     'issued': {
                     },
@@ -1842,11 +2138,17 @@ class DataModelMeta(type):
             'operations': {
                 'configPurge': [{
                 }],
+                'executeScript': [{
+                }],
                 'exportAllTests': [{
+                }],
+                'guardrailSettings': [{
                 }],
                 'importAllTests': [{
                 }],
                 'logs': [{
+                }],
+                'removeLicense': [{
                 }]
             },
             'sessions': [{
@@ -1894,6 +2196,22 @@ class DataModelMeta(type):
                 },
                 'clazz': {
                 },
+                'configPurge': {
+                    'currentTime': {
+                    },
+                    'interval': {
+                    },
+                    'name': {
+                    },
+                    'purgeEnabled': {
+                    },
+                    'purgeTime': {
+                    },
+                    'remainingTime': {
+                    },
+                    'testsPriority': {
+                    }
+                },
                 'createdBy': {
                 },
                 'createdOn': {
@@ -1901,6 +2219,8 @@ class DataModelMeta(type):
                 'description': {
                 },
                 'guardrailSettings': {
+                    'enableOversubscriptionExceptions': {
+                    },
                     'enableStrictMode': {
                     },
                     'stopOnLinkdown': {
@@ -1945,6 +2265,8 @@ class DataModelMeta(type):
                     },
                     'username': {
                     }
+                },
+                'timestamp': {
                 },
                 'vacuumSettings': {
                     'autoVacuum': {
@@ -2027,6 +2349,40 @@ class DataModelMeta(type):
                 'clazz': {
                 },
                 'constraints': {
+                    'constraints': [{
+                        'faildesc': {
+                        },
+                        'implies': {
+                            'constraints': [{
+                                'faildesc': {
+                                },
+                                'systemtype': {
+                                }
+                            }],
+                            'faildesc': {
+                            },
+                            'systemtype': {
+                            }
+                        },
+                        'systemtype': {
+                        }
+                    }],
+                    'faildesc': {
+                    },
+                    'implies': {
+                        'constraints': [{
+                            'faildesc': {
+                            },
+                            'systemtype': {
+                            }
+                        }],
+                        'faildesc': {
+                        },
+                        'systemtype': {
+                        }
+                    },
+                    'systemtype': {
+                    }
                 },
                 'createdBy': {
                 },
@@ -2075,6 +2431,8 @@ class DataModelMeta(type):
                     }],
                     'description': {
                     },
+                    'enabled': {
+                    },
                     'groupName': {
                     },
                     'label': {
@@ -2086,9 +2444,13 @@ class DataModelMeta(type):
                     'units': {
                     }
                 }],
+                'timestamp': {
+                },
                 'weight': {
                 }
             }],
+            'timestamp': {
+            },
             'weightType': {
             }
         },
@@ -2139,9 +2501,55 @@ class DataModelMeta(type):
             },
             'tcpPackets': {
             },
+            'timestamp': {
+            },
             'totalPackets': {
             },
             'udpPackets': {
+            }
+        },
+        'dut': {
+            'operations': {
+                'search': [{
+                    'author': {
+                    },
+                    'clazz': {
+                    },
+                    'command': [{
+                        'command': {
+                        },
+                        'delay': {
+                        },
+                        'event': {
+                        }
+                    }],
+                    'connection': {
+                    },
+                    'createdBy': {
+                    },
+                    'createdOn': {
+                    },
+                    'description': {
+                    },
+                    'label': {
+                    },
+                    'lockedBy': {
+                    },
+                    'meta': {
+                        'info': [{
+                            'name': {
+                            },
+                            'value': {
+                            }
+                        }]
+                    },
+                    'name': {
+                    },
+                    'revision': {
+                    },
+                    'timestamp': {
+                    }
+                }]
             }
         },
         'evasionProfile': {
@@ -2204,6 +2612,10 @@ class DataModelMeta(type):
                     'Password': {
                     },
                     'Username': {
+                    }
+                },
+                'Flood': {
+                    'Count': {
                     }
                 },
                 'Global': {
@@ -2378,6 +2790,38 @@ class DataModelMeta(type):
                     'Encoding': {
                     },
                     'Obfuscate': {
+                    }
+                },
+                'LLM': {
+                    'ASCIIArtFont': {
+                    },
+                    'ApiVersion': {
+                    },
+                    'BearerToken': {
+                    },
+                    'CustomPromptsFile': {
+                    },
+                    'ForbidenQuestionCategory': {
+                    },
+                    'GoogleApiKey': {
+                    },
+                    'GoogleApiKeyInHeader': {
+                    },
+                    'MaxOutputTokens': {
+                    },
+                    'Model': {
+                    },
+                    'NumOfPrompts': {
+                    },
+                    'SensitiveInformationDisclosure': {
+                    },
+                    'SystemPromptLeakageEvasionTechniques': {
+                    },
+                    'Temperature': {
+                    },
+                    'TransportLayer': {
+                    },
+                    'topP': {
                     }
                 },
                 'MALWARE': {
@@ -2646,12 +3090,74 @@ class DataModelMeta(type):
                             'name': {
                             }
                         }],
+                        'constraints': {
+                            'constraints': [{
+                                'faildesc': {
+                                },
+                                'implies': {
+                                    'constraints': [{
+                                        'faildesc': {
+                                        },
+                                        'systemtype': {
+                                        }
+                                    }],
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                },
+                                'systemtype': {
+                                }
+                            }],
+                            'faildesc': {
+                            },
+                            'implies': {
+                                'constraints': [{
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                }],
+                                'faildesc': {
+                                },
+                                'systemtype': {
+                                }
+                            },
+                            'systemtype': {
+                            }
+                        },
                         'description': {
+                        },
+                        'enabled': {
                         },
                         'groupName': {
                         },
                         'label': {
                         },
+                        'members': [{
+                            'choice': [{
+                                'description': {
+                                },
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            }],
+                            'description': {
+                            },
+                            'enabled': {
+                            },
+                            'groupName': {
+                            },
+                            'label': {
+                            },
+                            'name': {
+                            },
+                            'realtimeGroup': {
+                            },
+                            'units': {
+                            }
+                        }],
                         'name': {
                         },
                         'realtimeGroup': {
@@ -2700,6 +3206,8 @@ class DataModelMeta(type):
                 }]
             },
             'revision': {
+            },
+            'timestamp': {
             }
         },
         'loadProfile': {
@@ -2748,7 +3256,11 @@ class DataModelMeta(type):
                 },
                 'phaseId': {
                 },
+                'rampDist.downBehavior': {
+                },
                 'rampDist.steadyBehavior': {
+                },
+                'rampDist.upBehavior': {
                 },
                 'rateDist.min': {
                 },
@@ -2795,7 +3307,11 @@ class DataModelMeta(type):
                     },
                     'phaseId': {
                     },
+                    'rampDist.downBehavior': {
+                    },
                     'rampDist.steadyBehavior': {
+                    },
+                    'rampDist.upBehavior': {
                     },
                     'rateDist.min': {
                     },
@@ -2855,6 +3371,8 @@ class DataModelMeta(type):
                     },
                     'version': {
                     }
+                },
+                'timestamp': {
                 }
             }],
             'regen': {
@@ -2900,6 +3418,8 @@ class DataModelMeta(type):
                 },
                 'version': {
                 }
+            },
+            'timestamp': {
             }
         },
         'network': {
@@ -5476,6 +5996,8 @@ class DataModelMeta(type):
                         }]
                     },
                     'revision': {
+                    },
+                    'timestamp': {
                     }
                 }],
                 'new': [{
@@ -5485,9 +6007,1287 @@ class DataModelMeta(type):
                 'saveAs': [{
                 }],
                 'search': [{
+                    'author': {
+                    },
+                    'clazz': {
+                    },
+                    'createdBy': {
+                    },
+                    'createdOn': {
+                    },
+                    'description': {
+                    },
+                    'interfaceCount': {
+                    },
+                    'label': {
+                    },
+                    'lockedBy': {
+                    },
+                    'meta': {
+                        'info': [{
+                            'name': {
+                            },
+                            'value': {
+                            }
+                        }]
+                    },
+                    'name': {
+                    },
+                    'networkModel': {
+                        'dhcpv6c_cfg': [{
+                            'dhcp6c_duid_type': {
+                            },
+                            'dhcp6c_ia_t1': {
+                            },
+                            'dhcp6c_ia_t2': {
+                            },
+                            'dhcp6c_ia_type': {
+                            },
+                            'dhcp6c_initial_srate': {
+                            },
+                            'dhcp6c_max_outstanding': {
+                            },
+                            'dhcp6c_renew_timer': {
+                            },
+                            'dhcp6c_req_opts_config': {
+                            },
+                            'dhcp6c_tout_and_retr_config': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'dhcpv6c_req_opts_cfg': [{
+                            'dhcpv6v_req_dns_list': {
+                            },
+                            'dhcpv6v_req_dns_resolvers': {
+                            },
+                            'dhcpv6v_req_preference': {
+                            },
+                            'dhcpv6v_req_server_id': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'dhcpv6c_tout_and_retr_cfg': [{
+                            'dhcp6c_inforeq_attempts': {
+                            },
+                            'dhcp6c_initial_inforeq_tout': {
+                            },
+                            'dhcp6c_initial_rebind_tout': {
+                            },
+                            'dhcp6c_initial_release_tout': {
+                            },
+                            'dhcp6c_initial_renew_tout': {
+                            },
+                            'dhcp6c_initial_req_tout': {
+                            },
+                            'dhcp6c_initial_sol_tout': {
+                            },
+                            'dhcp6c_max_inforeq_tout': {
+                            },
+                            'dhcp6c_max_rebind_tout': {
+                            },
+                            'dhcp6c_max_renew_tout': {
+                            },
+                            'dhcp6c_max_req_tout': {
+                            },
+                            'dhcp6c_max_sol_tout': {
+                            },
+                            'dhcp6c_release_attempts': {
+                            },
+                            'dhcp6c_req_attempts': {
+                            },
+                            'dhcp6c_sol_attempts': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ds_lite_aftr': [{
+                            'b4_count': {
+                            },
+                            'b4_ip_address': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'ipv6_addr_alloc_mode': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'ds_lite_b4': [{
+                            'aftr_addr': {
+                            },
+                            'aftr_count': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'host_ip_addr_alloc_mode': {
+                            },
+                            'host_ip_base_addr': {
+                            },
+                            'hosts_ip_increment': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'ipv6_addr_alloc_mode': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'enodeb': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enodebs': [{
+                                'enodebCount': {
+                                },
+                                'ip_address': {
+                                },
+                                'mme_ip_address': {
+                                }
+                            }],
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'netmask': {
+                            },
+                            'plmn': {
+                            },
+                            'psn': {
+                            },
+                            'psn_netmask': {
+                            },
+                            'sctp_over_udp': {
+                            },
+                            'sctp_sport': {
+                            }
+                        }],
+                        'enodeb6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enodebs': [{
+                                'enodebCount': {
+                                },
+                                'ip_address': {
+                                },
+                                'mme_ip_address': {
+                                }
+                            }],
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'sctp_over_udp': {
+                            },
+                            'sctp_sport': {
+                            }
+                        }],
+                        'enodeb_mme': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enodebs': [{
+                                'default_container': {
+                                },
+                                'enodebCount': {
+                                },
+                                'gateway_ip_address': {
+                                },
+                                'ip_address': {
+                                },
+                                'netmask': {
+                                }
+                            }],
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_allocation_mode': {
+                            },
+                            'mme_ip_address': {
+                            },
+                            'netmask': {
+                            },
+                            'pgw_ip_address': {
+                            },
+                            'plmn': {
+                            },
+                            'sgw_ip_address': {
+                            },
+                            'ue_address': {
+                            }
+                        }],
+                        'enodeb_mme6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enodebs': [{
+                                'default_container': {
+                                },
+                                'enodebCount': {
+                                },
+                                'gateway_ip_address': {
+                                },
+                                'ip_address': {
+                                },
+                                'prefix_length': {
+                                }
+                            }],
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_allocation_mode': {
+                            },
+                            'mme_ip_address': {
+                            },
+                            'pgw_ip_address': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'sgw_ip_address': {
+                            },
+                            'ue_address': {
+                            }
+                        }],
+                        'enodeb_mme_sgw': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_allocation_mode': {
+                            },
+                            'mme_ip_address': {
+                            },
+                            'netmask': {
+                            },
+                            'pgw_ip_address': {
+                            },
+                            'plmn': {
+                            },
+                            'ue_address': {
+                            }
+                        }],
+                        'enodeb_mme_sgw6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_allocation_mode': {
+                            },
+                            'mme_ip_address': {
+                            },
+                            'pgw_ip_address': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'ue_address': {
+                            }
+                        }],
+                        'geneve_tep': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'header_options': [{
+                                'geneve_data': {
+                                },
+                                'geneve_option_class': {
+                                },
+                                'geneve_type': {
+                                }
+                            }],
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'netmask': {
+                            },
+                            'peer_ip_address': {
+                            },
+                            'remote_fixed': {
+                            },
+                            'vni_base': {
+                            },
+                            'vni_count': {
+                            }
+                        }],
+                        'ggsn': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ggsn_advertised_control_ip_address': {
+                            },
+                            'ggsn_advertised_data_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'ggsn6': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ggsn_advertised_control_ip_address': {
+                            },
+                            'ggsn_advertised_data_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'global_config': [{
+                            'gtp': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'interface': [{
+                            'description': {
+                            },
+                            'duplicate_mac_address': {
+                            },
+                            'id': {
+                            },
+                            'ignore_pause_frames': {
+                            },
+                            'impairments': {
+                                'corrupt_chksum': {
+                                },
+                                'corrupt_gt256': {
+                                },
+                                'corrupt_lt256': {
+                                },
+                                'corrupt_lt64': {
+                                },
+                                'corrupt_rand': {
+                                },
+                                'drop': {
+                                },
+                                'frack': {
+                                },
+                                'rate': {
+                                }
+                            },
+                            'mac_address': {
+                            },
+                            'mtu': {
+                            },
+                            'number': {
+                            },
+                            'packet_filter': {
+                                'dest_ip': {
+                                },
+                                'dest_port': {
+                                },
+                                'filter': {
+                                },
+                                'not_dest_ip': {
+                                },
+                                'not_dest_port': {
+                                },
+                                'not_src_ip': {
+                                },
+                                'not_src_port': {
+                                },
+                                'not_vlan': {
+                                },
+                                'src_ip': {
+                                },
+                                'src_port': {
+                                },
+                                'vlan': {
+                                }
+                            },
+                            'use_vnic_mac_address': {
+                            },
+                            'vlan_key': {
+                            }
+                        }],
+                        'ip6_dhcp_server': [{
+                            'default_container': {
+                            },
+                            'default_lease_time': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ia_type': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'max_lease_time': {
+                            },
+                            'offer_lifetime': {
+                            },
+                            'pool_base_address': {
+                            },
+                            'pool_dns_address1': {
+                            },
+                            'pool_dns_address2': {
+                            },
+                            'pool_prefix_length': {
+                            },
+                            'pool_size': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'ip6_dns_config': [{
+                            'dns_domain': {
+                            },
+                            'dns_server_address': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ip6_dns_proxy': [{
+                            'dns_proxy_ip_base': {
+                            },
+                            'dns_proxy_ip_count': {
+                            },
+                            'dns_proxy_src_ip_base': {
+                            },
+                            'dns_proxy_src_ip_count': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ip6_external_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip6_geneve_tep': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'header_options': [{
+                                'geneve_data': {
+                                },
+                                'geneve_option_class': {
+                                },
+                                'geneve_type': {
+                                }
+                            }],
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'peer_ip_address': {
+                            },
+                            'prefix_length': {
+                            },
+                            'remote_fixed': {
+                            },
+                            'vni_base': {
+                            },
+                            'vni_count': {
+                            }
+                        }],
+                        'ip6_mac_static_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'gateway_mac_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'mac_address': {
+                            },
+                            'mtu': {
+                            },
+                            'prefix_length': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip6_router': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'hosts_ip_alloc_container': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'ip6_static_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'dns_proxy': {
+                            },
+                            'enable_stats': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'host_ipv6_addr_alloc_mode': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'ip_alloc_container': {
+                            },
+                            'ip_selection_type': {
+                            },
+                            'maxmbps_per_host': {
+                            },
+                            'mpls_list': [{
+                                'id': {
+                                },
+                                'value': {
+                                }
+                            }],
+                            'prefix_length': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip_dhcp_hosts': [{
+                            'accept_local_offers_only': {
+                            },
+                            'allocation_rate': {
+                            },
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns_proxy': {
+                            },
+                            'enable_stats': {
+                            },
+                            'id': {
+                            },
+                            'ldap': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip_dhcp_server': [{
+                            'accept_local_requests_only': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_time': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'ip_dns_config': [{
+                            'dns_domain': {
+                            },
+                            'dns_server_address': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ip_dns_proxy': [{
+                            'dns_proxy_ip_base': {
+                            },
+                            'dns_proxy_ip_count': {
+                            },
+                            'dns_proxy_src_ip_base': {
+                            },
+                            'dns_proxy_src_ip_count': {
+                            },
+                            'id': {
+                            }
+                        }],
+                        'ip_external_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip_ldap_server': [{
+                            'auth_timeout': {
+                            },
+                            'authentication_rate': {
+                            },
+                            'dn_fixed_val': {
+                            },
+                            'id': {
+                            },
+                            'ldap_password_start_tag': {
+                            },
+                            'ldap_server_address': {
+                            },
+                            'ldap_user_count': {
+                            },
+                            'ldap_user_max': {
+                            },
+                            'ldap_user_min': {
+                            },
+                            'ldap_username_start_tag': {
+                            }
+                        }],
+                        'ip_mac_static_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'gateway_mac_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'mac_address': {
+                            },
+                            'mtu': {
+                            },
+                            'netmask': {
+                            },
+                            'proxy': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ip_router': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'ip_static_hosts': [{
+                            'behind_snapt': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'dns_proxy': {
+                            },
+                            'enable_stats': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'ip_selection_type': {
+                            },
+                            'ldap': {
+                            },
+                            'maxmbps_per_host': {
+                            },
+                            'mpls_list': [{
+                                'id': {
+                                },
+                                'value': {
+                                }
+                            }],
+                            'netmask': {
+                            },
+                            'proxy': {
+                            },
+                            'psn': {
+                            },
+                            'psn_netmask': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'ipsec_config': [{
+                            'debug_log': {
+                            },
+                            'dpd_delay': {
+                            },
+                            'dpd_enabled': {
+                            },
+                            'dpd_timeout': {
+                            },
+                            'enable_xauth': {
+                            },
+                            'esp_auth_alg': {
+                            },
+                            'esp_encr_alg': {
+                            },
+                            'id': {
+                            },
+                            'ike_1to1': {
+                            },
+                            'ike_auth_alg': {
+                            },
+                            'ike_dh': {
+                            },
+                            'ike_encr_alg': {
+                            },
+                            'ike_lifetime': {
+                            },
+                            'ike_mode': {
+                            },
+                            'ike_pfs': {
+                            },
+                            'ike_prf_alg': {
+                            },
+                            'ike_version': {
+                            },
+                            'init_rate': {
+                            },
+                            'initial_contact': {
+                            },
+                            'ipsec_lifetime': {
+                            },
+                            'left_id': {
+                            },
+                            'max_outstanding': {
+                            },
+                            'nat_traversal': {
+                            },
+                            'psk': {
+                            },
+                            'rekey_margin': {
+                            },
+                            'retrans_interval': {
+                            },
+                            'right_id': {
+                            },
+                            'setup_timeout': {
+                            },
+                            'wildcard_tsr': {
+                            },
+                            'xauth_password': {
+                            },
+                            'xauth_username': {
+                            }
+                        }],
+                        'ipsec_router': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ike_peer_ip_address': {
+                            },
+                            'ip_address': {
+                            },
+                            'ipsec': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'mme_sgw_pgw': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'netmask': {
+                            },
+                            'plmn': {
+                            },
+                            'sgw_advertised_pgw': {
+                            },
+                            'sgw_advertised_sgw': {
+                            },
+                            'ue_info': {
+                            }
+                        }],
+                        'mme_sgw_pgw6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'sgw_advertised_pgw': {
+                            },
+                            'sgw_advertised_sgw': {
+                            },
+                            'ue_info': {
+                            }
+                        }],
+                        'mobility_session_info': [{
+                            'access_point_name': {
+                            },
+                            'bearers': [{
+                                'qci_label': {
+                                }
+                            }],
+                            'id': {
+                            },
+                            'initiated_dedicated_bearers': {
+                            },
+                            'password': {
+                            },
+                            'username': {
+                            }
+                        }],
+                        'mpls_settings': [{
+                            'id': {
+                            },
+                            'mpls_tags': [{
+                                'mpls_exp': {
+                                },
+                                'mpls_label': {
+                                },
+                                'mpls_ttl': {
+                                }
+                            }]
+                        }],
+                        'path_advanced': [{
+                            'destination_container': {
+                            },
+                            'destination_port_algorithm': {
+                            },
+                            'destination_port_base': {
+                            },
+                            'destination_port_count': {
+                            },
+                            'enable_external_file': {
+                            },
+                            'file': {
+                            },
+                            'id': {
+                            },
+                            'source_container': {
+                            },
+                            'source_port_algorithm': {
+                            },
+                            'source_port_base': {
+                            },
+                            'source_port_count': {
+                            },
+                            'stream_group': {
+                            },
+                            'tags': {
+                            },
+                            'tuple_limit': {
+                            },
+                            'xor_bits': {
+                            }
+                        }],
+                        'path_basic': [{
+                            'destination_container': {
+                            },
+                            'id': {
+                            },
+                            'source_container': {
+                            }
+                        }],
+                        'pgw': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'netmask': {
+                            },
+                            'plmn': {
+                            }
+                        }],
+                        'pgw6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'plmn': [{
+                            'description': {
+                            },
+                            'id': {
+                            },
+                            'mcc': {
+                            },
+                            'mnc': {
+                            }
+                        }],
+                        'sgsn': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ggsn_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'netmask': {
+                            }
+                        }],
+                        'sgsn6': [{
+                            'default_container': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'ggsn_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'prefix_length': {
+                            }
+                        }],
+                        'sgw_pgw': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'netmask': {
+                            },
+                            'plmn': {
+                            },
+                            'sgw_advertised_pgw': {
+                            },
+                            'sgw_advertised_sgw': {
+                            }
+                        }],
+                        'sgw_pgw6': [{
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'ip_address': {
+                            },
+                            'lease_address': {
+                            },
+                            'lease_address_v6': {
+                            },
+                            'max_sessions': {
+                            },
+                            'plmn': {
+                            },
+                            'prefix_length': {
+                            },
+                            'sgw_advertised_pgw': {
+                            },
+                            'sgw_advertised_sgw': {
+                            }
+                        }],
+                        'sixrd_ce': [{
+                            'br_ip_address': {
+                            },
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enable_stats': {
+                            },
+                            'gateway_ip_address': {
+                            },
+                            'hosts_per_ce': {
+                            },
+                            'id': {
+                            },
+                            'ip4_mask_length': {
+                            },
+                            'ip_address': {
+                            },
+                            'netmask': {
+                            },
+                            'sixrd_prefix': {
+                            },
+                            'sixrd_prefix_length': {
+                            },
+                            'tags': {
+                            }
+                        }],
+                        'slaac_cfg': [{
+                            'enable_dad': {
+                            },
+                            'fallback_ip_address': {
+                            },
+                            'id': {
+                            },
+                            'stateless_dhcpv6c_cfg': {
+                            },
+                            'use_rand_addr': {
+                            }
+                        }],
+                        'ue': [{
+                            'allocation_rate': {
+                            },
+                            'behind_snapt': {
+                            },
+                            'default_container': {
+                            },
+                            'dns': {
+                            },
+                            'enable_stats': {
+                            },
+                            'id': {
+                            },
+                            'mobility_action': {
+                            },
+                            'mobility_interval_ms': {
+                            },
+                            'mobility_with_traffic': {
+                            },
+                            'proxy': {
+                            },
+                            'request_ipv6': {
+                            },
+                            'tags': {
+                            },
+                            'ue_info': {
+                            }
+                        }],
+                        'ue_info': [{
+                            'count': {
+                            },
+                            'id': {
+                            },
+                            'imei_base': {
+                            },
+                            'imsi_base': {
+                            },
+                            'maxmbps_per_ue': {
+                            },
+                            'mobility_session_infos': [{
+                                'id': {
+                                },
+                                'value': {
+                                }
+                            }],
+                            'msisdn_base': {
+                            },
+                            'operator_variant': {
+                            },
+                            'secret_key': {
+                            },
+                            'secret_key_step': {
+                            }
+                        }],
+                        'vlan': [{
+                            'count': {
+                            },
+                            'default_container': {
+                            },
+                            'description': {
+                            },
+                            'duplicate_mac_address': {
+                            },
+                            'id': {
+                            },
+                            'inner_vlan': {
+                            },
+                            'mac_address': {
+                            },
+                            'mtu': {
+                            },
+                            'outer_vlan': {
+                            },
+                            'tpid': {
+                            }
+                        }]
+                    },
+                    'revision': {
+                    },
+                    'timestamp': {
+                    }
                 }]
             },
             'revision': {
+            },
+            'timestamp': {
             }
         },
         'remote': {
@@ -5576,6 +7376,8 @@ class DataModelMeta(type):
                         }]
                     },
                     'revision': {
+                    },
+                    'timestamp': {
                     }
                 }],
                 'getHistoricalResultSize': [{
@@ -5599,6 +7401,8 @@ class DataModelMeta(type):
                     }],
                     'description': {
                     },
+                    'enabled': {
+                    },
                     'groupName': {
                     },
                     'label': {
@@ -5615,10 +7419,6 @@ class DataModelMeta(type):
             }]
         },
         'strikeList': {
-            'SecurityBehavior': {
-            },
-            'StrikeOptions': {
-            },
             'author': {
             },
             'clazz': {
@@ -5671,6 +7471,8 @@ class DataModelMeta(type):
             },
             'revision': {
             },
+            'smart': {
+            },
             'strikes': [{
                 'category': {
                 },
@@ -5706,7 +7508,9 @@ class DataModelMeta(type):
                 },
                 'year': {
                 }
-            }]
+            }],
+            'timestamp': {
+            }
         },
         'strikes': {
             'category': {
@@ -5727,6 +7531,40 @@ class DataModelMeta(type):
             },
             'operations': {
                 'search': [{
+                    'category': {
+                    },
+                    'direction': {
+                    },
+                    'fileExtension': {
+                    },
+                    'fileSize': {
+                    },
+                    'id': {
+                    },
+                    'keyword': [{
+                        'name': {
+                        }
+                    }],
+                    'name': {
+                    },
+                    'path': {
+                    },
+                    'protocol': {
+                    },
+                    'reference': [{
+                        'label': {
+                        },
+                        'type': {
+                        },
+                        'value': {
+                        }
+                    }],
+                    'severity': {
+                    },
+                    'variants': {
+                    },
+                    'year': {
+                    }
                 }]
             },
             'path': {
@@ -5751,6 +7589,68 @@ class DataModelMeta(type):
         'superflow': {
             'actions': [{
                 'actionInfo': {
+                    'allowedComponents': [{
+                        'label': {
+                        },
+                        'type': {
+                        }
+                    }],
+                    'caller': {
+                    },
+                    'commonConstraints': {
+                    },
+                    'constraints': {
+                        'constraints': [{
+                            'faildesc': {
+                            },
+                            'implies': {
+                                'constraints': [{
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                }],
+                                'faildesc': {
+                                },
+                                'systemtype': {
+                                }
+                            },
+                            'systemtype': {
+                            }
+                        }],
+                        'faildesc': {
+                        },
+                        'implies': {
+                            'constraints': [{
+                                'faildesc': {
+                                },
+                                'systemtype': {
+                                }
+                            }],
+                            'faildesc': {
+                            },
+                            'systemtype': {
+                            }
+                        },
+                        'systemtype': {
+                        }
+                    },
+                    'description': {
+                    },
+                    'exflows': {
+                    },
+                    'id': {
+                    },
+                    'label': {
+                    },
+                    'regexchoice': [{
+                        'label': {
+                        },
+                        'name': {
+                        },
+                        'regex': {
+                        }
+                    }],
                     'settings': [{
                         'choice': [{
                             'description': {
@@ -5762,6 +7662,8 @@ class DataModelMeta(type):
                         }],
                         'description': {
                         },
+                        'enabled': {
+                        },
                         'groupName': {
                         },
                         'label': {
@@ -5772,7 +7674,13 @@ class DataModelMeta(type):
                         },
                         'units': {
                         }
-                    }]
+                    }],
+                    'source': {
+                    },
+                    'transaction': {
+                    }
+                },
+                'actionid': {
                 },
                 'exflows': {
                 },
@@ -5780,16 +7688,158 @@ class DataModelMeta(type):
                 },
                 'flowlabel': {
                 },
-                'gotoBlock': {
-                },
                 'id': {
                 },
                 'label': {
                 },
-                'matchBlock': {
+                'loop': {
+                },
+                'match': [{
+                    'action': [{
+                        'actionid': {
+                        },
+                        'exflows': {
+                        },
+                        'flowid': {
+                        },
+                        'flowlabel': {
+                        },
+                        'id': {
+                        },
+                        'label': {
+                        },
+                        'loop': {
+                        },
+                        'match': [{
+                            'action': [{
+                            }],
+                            'pattern': {
+                            },
+                            'regex': {
+                            }
+                        }],
+                        'nomatch': {
+                            'action': [{
+                            }],
+                            'timeout': {
+                            }
+                        },
+                        'params': {
+                        },
+                        'source': {
+                        },
+                        'type': {
+                        }
+                    }],
+                    'pattern': {
+                    },
+                    'regex': {
+                    }
+                }],
+                'nomatch': {
+                    'action': [{
+                        'actionid': {
+                        },
+                        'exflows': {
+                        },
+                        'flowid': {
+                        },
+                        'flowlabel': {
+                        },
+                        'id': {
+                        },
+                        'label': {
+                        },
+                        'loop': {
+                        },
+                        'match': [{
+                            'action': [{
+                            }],
+                            'pattern': {
+                            },
+                            'regex': {
+                            }
+                        }],
+                        'nomatch': {
+                            'action': [{
+                            }],
+                            'timeout': {
+                            }
+                        },
+                        'params': {
+                        },
+                        'source': {
+                        },
+                        'type': {
+                        }
+                    }],
+                    'timeout': {
+                    }
                 },
                 'operations': {
                     'getActionChoices': [{
+                        'allowedComponents': [{
+                            'label': {
+                            },
+                            'type': {
+                            }
+                        }],
+                        'caller': {
+                        },
+                        'commonConstraints': {
+                        },
+                        'constraints': {
+                            'constraints': [{
+                                'faildesc': {
+                                },
+                                'implies': {
+                                    'constraints': [{
+                                        'faildesc': {
+                                        },
+                                        'systemtype': {
+                                        }
+                                    }],
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                },
+                                'systemtype': {
+                                }
+                            }],
+                            'faildesc': {
+                            },
+                            'implies': {
+                                'constraints': [{
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                }],
+                                'faildesc': {
+                                },
+                                'systemtype': {
+                                }
+                            },
+                            'systemtype': {
+                            }
+                        },
+                        'description': {
+                        },
+                        'exflows': {
+                        },
+                        'id': {
+                        },
+                        'label': {
+                        },
+                        'regexchoice': [{
+                            'label': {
+                            },
+                            'name': {
+                            },
+                            'regex': {
+                            }
+                        }],
                         'settings': [{
                             'choice': [{
                                 'description': {
@@ -5801,6 +7851,8 @@ class DataModelMeta(type):
                             }],
                             'description': {
                             },
+                            'enabled': {
+                            },
                             'groupName': {
                             },
                             'label': {
@@ -5811,9 +7863,167 @@ class DataModelMeta(type):
                             },
                             'units': {
                             }
-                        }]
+                        }],
+                        'source': {
+                        },
+                        'transaction': {
+                        }
+                    }],
+                    'getActionInFlowInfo': [{
+                        'allowedComponents': [{
+                            'label': {
+                            },
+                            'type': {
+                            }
+                        }],
+                        'caller': {
+                        },
+                        'commonConstraints': {
+                        },
+                        'constraints': {
+                            'constraints': [{
+                                'faildesc': {
+                                },
+                                'implies': {
+                                    'constraints': [{
+                                        'faildesc': {
+                                        },
+                                        'systemtype': {
+                                        }
+                                    }],
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                },
+                                'systemtype': {
+                                }
+                            }],
+                            'faildesc': {
+                            },
+                            'implies': {
+                                'constraints': [{
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                }],
+                                'faildesc': {
+                                },
+                                'systemtype': {
+                                }
+                            },
+                            'systemtype': {
+                            }
+                        },
+                        'description': {
+                        },
+                        'exflows': {
+                        },
+                        'id': {
+                        },
+                        'label': {
+                        },
+                        'regexchoice': [{
+                            'label': {
+                            },
+                            'name': {
+                            },
+                            'regex': {
+                            }
+                        }],
+                        'settings': [{
+                            'choice': [{
+                                'description': {
+                                },
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            }],
+                            'description': {
+                            },
+                            'enabled': {
+                            },
+                            'groupName': {
+                            },
+                            'label': {
+                            },
+                            'name': {
+                            },
+                            'realtimeGroup': {
+                            },
+                            'units': {
+                            }
+                        }],
+                        'source': {
+                        },
+                        'transaction': {
+                        }
                     }],
                     'getActionInfo': [{
+                        'allowedComponents': [{
+                            'label': {
+                            },
+                            'type': {
+                            }
+                        }],
+                        'caller': {
+                        },
+                        'commonConstraints': {
+                        },
+                        'constraints': {
+                            'constraints': [{
+                                'faildesc': {
+                                },
+                                'implies': {
+                                    'constraints': [{
+                                        'faildesc': {
+                                        },
+                                        'systemtype': {
+                                        }
+                                    }],
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                },
+                                'systemtype': {
+                                }
+                            }],
+                            'faildesc': {
+                            },
+                            'implies': {
+                                'constraints': [{
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                }],
+                                'faildesc': {
+                                },
+                                'systemtype': {
+                                }
+                            },
+                            'systemtype': {
+                            }
+                        },
+                        'description': {
+                        },
+                        'exflows': {
+                        },
+                        'id': {
+                        },
+                        'label': {
+                        },
+                        'regexchoice': [{
+                            'label': {
+                            },
+                            'name': {
+                            },
+                            'regex': {
+                            }
+                        }],
                         'settings': [{
                             'choice': [{
                                 'description': {
@@ -5825,6 +8035,8 @@ class DataModelMeta(type):
                             }],
                             'description': {
                             },
+                            'enabled': {
+                            },
                             'groupName': {
                             },
                             'label': {
@@ -5835,7 +8047,15 @@ class DataModelMeta(type):
                             },
                             'units': {
                             }
-                        }]
+                        }],
+                        'source': {
+                        },
+                        'transaction': {
+                        }
+                    }],
+                    'modify': [{
+                    }],
+                    'move': [{
                     }]
                 },
                 'params': {
@@ -5850,6 +8070,40 @@ class DataModelMeta(type):
             'clazz': {
             },
             'constraints': {
+                'constraints': [{
+                    'faildesc': {
+                    },
+                    'implies': {
+                        'constraints': [{
+                            'faildesc': {
+                            },
+                            'systemtype': {
+                            }
+                        }],
+                        'faildesc': {
+                        },
+                        'systemtype': {
+                        }
+                    },
+                    'systemtype': {
+                    }
+                }],
+                'faildesc': {
+                },
+                'implies': {
+                    'constraints': [{
+                        'faildesc': {
+                        },
+                        'systemtype': {
+                        }
+                    }],
+                    'faildesc': {
+                    },
+                    'systemtype': {
+                    }
+                },
+                'systemtype': {
+                }
             },
             'createdBy': {
             },
@@ -5880,11 +8134,49 @@ class DataModelMeta(type):
                         },
                         'clazz': {
                         },
+                        'constraints': {
+                            'constraints': [{
+                                'faildesc': {
+                                },
+                                'implies': {
+                                    'constraints': [{
+                                        'faildesc': {
+                                        },
+                                        'systemtype': {
+                                        }
+                                    }],
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                },
+                                'systemtype': {
+                                }
+                            }],
+                            'faildesc': {
+                            },
+                            'implies': {
+                                'constraints': [{
+                                    'faildesc': {
+                                    },
+                                    'systemtype': {
+                                    }
+                                }],
+                                'faildesc': {
+                                },
+                                'systemtype': {
+                                }
+                            },
+                            'systemtype': {
+                            }
+                        },
                         'createdBy': {
                         },
                         'createdOn': {
                         },
                         'description': {
+                        },
+                        'id': {
                         },
                         'label': {
                         },
@@ -5898,7 +8190,37 @@ class DataModelMeta(type):
                                 }
                             }]
                         },
+                        'name': {
+                        },
                         'revision': {
+                        },
+                        'settings': [{
+                            'choice': [{
+                                'description': {
+                                },
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            }],
+                            'description': {
+                            },
+                            'enabled': {
+                            },
+                            'groupName': {
+                            },
+                            'label': {
+                            },
+                            'name': {
+                            },
+                            'realtimeGroup': {
+                            },
+                            'units': {
+                            }
+                        }],
+                        'singleNP': {
+                        },
+                        'timestamp': {
                         }
                     }]
                 },
@@ -5946,7 +8268,15 @@ class DataModelMeta(type):
                 }],
                 'delete': [{
                 }],
+                'exportResource': [{
+                }],
+                'exportSuperflow': [{
+                }],
+                'getCategories': [{
+                }],
                 'importResource': [{
+                }],
+                'importSuperflow': [{
                 }],
                 'load': [{
                 }],
@@ -5984,6 +8314,8 @@ class DataModelMeta(type):
                 }],
                 'description': {
                 },
+                'enabled': {
+                },
                 'groupName': {
                 },
                 'label': {
@@ -5995,11 +8327,1577 @@ class DataModelMeta(type):
                 'units': {
                 }
             }],
+            'timestamp': {
+            },
             'weight': {
+            }
+        },
+        'testlab': {
+            'author': {
+            },
+            'clazz': {
+            },
+            'createdBy': {
+            },
+            'createdOn': {
+            },
+            'description': {
+            },
+            'label': {
+            },
+            'lawfulIntercept': {
+                'appProfile': {
+                },
+                'concurrentSessions': {
+                },
+                'dataRate': {
+                },
+                'duration': {
+                },
+                'dut': {
+                },
+                'network': {
+                },
+                'operations': {
+                    'search': [{
+                        'author': {
+                        },
+                        'clazz': {
+                        },
+                        'createdBy': {
+                        },
+                        'createdOn': {
+                        },
+                        'description': {
+                        },
+                        'label': {
+                        },
+                        'lawfulIntercept': {
+                            'appProfile': {
+                            },
+                            'concurrentSessions': {
+                            },
+                            'dataRate': {
+                            },
+                            'duration': {
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            },
+                            'sessionsPerSecond': {
+                            },
+                            'target': [{
+                                '@fieldType:creditcard': {
+                                    'numEntries': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                '@fieldType:directentries': {
+                                    'entries': [{
+                                        'content': {
+                                        },
+                                        'currval': {
+                                        },
+                                        'enabled': {
+                                        },
+                                        'origval': {
+                                        },
+                                        'token': {
+                                        }
+                                    }]
+                                },
+                                '@fieldType:fileentries': {
+                                    'customDelimiter': {
+                                    },
+                                    'delimiterType': {
+                                    },
+                                    'filename': {
+                                    }
+                                },
+                                '@fieldType:pattern': {
+                                    'numEntries': {
+                                    },
+                                    'pattern': {
+                                    }
+                                },
+                                '@fieldType:phone': {
+                                    'numEntries': {
+                                    }
+                                },
+                                '@fieldType:taxid': {
+                                    'numEntries': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                'active': {
+                                },
+                                'fieldType': {
+                                },
+                                'intervalType': {
+                                },
+                                'ipTrigger': {
+                                },
+                                'quantityInterval': {
+                                },
+                                'superflowName': {
+                                },
+                                'timeInterval': {
+                                }
+                            }]
+                        },
+                        'lockedBy': {
+                        },
+                        'meta': {
+                            'info': [{
+                                'name': {
+                                },
+                                'value': {
+                                }
+                            }]
+                        },
+                        'multicast': {
+                            'duration': {
+                            },
+                            'network': {
+                                'description': {
+                                },
+                                'gateway': {
+                                },
+                                'maxNetwork': {
+                                },
+                                'minNetwork': {
+                                },
+                                'name': {
+                                },
+                                'netmask': {
+                                },
+                                'sessionsMax': {
+                                },
+                                'sessionsMaxPerSecond': {
+                                },
+                                'vlans': {
+                                }
+                            },
+                            'source': [{
+                                'id': {
+                                },
+                                'ipAddress': {
+                                },
+                                'multicastAddress': {
+                                },
+                                'rate': {
+                                }
+                            }],
+                            'subscriber': [{
+                                'groupAddress': {
+                                },
+                                'id': {
+                                },
+                                'maxSubscribers': {
+                                },
+                                'sourceSpecific': {
+                                },
+                                'sources': [{
+                                    'id': {
+                                    },
+                                    'ip': {
+                                    }
+                                }]
+                            }]
+                        },
+                        'name': {
+                        },
+                        'revision': {
+                        },
+                        'rfc2544': {
+                            'control': {
+                                'acceptableCorruptFrames': {
+                                },
+                                'acceptableFrameLoss': {
+                                },
+                                'backoff': {
+                                },
+                                'bidirectional': {
+                                },
+                                'binaryRateLower': {
+                                },
+                                'binaryRateUpper': {
+                                },
+                                'binaryResolution': {
+                                },
+                                'customPayload': {
+                                },
+                                'customSteps': {
+                                },
+                                'frameSizeEnd': {
+                                },
+                                'frameSizeInterval': {
+                                },
+                                'frameSizeMax': {
+                                },
+                                'frameSizeMin': {
+                                },
+                                'frameSizeStart': {
+                                },
+                                'loadApplication': {
+                                },
+                                'loadUnits': {
+                                },
+                                'maxPossible': {
+                                },
+                                'maxStreams': {
+                                },
+                                'mode': {
+                                },
+                                'overallLoad': {
+                                },
+                                'packetType': {
+                                },
+                                'pauseOnError': {
+                                },
+                                'payloadType': {
+                                },
+                                'payloadWidth': {
+                                },
+                                'seriesType': {
+                                },
+                                'slowStartEnabled': {
+                                },
+                                'stepRate': {
+                                },
+                                'stepRateLower': {
+                                },
+                                'stepRateUpper': {
+                                },
+                                'stepduration': {
+                                },
+                                'stepdurationApplication': {
+                                },
+                                'stepdurationunits': {
+                                },
+                                'tryHighestFirst': {
+                                }
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            }
+                        },
+                        'sessionSender': {
+                            'control': {
+                                'aging': {
+                                },
+                                'appProfile': {
+                                },
+                                'dataRate': {
+                                },
+                                'dataType': {
+                                },
+                                'dstPortDist': {
+                                    'max': {
+                                    },
+                                    'min': {
+                                    }
+                                },
+                                'duration': {
+                                },
+                                'flowSize': {
+                                },
+                                'maximumConcurrent': {
+                                },
+                                'maximumConcurrentSession': {
+                                },
+                                'maximumRate': {
+                                },
+                                'minimumConcurrent': {
+                                },
+                                'minimumConcurrentSessions': {
+                                },
+                                'minimumRate': {
+                                },
+                                'packetsPerSession': {
+                                },
+                                'perfEmphasis': {
+                                },
+                                'resetConnectionsBetweenTests': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quanta': {
+                                },
+                                'srcPortDist': {
+                                    'max': {
+                                    },
+                                    'min': {
+                                    }
+                                },
+                                'steadyBehavior': {
+                                },
+                                'stepRate': {
+                                    'num': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                'stepdurationApplication': {
+                                },
+                                'testMode': {
+                                },
+                                'testType': {
+                                },
+                                'unlimitedDataRate': {
+                                }
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            }
+                        },
+                        'timestamp': {
+                        }
+                    }]
+                },
+                'sessionsPerSecond': {
+                },
+                'target': [{
+                    '@fieldType:creditcard': {
+                        'numEntries': {
+                        },
+                        'type': {
+                        }
+                    },
+                    '@fieldType:directentries': {
+                        'entries': [{
+                            'content': {
+                            },
+                            'currval': {
+                            },
+                            'enabled': {
+                            },
+                            'origval': {
+                            },
+                            'token': {
+                            }
+                        }]
+                    },
+                    '@fieldType:fileentries': {
+                        'customDelimiter': {
+                        },
+                        'delimiterType': {
+                        },
+                        'filename': {
+                        }
+                    },
+                    '@fieldType:pattern': {
+                        'numEntries': {
+                        },
+                        'pattern': {
+                        }
+                    },
+                    '@fieldType:phone': {
+                        'numEntries': {
+                        }
+                    },
+                    '@fieldType:taxid': {
+                        'numEntries': {
+                        },
+                        'type': {
+                        }
+                    },
+                    'active': {
+                    },
+                    'fieldType': {
+                    },
+                    'intervalType': {
+                    },
+                    'ipTrigger': {
+                    },
+                    'operations': {
+                        'listResources': [{
+                        }]
+                    },
+                    'quantityInterval': {
+                    },
+                    'superflowName': {
+                    },
+                    'timeInterval': {
+                    }
+                }]
+            },
+            'lockedBy': {
+            },
+            'meta': {
+                'info': [{
+                    'name': {
+                    },
+                    'value': {
+                    }
+                }]
+            },
+            'multicast': {
+                'duration': {
+                },
+                'network': {
+                    'description': {
+                    },
+                    'gateway': {
+                    },
+                    'maxNetwork': {
+                    },
+                    'minNetwork': {
+                    },
+                    'name': {
+                    },
+                    'netmask': {
+                    },
+                    'operations': {
+                        'search': [{
+                            'description': {
+                            },
+                            'gateway': {
+                            },
+                            'maxNetwork': {
+                            },
+                            'minNetwork': {
+                            },
+                            'name': {
+                            },
+                            'netmask': {
+                            },
+                            'sessionsMax': {
+                            },
+                            'sessionsMaxPerSecond': {
+                            },
+                            'vlans': {
+                            }
+                        }]
+                    },
+                    'sessionsMax': {
+                    },
+                    'sessionsMaxPerSecond': {
+                    },
+                    'vlans': {
+                    }
+                },
+                'operations': {
+                    'search': [{
+                        'author': {
+                        },
+                        'clazz': {
+                        },
+                        'createdBy': {
+                        },
+                        'createdOn': {
+                        },
+                        'description': {
+                        },
+                        'label': {
+                        },
+                        'lawfulIntercept': {
+                            'appProfile': {
+                            },
+                            'concurrentSessions': {
+                            },
+                            'dataRate': {
+                            },
+                            'duration': {
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            },
+                            'sessionsPerSecond': {
+                            },
+                            'target': [{
+                                '@fieldType:creditcard': {
+                                    'numEntries': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                '@fieldType:directentries': {
+                                    'entries': [{
+                                        'content': {
+                                        },
+                                        'currval': {
+                                        },
+                                        'enabled': {
+                                        },
+                                        'origval': {
+                                        },
+                                        'token': {
+                                        }
+                                    }]
+                                },
+                                '@fieldType:fileentries': {
+                                    'customDelimiter': {
+                                    },
+                                    'delimiterType': {
+                                    },
+                                    'filename': {
+                                    }
+                                },
+                                '@fieldType:pattern': {
+                                    'numEntries': {
+                                    },
+                                    'pattern': {
+                                    }
+                                },
+                                '@fieldType:phone': {
+                                    'numEntries': {
+                                    }
+                                },
+                                '@fieldType:taxid': {
+                                    'numEntries': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                'active': {
+                                },
+                                'fieldType': {
+                                },
+                                'intervalType': {
+                                },
+                                'ipTrigger': {
+                                },
+                                'quantityInterval': {
+                                },
+                                'superflowName': {
+                                },
+                                'timeInterval': {
+                                }
+                            }]
+                        },
+                        'lockedBy': {
+                        },
+                        'meta': {
+                            'info': [{
+                                'name': {
+                                },
+                                'value': {
+                                }
+                            }]
+                        },
+                        'multicast': {
+                            'duration': {
+                            },
+                            'network': {
+                                'description': {
+                                },
+                                'gateway': {
+                                },
+                                'maxNetwork': {
+                                },
+                                'minNetwork': {
+                                },
+                                'name': {
+                                },
+                                'netmask': {
+                                },
+                                'sessionsMax': {
+                                },
+                                'sessionsMaxPerSecond': {
+                                },
+                                'vlans': {
+                                }
+                            },
+                            'source': [{
+                                'id': {
+                                },
+                                'ipAddress': {
+                                },
+                                'multicastAddress': {
+                                },
+                                'rate': {
+                                }
+                            }],
+                            'subscriber': [{
+                                'groupAddress': {
+                                },
+                                'id': {
+                                },
+                                'maxSubscribers': {
+                                },
+                                'sourceSpecific': {
+                                },
+                                'sources': [{
+                                    'id': {
+                                    },
+                                    'ip': {
+                                    }
+                                }]
+                            }]
+                        },
+                        'name': {
+                        },
+                        'revision': {
+                        },
+                        'rfc2544': {
+                            'control': {
+                                'acceptableCorruptFrames': {
+                                },
+                                'acceptableFrameLoss': {
+                                },
+                                'backoff': {
+                                },
+                                'bidirectional': {
+                                },
+                                'binaryRateLower': {
+                                },
+                                'binaryRateUpper': {
+                                },
+                                'binaryResolution': {
+                                },
+                                'customPayload': {
+                                },
+                                'customSteps': {
+                                },
+                                'frameSizeEnd': {
+                                },
+                                'frameSizeInterval': {
+                                },
+                                'frameSizeMax': {
+                                },
+                                'frameSizeMin': {
+                                },
+                                'frameSizeStart': {
+                                },
+                                'loadApplication': {
+                                },
+                                'loadUnits': {
+                                },
+                                'maxPossible': {
+                                },
+                                'maxStreams': {
+                                },
+                                'mode': {
+                                },
+                                'overallLoad': {
+                                },
+                                'packetType': {
+                                },
+                                'pauseOnError': {
+                                },
+                                'payloadType': {
+                                },
+                                'payloadWidth': {
+                                },
+                                'seriesType': {
+                                },
+                                'slowStartEnabled': {
+                                },
+                                'stepRate': {
+                                },
+                                'stepRateLower': {
+                                },
+                                'stepRateUpper': {
+                                },
+                                'stepduration': {
+                                },
+                                'stepdurationApplication': {
+                                },
+                                'stepdurationunits': {
+                                },
+                                'tryHighestFirst': {
+                                }
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            }
+                        },
+                        'sessionSender': {
+                            'control': {
+                                'aging': {
+                                },
+                                'appProfile': {
+                                },
+                                'dataRate': {
+                                },
+                                'dataType': {
+                                },
+                                'dstPortDist': {
+                                    'max': {
+                                    },
+                                    'min': {
+                                    }
+                                },
+                                'duration': {
+                                },
+                                'flowSize': {
+                                },
+                                'maximumConcurrent': {
+                                },
+                                'maximumConcurrentSession': {
+                                },
+                                'maximumRate': {
+                                },
+                                'minimumConcurrent': {
+                                },
+                                'minimumConcurrentSessions': {
+                                },
+                                'minimumRate': {
+                                },
+                                'packetsPerSession': {
+                                },
+                                'perfEmphasis': {
+                                },
+                                'resetConnectionsBetweenTests': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quanta': {
+                                },
+                                'srcPortDist': {
+                                    'max': {
+                                    },
+                                    'min': {
+                                    }
+                                },
+                                'steadyBehavior': {
+                                },
+                                'stepRate': {
+                                    'num': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                'stepdurationApplication': {
+                                },
+                                'testMode': {
+                                },
+                                'testType': {
+                                },
+                                'unlimitedDataRate': {
+                                }
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            }
+                        },
+                        'timestamp': {
+                        }
+                    }]
+                },
+                'source': [{
+                    'id': {
+                    },
+                    'ipAddress': {
+                    },
+                    'multicastAddress': {
+                    },
+                    'rate': {
+                    }
+                }],
+                'subscriber': [{
+                    'groupAddress': {
+                    },
+                    'id': {
+                    },
+                    'maxSubscribers': {
+                    },
+                    'sourceSpecific': {
+                    },
+                    'sources': [{
+                        'id': {
+                        },
+                        'ip': {
+                        }
+                    }]
+                }]
+            },
+            'name': {
+            },
+            'operations': {
+                'load': [{
+                }],
+                'run': [{
+                }],
+                'save': [{
+                }],
+                'saveAs': [{
+                }],
+                'validate': [{
+                    'fixAction': {
+                        'content': {
+                        },
+                        'key': {
+                        }
+                    },
+                    'fixable': {
+                    },
+                    'message': {
+                        'content': {
+                        },
+                        'key': {
+                        }
+                    },
+                    'result': {
+                    }
+                }]
+            },
+            'revision': {
+            },
+            'rfc2544': {
+                'control': {
+                    'acceptableCorruptFrames': {
+                    },
+                    'acceptableFrameLoss': {
+                    },
+                    'backoff': {
+                    },
+                    'bidirectional': {
+                    },
+                    'binaryRateLower': {
+                    },
+                    'binaryRateUpper': {
+                    },
+                    'binaryResolution': {
+                    },
+                    'customPayload': {
+                    },
+                    'customSteps': {
+                    },
+                    'frameSizeEnd': {
+                    },
+                    'frameSizeInterval': {
+                    },
+                    'frameSizeMax': {
+                    },
+                    'frameSizeMin': {
+                    },
+                    'frameSizeStart': {
+                    },
+                    'loadApplication': {
+                    },
+                    'loadUnits': {
+                    },
+                    'maxPossible': {
+                    },
+                    'maxStreams': {
+                    },
+                    'mode': {
+                    },
+                    'overallLoad': {
+                    },
+                    'packetType': {
+                    },
+                    'pauseOnError': {
+                    },
+                    'payloadType': {
+                    },
+                    'payloadWidth': {
+                    },
+                    'seriesType': {
+                    },
+                    'slowStartEnabled': {
+                    },
+                    'stepRate': {
+                    },
+                    'stepRateLower': {
+                    },
+                    'stepRateUpper': {
+                    },
+                    'stepduration': {
+                    },
+                    'stepdurationApplication': {
+                    },
+                    'stepdurationunits': {
+                    },
+                    'tryHighestFirst': {
+                    }
+                },
+                'dut': {
+                },
+                'network': {
+                },
+                'operations': {
+                    'search': [{
+                        'author': {
+                        },
+                        'clazz': {
+                        },
+                        'createdBy': {
+                        },
+                        'createdOn': {
+                        },
+                        'description': {
+                        },
+                        'label': {
+                        },
+                        'lawfulIntercept': {
+                            'appProfile': {
+                            },
+                            'concurrentSessions': {
+                            },
+                            'dataRate': {
+                            },
+                            'duration': {
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            },
+                            'sessionsPerSecond': {
+                            },
+                            'target': [{
+                                '@fieldType:creditcard': {
+                                    'numEntries': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                '@fieldType:directentries': {
+                                    'entries': [{
+                                        'content': {
+                                        },
+                                        'currval': {
+                                        },
+                                        'enabled': {
+                                        },
+                                        'origval': {
+                                        },
+                                        'token': {
+                                        }
+                                    }]
+                                },
+                                '@fieldType:fileentries': {
+                                    'customDelimiter': {
+                                    },
+                                    'delimiterType': {
+                                    },
+                                    'filename': {
+                                    }
+                                },
+                                '@fieldType:pattern': {
+                                    'numEntries': {
+                                    },
+                                    'pattern': {
+                                    }
+                                },
+                                '@fieldType:phone': {
+                                    'numEntries': {
+                                    }
+                                },
+                                '@fieldType:taxid': {
+                                    'numEntries': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                'active': {
+                                },
+                                'fieldType': {
+                                },
+                                'intervalType': {
+                                },
+                                'ipTrigger': {
+                                },
+                                'quantityInterval': {
+                                },
+                                'superflowName': {
+                                },
+                                'timeInterval': {
+                                }
+                            }]
+                        },
+                        'lockedBy': {
+                        },
+                        'meta': {
+                            'info': [{
+                                'name': {
+                                },
+                                'value': {
+                                }
+                            }]
+                        },
+                        'multicast': {
+                            'duration': {
+                            },
+                            'network': {
+                                'description': {
+                                },
+                                'gateway': {
+                                },
+                                'maxNetwork': {
+                                },
+                                'minNetwork': {
+                                },
+                                'name': {
+                                },
+                                'netmask': {
+                                },
+                                'sessionsMax': {
+                                },
+                                'sessionsMaxPerSecond': {
+                                },
+                                'vlans': {
+                                }
+                            },
+                            'source': [{
+                                'id': {
+                                },
+                                'ipAddress': {
+                                },
+                                'multicastAddress': {
+                                },
+                                'rate': {
+                                }
+                            }],
+                            'subscriber': [{
+                                'groupAddress': {
+                                },
+                                'id': {
+                                },
+                                'maxSubscribers': {
+                                },
+                                'sourceSpecific': {
+                                },
+                                'sources': [{
+                                    'id': {
+                                    },
+                                    'ip': {
+                                    }
+                                }]
+                            }]
+                        },
+                        'name': {
+                        },
+                        'revision': {
+                        },
+                        'rfc2544': {
+                            'control': {
+                                'acceptableCorruptFrames': {
+                                },
+                                'acceptableFrameLoss': {
+                                },
+                                'backoff': {
+                                },
+                                'bidirectional': {
+                                },
+                                'binaryRateLower': {
+                                },
+                                'binaryRateUpper': {
+                                },
+                                'binaryResolution': {
+                                },
+                                'customPayload': {
+                                },
+                                'customSteps': {
+                                },
+                                'frameSizeEnd': {
+                                },
+                                'frameSizeInterval': {
+                                },
+                                'frameSizeMax': {
+                                },
+                                'frameSizeMin': {
+                                },
+                                'frameSizeStart': {
+                                },
+                                'loadApplication': {
+                                },
+                                'loadUnits': {
+                                },
+                                'maxPossible': {
+                                },
+                                'maxStreams': {
+                                },
+                                'mode': {
+                                },
+                                'overallLoad': {
+                                },
+                                'packetType': {
+                                },
+                                'pauseOnError': {
+                                },
+                                'payloadType': {
+                                },
+                                'payloadWidth': {
+                                },
+                                'seriesType': {
+                                },
+                                'slowStartEnabled': {
+                                },
+                                'stepRate': {
+                                },
+                                'stepRateLower': {
+                                },
+                                'stepRateUpper': {
+                                },
+                                'stepduration': {
+                                },
+                                'stepdurationApplication': {
+                                },
+                                'stepdurationunits': {
+                                },
+                                'tryHighestFirst': {
+                                }
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            }
+                        },
+                        'sessionSender': {
+                            'control': {
+                                'aging': {
+                                },
+                                'appProfile': {
+                                },
+                                'dataRate': {
+                                },
+                                'dataType': {
+                                },
+                                'dstPortDist': {
+                                    'max': {
+                                    },
+                                    'min': {
+                                    }
+                                },
+                                'duration': {
+                                },
+                                'flowSize': {
+                                },
+                                'maximumConcurrent': {
+                                },
+                                'maximumConcurrentSession': {
+                                },
+                                'maximumRate': {
+                                },
+                                'minimumConcurrent': {
+                                },
+                                'minimumConcurrentSessions': {
+                                },
+                                'minimumRate': {
+                                },
+                                'packetsPerSession': {
+                                },
+                                'perfEmphasis': {
+                                },
+                                'resetConnectionsBetweenTests': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quanta': {
+                                },
+                                'srcPortDist': {
+                                    'max': {
+                                    },
+                                    'min': {
+                                    }
+                                },
+                                'steadyBehavior': {
+                                },
+                                'stepRate': {
+                                    'num': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                'stepdurationApplication': {
+                                },
+                                'testMode': {
+                                },
+                                'testType': {
+                                },
+                                'unlimitedDataRate': {
+                                }
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            }
+                        },
+                        'timestamp': {
+                        }
+                    }]
+                }
+            },
+            'sessionSender': {
+                'control': {
+                    'aging': {
+                    },
+                    'appProfile': {
+                    },
+                    'dataRate': {
+                    },
+                    'dataType': {
+                    },
+                    'dstPortDist': {
+                        'max': {
+                        },
+                        'min': {
+                        }
+                    },
+                    'duration': {
+                    },
+                    'flowSize': {
+                    },
+                    'maximumConcurrent': {
+                    },
+                    'maximumConcurrentSession': {
+                    },
+                    'maximumRate': {
+                    },
+                    'minimumConcurrent': {
+                    },
+                    'minimumConcurrentSessions': {
+                    },
+                    'minimumRate': {
+                    },
+                    'packetsPerSession': {
+                    },
+                    'perfEmphasis': {
+                    },
+                    'resetConnectionsBetweenTests': {
+                    },
+                    'retries': {
+                    },
+                    'retry_quanta': {
+                    },
+                    'srcPortDist': {
+                        'max': {
+                        },
+                        'min': {
+                        }
+                    },
+                    'steadyBehavior': {
+                    },
+                    'stepRate': {
+                        'num': {
+                        },
+                        'type': {
+                        }
+                    },
+                    'stepdurationApplication': {
+                    },
+                    'testMode': {
+                    },
+                    'testType': {
+                    },
+                    'unlimitedDataRate': {
+                    }
+                },
+                'dut': {
+                },
+                'network': {
+                },
+                'operations': {
+                    'search': [{
+                        'author': {
+                        },
+                        'clazz': {
+                        },
+                        'createdBy': {
+                        },
+                        'createdOn': {
+                        },
+                        'description': {
+                        },
+                        'label': {
+                        },
+                        'lawfulIntercept': {
+                            'appProfile': {
+                            },
+                            'concurrentSessions': {
+                            },
+                            'dataRate': {
+                            },
+                            'duration': {
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            },
+                            'sessionsPerSecond': {
+                            },
+                            'target': [{
+                                '@fieldType:creditcard': {
+                                    'numEntries': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                '@fieldType:directentries': {
+                                    'entries': [{
+                                        'content': {
+                                        },
+                                        'currval': {
+                                        },
+                                        'enabled': {
+                                        },
+                                        'origval': {
+                                        },
+                                        'token': {
+                                        }
+                                    }]
+                                },
+                                '@fieldType:fileentries': {
+                                    'customDelimiter': {
+                                    },
+                                    'delimiterType': {
+                                    },
+                                    'filename': {
+                                    }
+                                },
+                                '@fieldType:pattern': {
+                                    'numEntries': {
+                                    },
+                                    'pattern': {
+                                    }
+                                },
+                                '@fieldType:phone': {
+                                    'numEntries': {
+                                    }
+                                },
+                                '@fieldType:taxid': {
+                                    'numEntries': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                'active': {
+                                },
+                                'fieldType': {
+                                },
+                                'intervalType': {
+                                },
+                                'ipTrigger': {
+                                },
+                                'quantityInterval': {
+                                },
+                                'superflowName': {
+                                },
+                                'timeInterval': {
+                                }
+                            }]
+                        },
+                        'lockedBy': {
+                        },
+                        'meta': {
+                            'info': [{
+                                'name': {
+                                },
+                                'value': {
+                                }
+                            }]
+                        },
+                        'multicast': {
+                            'duration': {
+                            },
+                            'network': {
+                                'description': {
+                                },
+                                'gateway': {
+                                },
+                                'maxNetwork': {
+                                },
+                                'minNetwork': {
+                                },
+                                'name': {
+                                },
+                                'netmask': {
+                                },
+                                'sessionsMax': {
+                                },
+                                'sessionsMaxPerSecond': {
+                                },
+                                'vlans': {
+                                }
+                            },
+                            'source': [{
+                                'id': {
+                                },
+                                'ipAddress': {
+                                },
+                                'multicastAddress': {
+                                },
+                                'rate': {
+                                }
+                            }],
+                            'subscriber': [{
+                                'groupAddress': {
+                                },
+                                'id': {
+                                },
+                                'maxSubscribers': {
+                                },
+                                'sourceSpecific': {
+                                },
+                                'sources': [{
+                                    'id': {
+                                    },
+                                    'ip': {
+                                    }
+                                }]
+                            }]
+                        },
+                        'name': {
+                        },
+                        'revision': {
+                        },
+                        'rfc2544': {
+                            'control': {
+                                'acceptableCorruptFrames': {
+                                },
+                                'acceptableFrameLoss': {
+                                },
+                                'backoff': {
+                                },
+                                'bidirectional': {
+                                },
+                                'binaryRateLower': {
+                                },
+                                'binaryRateUpper': {
+                                },
+                                'binaryResolution': {
+                                },
+                                'customPayload': {
+                                },
+                                'customSteps': {
+                                },
+                                'frameSizeEnd': {
+                                },
+                                'frameSizeInterval': {
+                                },
+                                'frameSizeMax': {
+                                },
+                                'frameSizeMin': {
+                                },
+                                'frameSizeStart': {
+                                },
+                                'loadApplication': {
+                                },
+                                'loadUnits': {
+                                },
+                                'maxPossible': {
+                                },
+                                'maxStreams': {
+                                },
+                                'mode': {
+                                },
+                                'overallLoad': {
+                                },
+                                'packetType': {
+                                },
+                                'pauseOnError': {
+                                },
+                                'payloadType': {
+                                },
+                                'payloadWidth': {
+                                },
+                                'seriesType': {
+                                },
+                                'slowStartEnabled': {
+                                },
+                                'stepRate': {
+                                },
+                                'stepRateLower': {
+                                },
+                                'stepRateUpper': {
+                                },
+                                'stepduration': {
+                                },
+                                'stepdurationApplication': {
+                                },
+                                'stepdurationunits': {
+                                },
+                                'tryHighestFirst': {
+                                }
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            }
+                        },
+                        'sessionSender': {
+                            'control': {
+                                'aging': {
+                                },
+                                'appProfile': {
+                                },
+                                'dataRate': {
+                                },
+                                'dataType': {
+                                },
+                                'dstPortDist': {
+                                    'max': {
+                                    },
+                                    'min': {
+                                    }
+                                },
+                                'duration': {
+                                },
+                                'flowSize': {
+                                },
+                                'maximumConcurrent': {
+                                },
+                                'maximumConcurrentSession': {
+                                },
+                                'maximumRate': {
+                                },
+                                'minimumConcurrent': {
+                                },
+                                'minimumConcurrentSessions': {
+                                },
+                                'minimumRate': {
+                                },
+                                'packetsPerSession': {
+                                },
+                                'perfEmphasis': {
+                                },
+                                'resetConnectionsBetweenTests': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quanta': {
+                                },
+                                'srcPortDist': {
+                                    'max': {
+                                    },
+                                    'min': {
+                                    }
+                                },
+                                'steadyBehavior': {
+                                },
+                                'stepRate': {
+                                    'num': {
+                                    },
+                                    'type': {
+                                    }
+                                },
+                                'stepdurationApplication': {
+                                },
+                                'testMode': {
+                                },
+                                'testType': {
+                                },
+                                'unlimitedDataRate': {
+                                }
+                            },
+                            'dut': {
+                            },
+                            'network': {
+                            }
+                        },
+                        'timestamp': {
+                        }
+                    }]
+                }
+            },
+            'timestamp': {
             }
         },
         'testmodel': {
             'author': {
+            },
+            'bandwidth': {
             },
             'clazz': {
             },
@@ -6088,6 +9986,8 @@ class DataModelMeta(type):
                         }
                     },
                     'resources': {
+                        'affinity': {
+                        },
                         'expand': {
                         }
                     },
@@ -6272,6 +10172,8 @@ class DataModelMeta(type):
                         }
                     },
                     'resources': {
+                        'affinity': {
+                        },
                         'expand': {
                         }
                     },
@@ -6931,6 +10833,10 @@ class DataModelMeta(type):
                         'unlimited': {
                         }
                     },
+                    'resources': {
+                        'affinity': {
+                        }
+                    },
                     'sessions': {
                         'allocationOverride': {
                         },
@@ -7105,6 +11011,10 @@ class DataModelMeta(type):
                         'unit': {
                         },
                         'unlimited': {
+                        }
+                    },
+                    'resources': {
+                        'affinity': {
                         }
                     },
                     'sessions': {
@@ -7291,6 +11201,10 @@ class DataModelMeta(type):
                         'unit': {
                         },
                         'unlimited': {
+                        }
+                    },
+                    'resources': {
+                        'affinity': {
                         }
                     },
                     'sessions': {
@@ -7535,6 +11449,10 @@ class DataModelMeta(type):
                         'unit': {
                         },
                         'unlimited': {
+                        }
+                    },
+                    'resources': {
+                        'affinity': {
                         }
                     },
                     'scrambleOptions': {
@@ -7806,6 +11724,8 @@ class DataModelMeta(type):
                                 }
                             },
                             'resources': {
+                                'affinity': {
+                                },
                                 'expand': {
                                 }
                             },
@@ -7990,6 +11910,8 @@ class DataModelMeta(type):
                                 }
                             },
                             'resources': {
+                                'affinity': {
+                                },
                                 'expand': {
                                 }
                             },
@@ -8649,6 +12571,10 @@ class DataModelMeta(type):
                                 'unlimited': {
                                 }
                             },
+                            'resources': {
+                                'affinity': {
+                                }
+                            },
                             'sessions': {
                                 'allocationOverride': {
                                 },
@@ -8823,6 +12749,10 @@ class DataModelMeta(type):
                                 'unit': {
                                 },
                                 'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'affinity': {
                                 }
                             },
                             'sessions': {
@@ -9009,6 +12939,10 @@ class DataModelMeta(type):
                                 'unit': {
                                 },
                                 'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'affinity': {
                                 }
                             },
                             'sessions': {
@@ -9255,6 +13189,10 @@ class DataModelMeta(type):
                                 'unlimited': {
                                 }
                             },
+                            'resources': {
+                                'affinity': {
+                                }
+                            },
                             'scrambleOptions': {
                                 'badEthType': {
                                 },
@@ -9470,6 +13408,8 @@ class DataModelMeta(type):
                                 }
                             }]
                         },
+                        'timestamp': {
+                        },
                         'type': {
                         }
                     }],
@@ -9508,6 +13448,8 @@ class DataModelMeta(type):
                         }
                     }]
                 },
+                'timestamp': {
+                },
                 'type': {
                 }
             }],
@@ -9521,6 +13463,8 @@ class DataModelMeta(type):
             },
             'dut': {
             },
+            'ifaces': [{
+            }],
             'label': {
             },
             'lastrun': {
@@ -9597,6 +13541,1900 @@ class DataModelMeta(type):
                 'saveAs': [{
                 }],
                 'search': [{
+                    'author': {
+                    },
+                    'bandwidth': {
+                    },
+                    'clazz': {
+                    },
+                    'component': [{
+                        '@type:appsim': {
+                            'app': {
+                                'fidelity': {
+                                },
+                                'removedns': {
+                                },
+                                'replace_streams': {
+                                },
+                                'streamsPerSuperflow': {
+                                }
+                            },
+                            'delayStart': {
+                            },
+                            'experimental': {
+                                'tcpSegmentsBurst': {
+                                },
+                                'unify_l4_bufs': {
+                                }
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'profile': {
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'affinity': {
+                                },
+                                'expand': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'ssl': {
+                                'client_record_len': {
+                                },
+                                'server_record_len': {
+                                },
+                                'sslReuseType': {
+                                },
+                                'ssl_client_keylog': {
+                                },
+                                'ssl_keylog_max_entries': {
+                                },
+                                'upgrade': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        '@type:clientsim': {
+                            'app': {
+                                'fidelity': {
+                                },
+                                'removedns': {
+                                },
+                                'replace_streams': {
+                                },
+                                'streamsPerSuperflow': {
+                                }
+                            },
+                            'delayStart': {
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'affinity': {
+                                },
+                                'expand': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'ssl': {
+                                'client_record_len': {
+                                },
+                                'server_record_len': {
+                                },
+                                'sslReuseType': {
+                                },
+                                'ssl_client_keylog': {
+                                },
+                                'ssl_keylog_max_entries': {
+                                },
+                                'upgrade': {
+                                }
+                            },
+                            'superflow': {
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        '@type:layer2': {
+                            'advanced': {
+                                'ethTypeField': {
+                                },
+                                'ethTypeVal': {
+                                }
+                            },
+                            'bidirectional': {
+                            },
+                            'delayStart': {
+                            },
+                            'duration': {
+                                'disable_nd_probes': {
+                                },
+                                'durationFrames': {
+                                },
+                                'durationTime': {
+                                }
+                            },
+                            'maxStreams': {
+                            },
+                            'payload': {
+                                'data': {
+                                },
+                                'dataWidth': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadAdvanced': {
+                                'udfDataWidth': {
+                                },
+                                'udfLength': {
+                                },
+                                'udfMode': {
+                                },
+                                'udfOffset': {
+                                }
+                            },
+                            'rateDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'ramptype': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'sizeDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'mixlen1': {
+                                },
+                                'mixlen10': {
+                                },
+                                'mixlen2': {
+                                },
+                                'mixlen3': {
+                                },
+                                'mixlen4': {
+                                },
+                                'mixlen5': {
+                                },
+                                'mixlen6': {
+                                },
+                                'mixlen7': {
+                                },
+                                'mixlen8': {
+                                },
+                                'mixlen9': {
+                                },
+                                'mixweight1': {
+                                },
+                                'mixweight10': {
+                                },
+                                'mixweight2': {
+                                },
+                                'mixweight3': {
+                                },
+                                'mixweight4': {
+                                },
+                                'mixweight5': {
+                                },
+                                'mixweight6': {
+                                },
+                                'mixweight7': {
+                                },
+                                'mixweight8': {
+                                },
+                                'mixweight9': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'slowStart': {
+                            },
+                            'slowStartFps': {
+                            }
+                        },
+                        '@type:layer3': {
+                            'Templates': {
+                                'TemplateType': {
+                                }
+                            },
+                            'addrGenMode': {
+                            },
+                            'advancedIPv4': {
+                                'checksumField': {
+                                },
+                                'checksumVal': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                },
+                                'optionHeaderData': {
+                                },
+                                'optionHeaderField': {
+                                },
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'advancedIPv6': {
+                                'extensionHeaderData': {
+                                },
+                                'extensionHeaderField': {
+                                },
+                                'flowLabel': {
+                                },
+                                'hopLimit': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                },
+                                'nextHeader': {
+                                },
+                                'trafficClass': {
+                                }
+                            },
+                            'advancedUDP': {
+                                'checksumField': {
+                                },
+                                'checksumVal': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                }
+                            },
+                            'bidirectional': {
+                            },
+                            'delayStart': {
+                            },
+                            'dstPort': {
+                            },
+                            'dstPortMask': {
+                            },
+                            'duration': {
+                                'disable_nd_probes': {
+                                },
+                                'durationFrames': {
+                                },
+                                'durationTime': {
+                                }
+                            },
+                            'enableTCP': {
+                            },
+                            'maxStreams': {
+                            },
+                            'payload': {
+                                'data': {
+                                },
+                                'dataWidth': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadAdvanced': {
+                                'udfDataWidth': {
+                                },
+                                'udfLength': {
+                                },
+                                'udfMode': {
+                                },
+                                'udfOffset': {
+                                }
+                            },
+                            'randomizeIP': {
+                            },
+                            'rateDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'ramptype': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'sizeDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'mixlen1': {
+                                },
+                                'mixlen10': {
+                                },
+                                'mixlen2': {
+                                },
+                                'mixlen3': {
+                                },
+                                'mixlen4': {
+                                },
+                                'mixlen5': {
+                                },
+                                'mixlen6': {
+                                },
+                                'mixlen7': {
+                                },
+                                'mixlen8': {
+                                },
+                                'mixlen9': {
+                                },
+                                'mixweight1': {
+                                },
+                                'mixweight10': {
+                                },
+                                'mixweight2': {
+                                },
+                                'mixweight3': {
+                                },
+                                'mixweight4': {
+                                },
+                                'mixweight5': {
+                                },
+                                'mixweight6': {
+                                },
+                                'mixweight7': {
+                                },
+                                'mixweight8': {
+                                },
+                                'mixweight9': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'slowStart': {
+                            },
+                            'slowStartFps': {
+                            },
+                            'srcPort': {
+                            },
+                            'srcPortMask': {
+                            },
+                            'syncIP': {
+                            },
+                            'udpDstPortMode': {
+                            },
+                            'udpSrcPortMode': {
+                            }
+                        },
+                        '@type:layer3advanced': {
+                            'Templates': {
+                                'TemplateType': {
+                                }
+                            },
+                            'advancedIPv4': {
+                                'checksumField': {
+                                },
+                                'checksumVal': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                },
+                                'optionHeaderData': {
+                                },
+                                'optionHeaderField': {
+                                },
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'advancedIPv6': {
+                                'extensionHeaderData': {
+                                },
+                                'extensionHeaderField': {
+                                },
+                                'flowLabel': {
+                                },
+                                'hopLimit': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                },
+                                'nextHeader': {
+                                },
+                                'trafficClass': {
+                                }
+                            },
+                            'advancedUDP': {
+                                'checksumField': {
+                                },
+                                'checksumVal': {
+                                },
+                                'lengthField': {
+                                },
+                                'lengthVal': {
+                                }
+                            },
+                            'bidirectional': {
+                            },
+                            'delayStart': {
+                            },
+                            'duration': {
+                                'disable_nd_probes': {
+                                },
+                                'durationFrames': {
+                                },
+                                'durationTime': {
+                                }
+                            },
+                            'enablePerStreamStats': {
+                            },
+                            'enableTCP': {
+                            },
+                            'payload': {
+                                'data': {
+                                },
+                                'dataWidth': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadAdvanced': {
+                                'udfDataWidth': {
+                                },
+                                'udfLength': {
+                                },
+                                'udfMode': {
+                                },
+                                'udfOffset': {
+                                }
+                            },
+                            'rateDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'ramptype': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'sizeDist': {
+                                'increment': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'mixlen1': {
+                                },
+                                'mixlen10': {
+                                },
+                                'mixlen2': {
+                                },
+                                'mixlen3': {
+                                },
+                                'mixlen4': {
+                                },
+                                'mixlen5': {
+                                },
+                                'mixlen6': {
+                                },
+                                'mixlen7': {
+                                },
+                                'mixlen8': {
+                                },
+                                'mixlen9': {
+                                },
+                                'mixweight1': {
+                                },
+                                'mixweight10': {
+                                },
+                                'mixweight2': {
+                                },
+                                'mixweight3': {
+                                },
+                                'mixweight4': {
+                                },
+                                'mixweight5': {
+                                },
+                                'mixweight6': {
+                                },
+                                'mixweight7': {
+                                },
+                                'mixweight8': {
+                                },
+                                'mixweight9': {
+                                },
+                                'rate': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                }
+                            },
+                            'slowStart': {
+                            },
+                            'slowStartFps': {
+                            },
+                            'tuple_gen_seed': {
+                            }
+                        },
+                        '@type:layer4': {
+                            'delayStart': {
+                            },
+                            'dstPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'packetsPerSession': {
+                            },
+                            'payload': {
+                                'add_timestamp': {
+                                },
+                                'data': {
+                                },
+                                'http_type': {
+                                },
+                                'transport': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadSizeDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'affinity': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        '@type:liveappsim': {
+                            'app': {
+                                'fidelity': {
+                                },
+                                'removeUnknownSSL': {
+                                },
+                                'removeUnknownTcpUdp': {
+                                },
+                                'removedns': {
+                                },
+                                'replace_streams': {
+                                },
+                                'streamsPerSuperflow': {
+                                }
+                            },
+                            'concurrencyscalefactor': {
+                            },
+                            'delayStart': {
+                            },
+                            'inflateDeflate': {
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'liveProfile': {
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'affinity': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'sfratescalefactor': {
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            },
+                            'tputscalefactor': {
+                            }
+                        },
+                        '@type:playback': {
+                            'behavior': {
+                            },
+                            'delayStart': {
+                            },
+                            'file': {
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'modification': {
+                                'bpfstring': {
+                                },
+                                'endpacket': {
+                                },
+                                'independentflows': {
+                                },
+                                'loopcount': {
+                                },
+                                'newport': {
+                                },
+                                'originalport': {
+                                },
+                                'replay': {
+                                },
+                                'serveripinjection': {
+                                },
+                                'single': {
+                                },
+                                'startpacket': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'affinity': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        '@type:security_all': {
+                            'attackPlan': {
+                            },
+                            'attackPlanIterationDelay': {
+                            },
+                            'attackPlanIterations': {
+                            },
+                            'attackProfile': {
+                            },
+                            'attackRetries': {
+                            },
+                            'delayStart': {
+                            },
+                            'maxAttacksPerSecond': {
+                            },
+                            'maxConcurrAttacks': {
+                            },
+                            'maxPacketsPerSecond': {
+                            },
+                            'randomSeed': {
+                            }
+                        },
+                        '@type:security_np': {
+                            'attackPlan': {
+                            },
+                            'attackPlanIterationDelay': {
+                            },
+                            'attackPlanIterations': {
+                            },
+                            'attackProfile': {
+                            },
+                            'attackRetries': {
+                            },
+                            'delayStart': {
+                            },
+                            'randomSeed': {
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'sessions': {
+                                'max': {
+                                },
+                                'maxPerSecond': {
+                                }
+                            }
+                        },
+                        '@type:stackscrambler': {
+                            'delayStart': {
+                            },
+                            'dstPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'ip': {
+                                'tos': {
+                                },
+                                'ttl': {
+                                }
+                            },
+                            'ip6': {
+                                'flowlabel': {
+                                },
+                                'hop_limit': {
+                                },
+                                'traffic_class': {
+                                }
+                            },
+                            'loadprofile': {
+                                'label': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'payload': {
+                                'data': {
+                                },
+                                'transport': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'payloadSizeDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'prng': {
+                                'offset': {
+                                },
+                                'seed': {
+                                }
+                            },
+                            'rampDist': {
+                                'down': {
+                                },
+                                'downBehavior': {
+                                },
+                                'steady': {
+                                },
+                                'steadyBehavior': {
+                                },
+                                'synRetryMode': {
+                                },
+                                'up': {
+                                },
+                                'upBehavior': {
+                                }
+                            },
+                            'rampUpProfile': {
+                                'increment': {
+                                },
+                                'interval': {
+                                },
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'rateDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'scope': {
+                                },
+                                'type': {
+                                },
+                                'unit': {
+                                },
+                                'unlimited': {
+                                }
+                            },
+                            'resources': {
+                                'affinity': {
+                                }
+                            },
+                            'scrambleOptions': {
+                                'badEthType': {
+                                },
+                                'badGTPFlags': {
+                                },
+                                'badGTPLen': {
+                                },
+                                'badGTPNext': {
+                                },
+                                'badGTPNpdu': {
+                                },
+                                'badGTPSeqno': {
+                                },
+                                'badGTPType': {
+                                },
+                                'badICMPCode': {
+                                },
+                                'badICMPType': {
+                                },
+                                'badIPChecksum': {
+                                },
+                                'badIPFlags': {
+                                },
+                                'badIPFlowLabel': {
+                                },
+                                'badIPFragOffset': {
+                                },
+                                'badIPLength': {
+                                },
+                                'badIPOptions': {
+                                },
+                                'badIPProtocol': {
+                                },
+                                'badIPTOS': {
+                                },
+                                'badIPTTL': {
+                                },
+                                'badIPTotalLength': {
+                                },
+                                'badIPVersion': {
+                                },
+                                'badL4Checksum': {
+                                },
+                                'badL4HeaderLength': {
+                                },
+                                'badSCTPChecksum': {
+                                },
+                                'badSCTPFlags': {
+                                },
+                                'badSCTPLength': {
+                                },
+                                'badSCTPType': {
+                                },
+                                'badSCTPVerificationTag': {
+                                },
+                                'badTCPFlags': {
+                                },
+                                'badTCPOptions': {
+                                },
+                                'badUrgentPointer': {
+                                },
+                                'handshakeTCP': {
+                                },
+                                'maxCorruptions': {
+                                }
+                            },
+                            'sessions': {
+                                'allocationOverride': {
+                                },
+                                'closeFast': {
+                                },
+                                'emphasis': {
+                                },
+                                'enableIgnoreAdaptiveRampupSettings': {
+                                },
+                                'enableSuperflowTimeout': {
+                                },
+                                'engine': {
+                                },
+                                'max': {
+                                },
+                                'maxActive': {
+                                },
+                                'maxPerSecond': {
+                                },
+                                'openFast': {
+                                },
+                                'statDetail': {
+                                },
+                                'target': {
+                                },
+                                'targetMatches': {
+                                },
+                                'targetPerSecond': {
+                                },
+                                'valueSuperflowTimeout': {
+                                }
+                            },
+                            'srcPortDist': {
+                                'max': {
+                                },
+                                'min': {
+                                },
+                                'type': {
+                                }
+                            },
+                            'tcp': {
+                                'ack_every_n': {
+                                },
+                                'add_timestamps': {
+                                },
+                                'aging_time': {
+                                },
+                                'aging_time_data_type': {
+                                },
+                                'delay_acks': {
+                                },
+                                'delay_acks_ms': {
+                                },
+                                'disable_ack_piggyback': {
+                                },
+                                'dynamic_receive_window_size': {
+                                },
+                                'ecn': {
+                                },
+                                'handshake_data': {
+                                },
+                                'initial_receive_window': {
+                                },
+                                'mss': {
+                                },
+                                'psh_every_segment': {
+                                },
+                                'raw_flags': {
+                                },
+                                'reset_at_end': {
+                                },
+                                'retries': {
+                                },
+                                'retry_quantum_ms': {
+                                },
+                                'shutdown_data': {
+                                },
+                                'syn_data_padding': {
+                                },
+                                'tcp_4_way_close': {
+                                },
+                                'tcp_connect_delay_ms': {
+                                },
+                                'tcp_icw': {
+                                },
+                                'tcp_keepalive_timer': {
+                                },
+                                'tcp_window_scale': {
+                                }
+                            }
+                        },
+                        'active': {
+                        },
+                        'author': {
+                        },
+                        'clazz': {
+                        },
+                        'createdBy': {
+                        },
+                        'createdOn': {
+                        },
+                        'description': {
+                        },
+                        'id': {
+                        },
+                        'label': {
+                        },
+                        'lockedBy': {
+                        },
+                        'meta': {
+                            'info': [{
+                                'name': {
+                                },
+                                'value': {
+                                }
+                            }]
+                        },
+                        'originalPreset': {
+                        },
+                        'originalPresetLabel': {
+                        },
+                        'reportResults': {
+                        },
+                        'revision': {
+                        },
+                        'tags': [{
+                            'domainId': {
+                                'external': {
+                                },
+                                'iface': {
+                                },
+                                'name': {
+                                }
+                            },
+                            'id': {
+                            },
+                            'type': {
+                            }
+                        }],
+                        'timeline': {
+                            'timesegment': [{
+                                'label': {
+                                },
+                                'size': {
+                                },
+                                'type': {
+                                }
+                            }]
+                        },
+                        'timestamp': {
+                        },
+                        'type': {
+                        }
+                    }],
+                    'createdBy': {
+                    },
+                    'createdOn': {
+                    },
+                    'description': {
+                    },
+                    'duration': {
+                    },
+                    'dut': {
+                    },
+                    'ifaces': [{
+                    }],
+                    'label': {
+                    },
+                    'lastrun': {
+                    },
+                    'lastrunby': {
+                    },
+                    'lockedBy': {
+                    },
+                    'meta': {
+                        'info': [{
+                            'name': {
+                            },
+                            'value': {
+                            }
+                        }]
+                    },
+                    'name': {
+                    },
+                    'network': {
+                    },
+                    'result': {
+                    },
+                    'revision': {
+                    },
+                    'sharedComponentSettings': {
+                        'maxFlowCreationRate': {
+                            'content': {
+                            },
+                            'current': {
+                            },
+                            'enabled': {
+                            },
+                            'original': {
+                            }
+                        },
+                        'maximumConcurrentFlows': {
+                            'content': {
+                            },
+                            'current': {
+                            },
+                            'enabled': {
+                            },
+                            'original': {
+                            }
+                        },
+                        'samplePeriod': {
+                            'content': {
+                            },
+                            'current': {
+                            },
+                            'enabled': {
+                            },
+                            'original': {
+                            }
+                        },
+                        'totalAddresses': {
+                            'content': {
+                            },
+                            'current': {
+                            },
+                            'enabled': {
+                            },
+                            'original': {
+                            }
+                        },
+                        'totalAttacks': {
+                            'content': {
+                            },
+                            'current': {
+                            },
+                            'enabled': {
+                            },
+                            'original': {
+                            }
+                        },
+                        'totalBandwidth': {
+                            'content': {
+                            },
+                            'current': {
+                            },
+                            'enabled': {
+                            },
+                            'original': {
+                            }
+                        }
+                    },
+                    'summaryInfo': {
+                        'requiredMTU': {
+                        },
+                        'totalMacAddresses': {
+                        },
+                        'totalSubnets': {
+                        },
+                        'totalUniqueStrikes': {
+                        },
+                        'totalUniqueSuperflows': {
+                        }
+                    },
+                    'testLabType': {
+                    },
+                    'timestamp': {
+                    }
                 }],
                 'stopRun': [{
                 }],
@@ -9710,7 +15548,11 @@ class DataModelMeta(type):
                 },
                 'type': {
                 }
-            }]
+            }],
+            'testLabType': {
+            },
+            'timestamp': {
+            }
         },
         'topology': {
             'chain': {
@@ -9742,10 +15584,22 @@ class DataModelMeta(type):
                 }],
                 'firmwareUpgrade': {
                 },
+                'label': {
+                },
                 'licensed': {
                 },
-                'marketingName': {
+                'model': {
                 },
+                'npModes': [{
+                    'active': {
+                    },
+                    'id': {
+                    },
+                    'label': {
+                    },
+                    'name': {
+                    }
+                }],
                 'opModes': [{
                     'active': {
                     },
@@ -9772,6 +15626,8 @@ class DataModelMeta(type):
             'ixos': {
             },
             'ixoslicensed': {
+            },
+            'label': {
             },
             'model': {
             },
@@ -9814,6 +15670,8 @@ class DataModelMeta(type):
                     'slot': {
                     }
                 }],
+                'getResourceTypes': [{
+                }],
                 'reboot': [{
                 }],
                 'rebootComputeNode': [{
@@ -9840,11 +15698,15 @@ class DataModelMeta(type):
                 }],
                 'setCardSpeed': [{
                 }],
+                'setNpMode': [{
+                }],
                 'setPerfAcc': [{
                 }],
                 'setPortFanoutMode': [{
                 }],
                 'setPortSettings': [{
+                }],
+                'setResourceSettings': [{
                 }],
                 'softReboot': [{
                 }],
@@ -9879,6 +15741,12 @@ class DataModelMeta(type):
                 'phase': {
                 },
                 'port': [{
+                    'ri': {
+                        'port': {
+                        },
+                        'slot': {
+                        }
+                    }
                 }],
                 'progress': {
                 },
@@ -9938,6 +15806,8 @@ class DataModelMeta(type):
                 },
                 'ipAddress': {
                 },
+                'label': {
+                },
                 'mode': {
                 },
                 'model': {
@@ -9948,6 +15818,10 @@ class DataModelMeta(type):
                     'group': {
                     },
                     'id': {
+                    },
+                    'mode': {
+                    },
+                    'model': {
                     },
                     'name': {
                     },
@@ -10202,6 +16076,11 @@ class DataModelProxy(object, metaclass = DataModelMeta):
             doc_data = doc_data['custom']
         if doc_data and 'description' in doc_data:
             print(doc_data['description'])
+
+    def options(self):
+        doc_data = self._wrapper._BPS__options(self._path+'/'+self._name)
+        if doc_data and 'custom' in doc_data:
+            return doc_data['custom']
 
     def patch(self, value):
         return self._wrapper._BPS__patch(self._path+'/'+self._name, value)

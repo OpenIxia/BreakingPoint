@@ -31,7 +31,7 @@ bpsuser     = 'bps user'
 bpspass     = 'bps pass'
 
 slot_number = 3
-port_list   = [0, 4]
+port_list   = [0, 1]
 
 ########################################
 
@@ -63,12 +63,12 @@ bps.testmodel.saveAs(new_testmodel_name, force = True)
 ########################################
 print("Reserve Ports")
 for p in port_list:
-    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 2,  "capture": True}])
+    bps.topology.reserve([{'slot': slot_number, 'port': p, 'group': 20,  "capture": True}])
 
 
 ########################################
 print("Run test and Get Stats:")
-test_id_json = bps.testmodel.run(modelname=new_testmodel_name, group=2)
+test_id_json = bps.testmodel.run(modelname=new_testmodel_name, group=20)
 run_id = test_id_json["runid"]
 print("Test Run Id: %s"%run_id)
 

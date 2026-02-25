@@ -29,11 +29,11 @@ from bps_restpy.bps import BPS,pp
 # Demo script global variables
 canned_test_name = 'AppSim'
 #bps system info
-bps_system  = '<BPS_BOX_IP/HOSTNAME>'
-bpsuser     = 'bps user'
-bpspass     = 'bps pass'
+bps_system  = 'xgs12-bpsst.lbj.is.keysight.com'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 
-slot_number = 1
+slot_number = 3
 port_list   = [0, 1]
 
 ########################################
