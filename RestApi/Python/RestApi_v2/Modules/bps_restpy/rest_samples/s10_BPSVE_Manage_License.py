@@ -7,6 +7,8 @@
 #   5. Activate deactivate licenses
 #   6. Check floating license feature statistics (check how many are available and taken)
 
+
+
 #================
 
 ########################################
@@ -30,9 +32,13 @@ from bpsVELicense import BPSVELicenseManagement
 bps_system  = '<BPS_BOX_IP/HOSTNAME>'
 bpsuser     = 'bps user'
 bpspass     = 'bps pass'
+bps_system  = '10.36.82.74'
+bpsuser     = 'admin'
+bpspass     = 'admin'
 mainLicenseServer = '<License_Server_IP/HOSTNAME>'
+mainLicenseServer = "10.36.66.31"
 activationCode = '<Activation_Code>'
-
+activationCode = ""
 ########################################
 
 

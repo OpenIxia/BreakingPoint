@@ -1,18 +1,10 @@
 # Title:  Change modes on BPS PerfectStorm and CloudStorm Cards.
 # Date:   Nov 2019
 # Actions:
-#   1. Login to BPS box
-#   2. Get the list of fanout modes for the card
-#   3. Display information about the current operation mode, model, type, speed,
-#      link status, reservedby status of the selected slot/port
-#   4. Change the operation mode of the card to a BPS mode (i.e. BPS L2-3, BPS L4-7)
-#   5. Change the fanout mode of the card to a BPS mode (i.e. 100G, 40G, 25G, 10G)
-#   6. Wait for the operation to complete 
-#   7. Logout
-
+#   1. Get some card/port informations
+#   2. xample on how to change mode or speed and wait for the status
 
 # Install bps_restpy with pip or download the library from git
-
 ########################################
 import time, sys, os
 # Add bps_restpy libpath *required if the library is not installed

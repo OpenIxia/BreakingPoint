@@ -9,8 +9,6 @@
 #   5. Edit parameters inside an action
 #   6. Add the created superflow to a Application Mix
 #   7. Run a test with the AppMix and get the result.
-#   8. Unreserve the ports
-#   9. Logout
 
 
 # Import BPSv2 python library from outside the folder with samples.

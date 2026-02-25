@@ -24,7 +24,7 @@ class BPS_Updates:
    
     #returns operation state for statusUrl    
     def _getOperationInfo(self, statusUrl, retry = 3 , enableRequestPrints = False):
-        jheaders = {'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}
+        jheaders = {'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}
         #try to get the response from the url in service for retry times
         while 1:
             try:
@@ -75,7 +75,7 @@ class BPS_Updates:
     #request Latest Available Updates   
     def getLatestAvailableUpdates(self,follow202 = True, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/cloudupdates/operations/check'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         #jdata = json.dumps()
         r = self.session.post(service, data='', headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -94,7 +94,7 @@ class BPS_Updates:
     #Get and parse the update list
     def cloudUpdates(self, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/cloudupdates'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         #jdata = json.dumps()
         r = self.session.get(service, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -110,7 +110,7 @@ class BPS_Updates:
     #Get and parse the installed update list
     def getInstalledPackages(self, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/cloudupdates/installedpackages'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         #jdata = json.dumps()
         r = self.session.get(service, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -127,7 +127,7 @@ class BPS_Updates:
     #example input: #[{'packageName': u'ati-strikepack-bps', 'buildNoTS': 1528125898, 'versionString': u'2018-11'},  {'packageName': u'ati-malware-bps', 'buildNoTS': 1527013760, 'versionString': u'2018-May'},   {'packageName': u'ati-dailymalware-bps', 'buildNoTS': 1526020319, 'versionString': u'2018-05-11'}]
     def installCloudUpdates(self,updateList, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/cloudupdates/operations/install'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps(updateList)
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -147,7 +147,7 @@ class BPS_Updates:
 
     def uploadBpsBuildForInstall (self,bpsBuildUrl, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/applications/operations/uploadUsingUrl'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({'url': bpsBuildUrl})
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -170,7 +170,7 @@ class BPS_Updates:
             return False
         fileName = os.path.bsename(bpsBuildUrl)
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/applications/operations/install'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({updateRemotePath: "/var/tmp/ixia/waf/updates/%s" % fileName , updateType: "SYSTEM_UPDATE"})
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -190,7 +190,7 @@ class BPS_Updates:
     
     def uninstallBpsBuild (self,versionId, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/systemrestore/versions/' + str(versionId)+ '/operations/delete'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({})
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -211,7 +211,7 @@ class BPS_Updates:
     #Get and parse the installed build list
     def getInstalledBpsBuilds(self, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/systemrestore/versions'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         #jdata = json.dumps()
         r = self.session.get(service, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -225,9 +225,9 @@ class BPS_Updates:
         return installedBuilds
     
     #Get system information
-    def getInstalledBpsBuilds(self, enableRequestPrints = False):
+    def getInstalledBpsBuild(self, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/systeminformation'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         #jdata = json.dumps()
         r = self.session.get(service, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -263,7 +263,7 @@ class BPS_Storrage:
    
     #returns operation state for statusUrl    
     def _getOperationInfo(self, statusUrl, retry = 3 , enableRequestPrints = False):
-        jheaders = {'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}
+        jheaders = {'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}
         #try to get the response from the url in service for retry times
         while 1:
             try:
@@ -318,7 +318,7 @@ class BPS_Storrage:
         start = time.time()
         while ( 1 ):
             service = 'https://' + self.ipstr + '/bps/api/v1/admin/systeminformation'
-            jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+            jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
             try:
                 r = self.session.get(service, headers=jheaders, verify=False )
             except requests.exceptions.ConnectionError:
@@ -348,9 +348,8 @@ class BPS_Storrage:
         
     #delete all execution results reports    
     def purgeReports (self,versionId, enableRequestPrints = False):
-        # APS/VE might have diffrent API: https://<bps-system>/bps/api/v1/admin/database/operations/clean
-        service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/purge'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/compact'
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({'removeReports' : 'true' })
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -364,14 +363,14 @@ class BPS_Storrage:
             print("Waiting for purgeReports to complete")
             self.waitOnFinish( service )
         else:
-            print("Purge failed: %s - %s" % (r, r.content))
+            print("Uninstall failed: %s - %s" % (r, r.content))
             return False
         return True
     
     #compact the database after deleting reports   
     def compactStorage (self,versionId, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/compact'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({})
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -392,7 +391,7 @@ class BPS_Storrage:
     #backup all execution results reports    
     def backup (self, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/backup'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({'download' : 'true' })
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -414,7 +413,7 @@ class BPS_Storrage:
     #Download backup file
     def downloadBackup(self,location,enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/download'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         #jdata = json.dumps()
         r = self.session.get(service, headers=jheaders, stream=True )
         if(enableRequestPrints):
@@ -439,7 +438,7 @@ class BPS_Storrage:
             
     def uploadBackupFile (self,importFile, enableRequestPrints = False):
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/upload'
-        jheaders = { 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'} 
+        jheaders = { 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'} 
         fileName = os.path.basename(importFile)
         files = {'file': (fileName, open(importFile, 'rb') , 'multipart/form-data')}      
         r = self.session.post(service, files=files , headers=jheaders, verify=False )
@@ -463,7 +462,7 @@ class BPS_Storrage:
             return False
         fileName = os.path.basename(importFile)
         service = 'https://' + self.ipstr + '/bps/api/v1/admin/storage/operations/restore'
-        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer Policy' : 'no-referrer-when-downgrade'}        
+        jheaders = {'content-type': 'application/json', 'x-api-key': self.api_key, 'Referrer_Policy' : 'no-referrer-when-downgrade'}        
         jdata = json.dumps({ 'upload' : 'true' })
         r = self.session.post(service, data=jdata, headers=jheaders, verify=False )
         if(enableRequestPrints):
@@ -482,22 +481,23 @@ class BPS_Storrage:
         return True
             
 
-#separate method to compare 2 lists of updates 
-def createMissingUpdateList(available, installed):
-    missingUpdates = {}
-    for availableType in available:
-        missingUpdates[availableType["packageType"]]=[]
-        for aitem in availableType['versions']:
-            #searching in installed list
-            found = False
-            for installedType in installed:
-                if not installedType['packageType'] == availableType['packageType']:
-                    continue
-                for iitem in installedType['versions']:
-                    if str(iitem['timestamp']) ==  str(aitem ['version']):
-                        found = True
-                        print("SKIP   : %s update id: %s version :%s already installed." % (availableType['packageType'], aitem['version'], aitem['timestamp'] ))
-            if not found: 
-                print("Available :%s update packageType: %s version :%s was checked." % (availableType['packageType'], aitem['version'], aitem['timestamp'] ))
-                missingUpdates[availableType["packageType"]].append (aitem)             
-    return missingUpdates
+    #separate method to compare 2 lists of updates 
+    def createMissingUpdateList(available, installed):
+        missingUpdates = {}
+        for availableType in available:
+            if 'versions' in availableType.keys():
+                missingUpdates[availableType["packageType"]]=[]
+                for aitem in availableType['versions']:
+                    #searching in installed list
+                    found = False
+                    for installedType in installed:
+                        if not installedType['packageType'] == availableType['packageType']:
+                            continue
+                        for iitem in installedType['versions']:
+                            if str(iitem['timestamp']) ==  str(aitem ['version']):
+                                found = True
+                                print("SKIP   : %s update id: %s version :%s already installed." % (availableType['packageType'], aitem['version'], aitem['timestamp'] ))
+                    if not found: 
+                        print("Available :%s update packageType: %s version :%s was checked." % (availableType['packageType'], aitem['version'], aitem['timestamp'] ))
+                        missingUpdates[availableType["packageType"]].append (aitem)             
+        return missingUpdates
