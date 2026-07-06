@@ -1,5 +1,5 @@
 # Version of the package
-__version__ = "26.0.6"
+__version__ = "26.1.42"
 URL = "https://github.com/OpenIxia/BreakingPoint"
 
 import sys,os
