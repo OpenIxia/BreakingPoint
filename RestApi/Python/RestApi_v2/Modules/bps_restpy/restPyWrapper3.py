@@ -117,7 +117,10 @@ class BPS(object):
             content_message = r.content.decode() + ' Execute: help(<BPS session name>%s) for more information about the method.'%methodCall
             raise Exception({'status_code': r.status_code, 'content': content_message})
         if(r.status_code == 200) or r.status_code == 204:
-            get_url = 'https://' + self.host + self.__json_load(r)['url']
+            parsed = self.__json_load(r)
+            # server 26.1 returns {"url": "/path"}, server 11.0 returns the path as a plain string
+            url_path = parsed['url'] if isinstance(parsed, dict) and 'url' in parsed else parsed
+            get_url = 'https://' + self.host + url_path
             get_head = {'content-type': 'application/json'}
             get_req = self.session.get(url = get_url, verify = False, headers = get_head)
             with open(kwargs['filepath'], 'wb') as fd:
